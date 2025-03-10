@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AMFormsCST.Core.Interfaces.CodeBlocks;
 using System.Text;
 
-namespace FormgenAssistant.DataTypes.Code
+namespace AMFormsCST.Core.Types.CodeBlocks
 {
-    public abstract class CodeBase
+    public abstract class CodeBase : ICodeBase
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
         public string? Prefix { get; set; }
-        public List<CodeInput> Inputs { get; } = new();
+        public List<CodeInput> Inputs { get; } = [];
 
         public bool HasNoInputs() => Inputs.Count == 0;
 

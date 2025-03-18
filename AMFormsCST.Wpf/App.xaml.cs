@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace AMFormsCST.Wpf;
+namespace AMFormsCST.Desktop;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>

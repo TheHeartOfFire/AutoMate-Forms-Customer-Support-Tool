@@ -38,4 +38,8 @@
     <Resource Include="Assets\AMLogo.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\" />
+  </ItemGroup>
+
 </Project>

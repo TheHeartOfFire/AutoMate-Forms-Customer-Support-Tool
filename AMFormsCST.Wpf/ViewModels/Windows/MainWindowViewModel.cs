@@ -10,7 +10,7 @@ using System.Windows.Documents;
 using System.Windows;
 using Wpf.Ui.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
-using AMFormsCST.Desktop.Pages;
+using AMFormsCST.Desktop.Views.Pages;
 
 namespace AMFormsCST.Desktop.ViewModels;
 public partial class MainWindowViewModel : ViewModel

@@ -4,7 +4,7 @@
 // All Rights Reserved.
 
 using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Pages;
+using AMFormsCST.Desktop.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Windows;

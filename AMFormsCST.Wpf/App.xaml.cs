@@ -1,5 +1,5 @@
 ﻿using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Pages;
+using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Resources;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;

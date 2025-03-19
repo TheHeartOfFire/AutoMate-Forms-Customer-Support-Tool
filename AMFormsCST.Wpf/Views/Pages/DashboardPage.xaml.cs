@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Wpf.Ui.Abstractions.Controls;
 
-namespace AMFormsCST.Desktop.Pages;
+namespace AMFormsCST.Desktop.Views.Pages;
 /// <summary>
 /// Interaction logic for DashboardPage.xaml
 /// </summary>

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-internal class TestDeal
+public class TestDeal
 {
     public string? DealNumber { get; set; } = string.Empty;
     public string? Purpose { get; set; } = string.Empty;

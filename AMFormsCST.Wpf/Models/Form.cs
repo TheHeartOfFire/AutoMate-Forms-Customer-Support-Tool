@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-internal class Form
+public class Form
 {
     public string? Name { get; set; } = string.Empty;
     public string? Notes { get; set; } = string.Empty;

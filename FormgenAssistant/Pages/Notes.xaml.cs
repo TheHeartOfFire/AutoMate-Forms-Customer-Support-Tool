@@ -83,6 +83,7 @@ namespace FormgenAssistant.Pages
             txtCaseNo.Text = string.Empty;
             txtForms.Text = string.Empty;
             txtDeal.Text = string.Empty;
+            
         }
 
         private void btnCopyAll_Click(object sender, RoutedEventArgs e)

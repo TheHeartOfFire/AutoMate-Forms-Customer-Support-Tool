@@ -1,5 +1,14 @@
-﻿namespace AMFormsCST.Desktop.ViewModels.Pages;
+﻿using AMFormsCST.Desktop.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
-public class DashboardViewModel
+namespace AMFormsCST.Desktop.ViewModels.Pages;
+
+public partial class DashboardViewModel : ViewModel
 {
+    [ObservableProperty]
+    private ObservableCollection<Note> _notes = [];
+
+    [ObservableProperty]
+    private Note? _selectedNote;
 }

@@ -25,20 +25,20 @@ public partial class MainWindowViewModel : ViewModel
         new NavigationViewItem()
         {
             Content = "Tools",
-            Icon = new SymbolIcon { Symbol = SymbolRegular.DesignIdeas24 },
-            MenuItemsSource = new object[]
-            {
-                new NavigationViewItem("Formgen Utilities", SymbolRegular.TextFont24, typeof(TypographyPage)),
-                new NavigationViewItem("Form Name Generator", SymbolRegular.Diversity24, typeof(IconsPage)),
-                new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
-            },
+            Icon = new SymbolIcon { Symbol = SymbolRegular.DesktopToolbox20 },
+            //MenuItemsSource = new object[]
+            //{
+            //    new NavigationViewItem("Formgen Utilities", SymbolRegular.TextFont24, typeof(TypographyPage)),
+            //    new NavigationViewItem("Form Name Generator", SymbolRegular.Diversity24, typeof(IconsPage)),
+            //    new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
+            //},
         }
     ];
 
     [ObservableProperty]
     private ObservableCollection<object> _footerMenuItems =
     [
-        new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
+        //new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
     ];
 
     [ObservableProperty]

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-internal class Contact
+public class Contact
 {
     public string? Name { get; set; } = string.Empty;
     public string? Email { get; set; } = string.Empty;

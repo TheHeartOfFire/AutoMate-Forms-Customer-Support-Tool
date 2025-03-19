@@ -30,6 +30,6 @@ public abstract partial class ViewModel : ObservableObject, INavigationAware
 
     private void OnNavigatedTo()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 }

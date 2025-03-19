@@ -9,8 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\amlogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\AMLogo.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Lepo.i18n" Version="2.0.0" />
+    <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
     <PackageReference Include="WPF-UI" Version="4.0.2" />
+    <PackageReference Include="WPF-UI.DependencyInjection" Version="4.0.2" />
+    <PackageReference Include="WPF-UI.Tray" Version="4.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\" />
+    <Resource Include="Assets\AMLogo.png" />
   </ItemGroup>
 
 </Project>

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-internal class Note
+public class Note
 {
     public string? CaseNumber { get; set; }
     public string? Notes { get; set; }

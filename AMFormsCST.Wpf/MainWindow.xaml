@@ -17,7 +17,8 @@
         WindowCornerPreference="Default"
         WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
-        SizeChanged="MainWindow_OnSizeChanged">
+        SizeChanged="MainWindow_OnSizeChanged"
+                 MinWidth="1050" MinHeight="775">
     <Grid>
         <ui:NavigationView
     x:Name="NavigationView"

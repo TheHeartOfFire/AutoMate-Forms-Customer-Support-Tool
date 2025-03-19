@@ -4,77 +4,115 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="1000"
-      Title="DashboardPage" 
-      d:DataContext="{d:DesignInstance local:DashboardPage, 
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:pages="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
+      mc:Ignorable="d"
+      d:DesignHeight="650" d:DesignWidth="1100"
+      Title="DashboardPage"
+      d:DataContext="{d:DesignInstance pages:DashboardViewModel, 
                                        IsDesignTimeCreatable=False}">
 
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" MinWidth="500"/>
         </Grid.ColumnDefinitions>
-        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.RowSpan="1" Grid.Row="1">
+            <StackPanel Orientation="Horizontal">
+                <ui:SymbolIcon Symbol="BuildingPeople20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
+                <StackPanel>
+                    <StackPanel x:Name="DealerNameButtonsStackPanel" Orientation="Horizontal">
+                        <ToggleButton Content="Enter a dealership name..." IsEnabled="False"/>
+                    </StackPanel>
+                    <StackPanel x:Name="CompanyNumberButtonsStackPanel" Orientation="Horizontal" Margin="0,10,0,0">
+                        <ToggleButton Content="Enter a company number..." IsEnabled="False"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="95,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Server ID: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" Margin="77,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Company Number(s): " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="5,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,25,0,0">
+                <ui:SymbolIcon Symbol="ContactCardGroup16" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
+                <StackPanel>
+                    <StackPanel x:Name="ContactNameStackPanel" Orientation="Horizontal">
+                        <ToggleButton Content="Enter a contact name..." IsEnabled="False"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Email: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Email, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="23,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Phone #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Phone, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="5,0,0,0"/>
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtensionDelimiter, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" Margin="15,0,15,0"/>
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtension, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,25,0,0">
+                <ui:SymbolIcon Symbol="FormMultiple20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
+                <StackPanel>
+                    <StackPanel x:Name="FormNameStackPanel" Orientation="Horizontal">
+                        <ToggleButton Content="Enter a form name..." IsEnabled="False"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedForm.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Deal#: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedForm.SelectedTestDeal.DealNumber, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="20,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Phone #: " VerticalAlignment="Top" HorizontalAlignment="Center" />
+                        <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Phone, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="5,0,0,0" AcceptsReturn="True" MinHeight="100"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Content="Pdf" VerticalAlignment="Center"/>
+                        <ui:ToggleSwitch Margin="5,0,5,0"/>
+                        <Label Content="Impact" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <ToggleButton Margin="0,0,5,0">
+                            <ui:SymbolIcon Symbol="Note24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                        </ToggleButton>
+                        <ui:Button Margin="0,0,5,0">
+                            <ui:SymbolIcon Symbol="MailTemplate24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                        </ui:Button>
+                        <ui:Button Margin="0,0,5,0">
+                            <ui:SymbolIcon Symbol="Code20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                        </ui:Button>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel x:Name="CaseNumberButtonsStackPanel" Orientation="Horizontal">
+            <ToggleButton Content="Enter a case number..." IsEnabled="False"/>
+        </StackPanel>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Case #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
                     <ui:TextBox Text="{Binding ViewModel.SelectedNote.CaseNumber, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" />
                 </StackPanel>
-                <Label Content="Notes" />
-                <ui:TextBox Text="{Binding ViewModel.SelectedNote.Notes, Mode=TwoWay}" AcceptsReturn="True" MinHeight="200" ClearButtonEnabled="True"/>
+                <Label Content="Notes"  Margin=" 0, 25, 0, 0"/>
+                <ui:TextBox Text="{Binding ViewModel.SelectedNote.Notes, Mode=TwoWay}" AcceptsReturn="True" MinHeight="250" ClearButtonEnabled="True" MinWidth="500"/>
             </StackPanel>
         </Grid>
-        <Grid Grid.Column="1" Grid.RowSpan="2">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="BuildingPeople20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="80" />
-                    <StackPanel>
-                        <StackPanel x:Name="DealerNameButtonsStackPanel" Orientation="Horizontal">
-                            <ToggleButton Content="Enter a dealership name..." IsEnabled="False"/>
-                        </StackPanel>
-                        <StackPanel x:Name="CompanyNumberButtonsStackPanel" Orientation="Horizontal">
-                            <ToggleButton Content="Enter a company number..." IsEnabled="False"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Dealership Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Server ID: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
-                            <Label Content="Company Number(s): " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" />
-                        </StackPanel>
-                    </StackPanel>
-
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="PersonBoard32" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="80" />
-                    <StackPanel>
-                        <StackPanel x:Name="ContactNameStackPanel" Orientation="Horizontal">
-                            <ToggleButton Content="Enter a contact name..." IsEnabled="False"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Email: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Email, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Phone #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Phone, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtensionDelimiter, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtension, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
-                        </StackPanel>
-                    </StackPanel>
-
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-
     </Grid>
 </Page>

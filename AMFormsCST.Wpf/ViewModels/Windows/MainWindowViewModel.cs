@@ -11,6 +11,7 @@ using System.Windows;
 using Wpf.Ui.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 
 namespace AMFormsCST.Desktop.ViewModels;
 public partial class MainWindowViewModel : ViewModel
@@ -26,12 +27,13 @@ public partial class MainWindowViewModel : ViewModel
         {
             Content = "Tools",
             Icon = new SymbolIcon { Symbol = SymbolRegular.DesktopToolbox20 },
-            //MenuItemsSource = new object[]
-            //{
-            //    new NavigationViewItem("Formgen Utilities", SymbolRegular.TextFont24, typeof(TypographyPage)),
-            //    new NavigationViewItem("Form Name Generator", SymbolRegular.Diversity24, typeof(IconsPage)),
-            //    new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
-            //},
+            TargetPageType = typeof(ToolsPage),
+            MenuItemsSource = new object[]
+            {
+                new NavigationViewItem("Formgen Utilities", SymbolRegular.DocumentTextToolbox24, typeof(FormgenUtilitiesPage)),
+                //new NavigationViewItem("Form Name Generator", SymbolRegular.Diversity24, typeof(IconsPage)),
+                //new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
+            },
         }
     ];
 

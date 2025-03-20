@@ -18,7 +18,7 @@ public abstract partial class ViewModel : ObservableObject, INavigationAware
 
     private void OnNavigatedFrom()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     public Task OnNavigatedToAsync()

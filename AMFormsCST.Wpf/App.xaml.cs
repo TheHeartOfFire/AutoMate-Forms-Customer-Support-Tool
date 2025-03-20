@@ -14,6 +14,9 @@ using System.Windows;
 using System.Windows.Threading;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
+using AMFormsCST.Desktop.Views.Pages.Tools;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.DependencyModel;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -45,17 +48,17 @@ public partial class App : Application
                 // Top-level pages
                 _ = services.AddSingleton<DashboardPage>();
                 _ = services.AddSingleton<DashboardViewModel>();
-                //_ = services.AddSingleton<AllControlsPage>();
-                //_ = services.AddSingleton<AllControlsViewModel>();
+                _ = services.AddSingleton<ToolsPage>();
+                _ = services.AddSingleton<ToolsViewModel>();
                 //_ = services.AddSingleton<SettingsPage>();
                 //_ = services.AddSingleton<SettingsViewModel>();
 
-                // All other pages and view models
-                //_ = services.AddTransientFromNamespace("Wpf.Ui.Gallery.Views", GalleryAssembly.Asssembly);
-                //_ = services.AddTransientFromNamespace(
-                //    "Wpf.Ui.Gallery.ViewModels",
-                //    GalleryAssembly.Asssembly
-                //);
+                 //All other pages and view models
+                _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Asssembly);
+                _ = services.AddTransientFromNamespace(
+                    "AMFormsCST.Desktop.ViewModels",
+                    GalleryAssembly.Asssembly
+                );
 
                 _ = services.AddStringLocalizer(b =>
                 {

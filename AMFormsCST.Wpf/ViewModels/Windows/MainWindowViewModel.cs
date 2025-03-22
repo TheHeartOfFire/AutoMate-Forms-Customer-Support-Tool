@@ -31,7 +31,7 @@ public partial class MainWindowViewModel : ViewModel
             MenuItemsSource = new object[]
             {
                 new NavigationViewItem("Formgen Utilities", SymbolRegular.DocumentTextToolbox24, typeof(FormgenUtilitiesPage)),
-                //new NavigationViewItem("Form Name Generator", SymbolRegular.Diversity24, typeof(IconsPage)),
+                new NavigationViewItem("Form Name Generator", SymbolRegular.TextT12, typeof(FormNameGeneratorPage)),
                 //new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
             },
         }

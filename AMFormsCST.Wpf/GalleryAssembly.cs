@@ -9,5 +9,5 @@ namespace AMFormsCST;
 
 public class GalleryAssembly
 {
-    public static Assembly Asssembly => Assembly.GetExecutingAssembly();
+    public static Assembly Assembly => Assembly.GetExecutingAssembly();
 }

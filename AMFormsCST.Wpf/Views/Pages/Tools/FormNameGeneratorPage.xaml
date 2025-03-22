@@ -4,14 +4,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages.Tools"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" x:Class="AMFormsCST.Desktop.Views.Pages.Tools.FormgenUtilitiesPage"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" x:Class="AMFormsCST.Desktop.Views.Pages.Tools.FormNameGeneratorPage"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="FormgenUtilitiesPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type={x:Type local:FormgenUtilitiesPage}}">
+      Title="FormNameGeneratorPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type={x:Type local:FormNameGeneratorPage}}">
 
     <Grid>
 
-        <ui:ToggleSwitch Content="ToggleSwitch" Margin="377,0,0,0"/>
+        <ui:ThumbRate HorizontalAlignment="Left" Margin="380,199,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Page>

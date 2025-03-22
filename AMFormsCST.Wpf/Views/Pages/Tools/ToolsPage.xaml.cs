@@ -27,7 +27,6 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
     {
         private readonly INavigationService _navigationService;
 
-        private SnowflakeEffect? _snowflake;
         public ToolsViewModel ViewModel { get; }
 
         public ToolsPage(ToolsViewModel viewModel, INavigationService navigationService)
@@ -46,28 +45,12 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             INavigationView? navigationControl = _navigationService.GetNavigationControl();
             if (
                 navigationControl?.BreadcrumbBar != null
-                && navigationControl.BreadcrumbBar.Visibility != Visibility.Collapsed
+                && navigationControl.BreadcrumbBar.Visibility != Visibility.Visible
             )
             {
-                navigationControl.BreadcrumbBar.SetCurrentValue(VisibilityProperty, Visibility.Collapsed);
-            }
-            INavigationViewItem? selectedItem = navigationControl?.SelectedItem;
-            if (selectedItem != null)
-            {
-                string? newTitle = selectedItem.Content?.ToString();
-                if (MainTitle.Text != newTitle)
-                {
-                    MainTitle.SetCurrentValue(System.Windows.Controls.TextBlock.TextProperty, newTitle);
-                }
-
-                if (selectedItem.Icon is SymbolIcon selectedIcon && MainSymbolIcon.Symbol != selectedIcon.Symbol)
-                {
-                    MainSymbolIcon.SetCurrentValue(SymbolIcon.SymbolProperty, selectedIcon.Symbol);
-                }
+                navigationControl.BreadcrumbBar.SetCurrentValue(VisibilityProperty, Visibility.Visible);
             }
 
-            _snowflake ??= new(MainCanvas);
-            _snowflake.Start();
         }
 
         private void HandleUnloaded(object sender, RoutedEventArgs e)
@@ -75,14 +58,12 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             INavigationView? navigationControl = _navigationService.GetNavigationControl();
             if (
                 navigationControl?.BreadcrumbBar != null
-                && navigationControl.BreadcrumbBar.Visibility != Visibility.Visible
+                && navigationControl.BreadcrumbBar.Visibility != Visibility.Collapsed
             )
             {
-                navigationControl.BreadcrumbBar.SetCurrentValue(VisibilityProperty, Visibility.Visible);
+                navigationControl.BreadcrumbBar.SetCurrentValue(VisibilityProperty, Visibility.Collapsed);
             }
 
-            _snowflake?.Stop();
-            _snowflake = null;
             Loaded -= HandleLoaded;
             Unloaded -= HandleUnloaded;
         }

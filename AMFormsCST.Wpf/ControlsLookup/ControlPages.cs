@@ -15,7 +15,7 @@ internal static class ControlPages
     {
         foreach (
             Type? type in GalleryAssembly
-                .Asssembly.GetTypes()
+                .Assembly.GetTypes()
                 .Where(t => t.IsDefined(typeof(GalleryPageAttribute)))
         )
         {

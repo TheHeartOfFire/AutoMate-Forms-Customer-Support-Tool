@@ -10,8 +10,30 @@
       Title="FormgenUtilitiesPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type={x:Type local:FormgenUtilitiesPage}}">
 
     <Grid>
-
-        <ui:ToggleSwitch Content="ToggleSwitch" Margin="377,0,0,0"/>
-
+        <StackPanel Orientation="Horizontal">
+            <TreeView x:Name="FormgenFileTreeView" Width="100"/>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Rename" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
+                    <ui:TextBox x:Name="RenameFormgenFileTextBox" PlaceholderText="Load a .formgen file to rename it." />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="ArrowTurnDownRight20" Foreground="White" FontSize="29" Margin="31,0,0,0" />
+                    <Label Content="Image found?" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,3,4" />
+                    <ui:SymbolIcon x:Name="ImageFoundFailedIcon" Symbol="Dismiss32" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="21" Foreground="Red" />
+                    <ui:SymbolIcon x:Name="ImageFoundSuccessIcon" Symbol="Checkmark28" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="21" Foreground="#FF1FFF00" />
+                    <Label Content="Rename Image?" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="10,0,0,4" />
+                    <CheckBox x:Name="RenameImageCheckBox" Padding="4,5,11,6"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="UUID" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
+                    <ui:TextBox x:Name="RegenerateUUIDTextBox" PlaceholderText="Load a .formgen file to regenerate its UUID" IsReadOnly="True" />
+                </StackPanel>
+                <ui:Button Padding="2,0,2,0" Margin="43,0,0,0">
+                    <ui:SymbolIcon Symbol="ArrowSync12" FontSize="27"/>
+                </ui:Button>
+            <Grid/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

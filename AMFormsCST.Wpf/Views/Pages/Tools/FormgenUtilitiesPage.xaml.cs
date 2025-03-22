@@ -34,6 +34,23 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             DataContext = this;
 
             InitializeComponent();
+#if DEBUG
+            DebugStackPanel.Visibility = Visibility.Visible;
+#endif
+        }
+
+        private void Debug_ToggleImageFoundButtonClick(object sender, RoutedEventArgs e)
+        {
+            if(ImageFoundFailedIcon.Visibility == Visibility.Visible)
+            {
+                ImageFoundFailedIcon.Visibility = Visibility.Collapsed;
+                ImageFoundSuccessIcon.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ImageFoundFailedIcon.Visibility = Visibility.Visible;
+                ImageFoundSuccessIcon.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.Notebook;
 
 namespace AMFormsCST.Core.Utils;

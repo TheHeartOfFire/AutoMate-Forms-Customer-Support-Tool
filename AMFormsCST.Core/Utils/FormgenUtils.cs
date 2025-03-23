@@ -1,10 +1,11 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.Xml;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Core.Utils;
-public class FormgenUtils(FormgenUtilsProperties properties)
+public class FormgenUtils(FormgenUtilsProperties properties) : IFormgenUtils
 {
     public DotFormgen? ParsedFormgenFile { get; private set; }
     public string? FileName => _formgenXml.BaseURI[(_formgenXml.BaseURI.LastIndexOf('\\') + 1)..^8];

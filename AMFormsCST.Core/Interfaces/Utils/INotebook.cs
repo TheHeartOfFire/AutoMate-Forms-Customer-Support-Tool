@@ -1,6 +1,6 @@
 ﻿using AMFormsCST.Core.Types.Notebook;
 
-namespace AMFormsCST.Core.Interfaces.Notebook;
+namespace AMFormsCST.Core.Interfaces.Utils;
 public interface INotebook
 {
     Note CurrentNote { get; }

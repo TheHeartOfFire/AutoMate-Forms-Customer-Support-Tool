@@ -16,7 +16,6 @@ using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
-using AMFormsCST.Desktop.Effects;
 
 namespace AMFormsCST.Desktop.Views.Pages.Tools
 {

@@ -11,8 +11,13 @@
 
     <Grid>
         <StackPanel Orientation="Horizontal">
-            <TreeView x:Name="FormgenFileTreeView" Width="100"/>
+            <TreeView x:Name="FormgenFileTreeView" />
             <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Padding="2" Click="OpenButtonClick" >
+                        <ui:SymbolIcon Symbol="FolderOpen24" FontSize="20"/>
+                    </ui:Button>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Rename" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
                     <ui:TextBox x:Name="RenameFormgenFileTextBox" PlaceholderText="Load a .formgen file to rename it." />

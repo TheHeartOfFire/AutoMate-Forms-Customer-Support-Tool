@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMFormsCST.Core", "AMFormsC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMFormsCST.Test", "AMFormsCST.Test\AMFormsCST.Test.csproj", "{9169F5C8-B3D1-41A9-9FC6-53E344A55E81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMFormsCST.Desktop", "AMFormsCST.Wpf\AMFormsCST.Desktop.csproj", "{37ECD445-0534-4207-BBA6-03BBF54F745A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMFormsCST.Desktop", "AMFormsCST.Desktop\AMFormsCST.Desktop.csproj", "{37ECD445-0534-4207-BBA6-03BBF54F745A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,10 +1,13 @@
 ﻿using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Desktop.Controls.FormgenUtilities;
 using AMFormsCST.Desktop.ControlsLookup;
+using AMFormsCST.Desktop.Extensions;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Microsoft.Win32;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Media;
 using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
@@ -28,7 +31,7 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
             InitializeComponent();
 #if DEBUG
-            DebugStackPanel.Visibility = Visibility.Visible;
+            ViewModel.ToggleDebugMode(true);
 #endif
         }
 
@@ -70,7 +73,12 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             if (dialog.ShowDialog() == false) return; // TODO: this needs to collaps most of the page if no file was found
             ProgressRing.Visibility = Visibility.Visible;
             ViewModel.FormgenUtils.OpenFile(dialog.FileName);
-            PopulateTreeView(ViewModel.FormgenUtils);
+            if (FormgenFileTreeView.ItemsSource is null)
+                FormgenFileTreeView.Items.Clear();
+            var rootNode = new TreeItemNodeViewModel();
+            rootNode.Initialize(ViewModel.FormgenUtils.ParsedFormgenFile!);
+            FormgenFileTreeView.ItemsSource = new[] { rootNode };
+
             RenameFormgenFileTextBox.Text = ViewModel.FormgenUtils.ParsedFormgenFile?.Title;
 
             var extension = "pdf";
@@ -103,69 +111,20 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             ProgressRing.Visibility = Visibility.Collapsed;
         }
 
-        private void PopulateTreeView(IFormgenUtils utils)
-        {
-            FormgenFileTreeView.Items.Clear();
-
-            var header = new TreeViewItem() { Header = utils.ParsedFormgenFile?.Title };
-
-            var codelines = new TreeViewItem() { Header = "Code Lines" };
-
-            var init = new TreeViewItem() { Header = "Init" };
-            var prompts = new TreeViewItem() { Header = "Prompts" };
-            var postPrompts = new TreeViewItem() { Header = "Post Prompts" };
-
-            foreach (var line in utils.ParsedFormgenFile!.CodeLines)
-            {
-                switch(line.Settings?.Type)
-                {
-                    case CodeType.INIT:
-                        init.Items.Add(new TreeViewItem() { 
-                            Header = $"{line.Settings.Order.ToString() ?? string.Empty}: " +
-                            $"{line.Settings.Variable ?? string.Empty }" });
-                        break;
-                    case CodeType.PROMPT:
-                        prompts.Items.Add(new TreeViewItem() { 
-                            Header = $"{line.Settings.Order.ToString() ?? string.Empty}: " +
-                            $"{line.Settings.Variable ?? string.Empty}"
-                        });
-                        break;
-                    case CodeType.POST:
-                        postPrompts.Items.Add(new TreeViewItem() { 
-                            Header = $"{line.Settings.Order.ToString() ?? string.Empty}: " +
-                            $"{line.Settings.Variable ?? string.Empty}"
-                        });
-                        break;
-                }
-
-            }
-            init.IsExpanded = true;
-            prompts.IsExpanded = true;
-            postPrompts.IsExpanded = true;
-
-            codelines.Items.Add(init);
-            codelines.Items.Add(prompts);
-            codelines.Items.Add(postPrompts);
-            codelines.IsExpanded = true;
-
-            var fields = new TreeViewItem() { Header = "Fields" };
-
-            foreach(var page in utils.ParsedFormgenFile.Pages)
-                foreach (var field in page.Fields)
-                    fields.Items.Add(new TreeViewItem() { Header = field.Expression });
-
-            fields.IsExpanded = true;
-
-            header.Items.Add(codelines);
-            header.Items.Add(fields);
-            header.IsExpanded = true;
-
-            FormgenFileTreeView.Items.Add(header);
-        }
-
         private void RegenerateUUIDButtonClick(object sender, RoutedEventArgs e)
         {
 
+        }
+
+
+        private void FormgenFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (FormgenFileTreeView.SelectedItem is not TreeItemNodeViewModel item) return;
+
+            var properties = item.Properties as FormProperties;
+
+            PropertiesStackPanel.Children.Clear();
+            PropertiesStackPanel.Children.Add(properties);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AMFormsCST.Desktop.Models;
+namespace AMFormsCST.Desktop.Models.Notebook;
 public class Contact
 {
     public string? Name { get; set; } = string.Empty;

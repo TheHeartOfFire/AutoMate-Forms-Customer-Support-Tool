@@ -1,4 +1,4 @@
-﻿using AMFormsCST.Desktop.Models;
+﻿using AMFormsCST.Desktop.Models.Notebook;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 

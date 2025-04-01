@@ -13,7 +13,7 @@
         <StackPanel Orientation="Horizontal">
             <TreeView x:Name="FormgenFileTreeView" MaxWidth="250" MaxHeight="600" 
                       ScrollViewer.HorizontalScrollBarVisibility="Auto" Padding="0,0,10,0" 
-                      SelectedItemChanged="FormgenFileTreeView_SelectedItemChanged">
+                      SelectedItemChanged="FormgenFileTreeView_SelectedItemChanged" VerticalAlignment="Top">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="True"/>
@@ -54,7 +54,7 @@
                     <ui:SymbolIcon Symbol="ArrowSync12" FontSize="27"/>
                 </ui:Button>
                 <ui:ProgressRing x:Name="ProgressRing" IsIndeterminate="True" Visibility="Collapsed" />
-                <StackPanel x:Name="PropertiesStackPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <StackPanel x:Name="PropertiesStackPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Horizontal" CanHorizontallyScroll="True"/>
                 <StackPanel x:Name="DebugStackPanel" Visibility="{Binding ViewModel.DebugVisibility}">
                     <Label Content="Debug Panel" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
                     <StackPanel Orientation="Horizontal">

@@ -1,12 +1,15 @@
 ﻿using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Desktop.Controls.FormgenUtilities;
+using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.ControlsLookup;
 using AMFormsCST.Desktop.Extensions;
+using AMFormsCST.Desktop.Models.FormgenUtilities;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Microsoft.Win32;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
@@ -70,7 +73,7 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
                 Filter = "Formgen Files (*.formgen)|*.formgen"
             };
 
-            if (dialog.ShowDialog() == false) return; // TODO: this needs to collaps most of the page if no file was found
+            if (dialog.ShowDialog() == false) return; 
             ProgressRing.Visibility = Visibility.Visible;
             ViewModel.FormgenUtils.OpenFile(dialog.FileName);
             if (FormgenFileTreeView.ItemsSource is null)
@@ -83,7 +86,8 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
             var extension = "pdf";
 
-            if(ViewModel.FormgenUtils.ParsedFormgenFile?.FormType is Format.LegacyImpact or Format.LegacyLaser)
+            if (ViewModel.FormgenUtils.ParsedFormgenFile?.FormType
+                is Format.LegacyImpact or Format.LegacyLaser)
                 extension = "jpg";
 
             if (File.Exists(dialog.FileName[..^7] + extension))
@@ -107,13 +111,13 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             RenameStackPanel.Visibility = Visibility.Visible;
             RegenerateUUIDButton.Visibility = Visibility.Visible;
             OpenButtonIcon.FontSize = 20;
-
+            PropertiesStackPanel.Children.Clear();
             ProgressRing.Visibility = Visibility.Collapsed;
         }
 
         private void RegenerateUUIDButtonClick(object sender, RoutedEventArgs e)
         {
-
+            ViewModel.FormgenUtils.uu;
         }
 
 
@@ -121,10 +125,10 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
         {
             if (FormgenFileTreeView.SelectedItem is not TreeItemNodeViewModel item) return;
 
-            var properties = item.Properties as FormProperties;
-
             PropertiesStackPanel.Children.Clear();
-            PropertiesStackPanel.Children.Add(properties);
+
+            PropertiesStackPanel.Children.Add(item.Properties.GetUIElements());
+
         }
     }
 }

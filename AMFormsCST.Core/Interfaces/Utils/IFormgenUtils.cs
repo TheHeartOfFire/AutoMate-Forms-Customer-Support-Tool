@@ -17,4 +17,5 @@ public interface IFormgenUtils
     void OpenFile(string filePath);
     void RenameFile(string newName, bool hasImageFile, bool renameImage);
     void SaveFile(string filePath);
+    void RegenerateUUID();
 }

@@ -11,24 +11,25 @@
 
     <Grid>
         <StackPanel Orientation="Horizontal">
-            <TreeView x:Name="FormgenFileTreeView" MaxWidth="250" MaxHeight="600" 
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto" Padding="0,0,10,0" 
+            <Border x:Name="FileViewer" BorderBrush="#7F000000" BorderThickness="0,0,1,0" Visibility="Collapsed">
+                <TreeView x:Name="FormgenFileTreeView" MaxWidth="400"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto" Padding="0,0,10,0"  Margin="0,0,15,0"
                       SelectedItemChanged="FormgenFileTreeView_SelectedItemChanged" VerticalAlignment="Top">
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}">
-                        <Setter Property="IsExpanded" Value="True"/>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding NodeName}" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
-                        </StackPanel>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-                <TreeViewItem Header="Sample Data" />
-            </TreeView>
-            <StackPanel>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="{Binding NodeName}" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+            <StackPanel Margin="15,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <ui:Button Padding="2" Click="OpenButtonClick" >
                         <ui:SymbolIcon x:Name="OpenButtonIcon" Symbol="FolderOpen24" FontSize="64"/>
@@ -48,13 +49,13 @@
                 </StackPanel>
                 <StackPanel x:Name="UUIDStackPanel" Orientation="Horizontal" Visibility="{Binding ViewModel.DebugVisibility}" >
                     <Label Content="UUID" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
-                    <ui:TextBox x:Name="RegenerateUUIDTextBox" PlaceholderText="Load a .formgen file to regenerate its UUID" IsReadOnly="True" />
+                    <ui:TextBox x:Name="RegenerateUUIDTextBox" PlaceholderText="Load a .formgen file to regenerate its UUID" IsReadOnly="True" Text="{Binding ViewModel.Uuid}"/>
                 </StackPanel>
                 <ui:Button x:Name="RegenerateUUIDButton" Padding="2,0,2,0" Margin="43,0,0,0" Click="RegenerateUUIDButtonClick" Visibility="{Binding ViewModel.DebugVisibility}">
                     <ui:SymbolIcon Symbol="ArrowSync12" FontSize="27"/>
                 </ui:Button>
                 <ui:ProgressRing x:Name="ProgressRing" IsIndeterminate="True" Visibility="Collapsed" />
-                <StackPanel x:Name="PropertiesStackPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Horizontal" CanHorizontallyScroll="True"/>
+                <StackPanel x:Name="PropertiesStackPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Horizontal" CanHorizontallyScroll="True" Margin="0,15,0,0"/>
                 <StackPanel x:Name="DebugStackPanel" Visibility="{Binding ViewModel.DebugVisibility}">
                     <Label Content="Debug Panel" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />
                     <StackPanel Orientation="Horizontal">

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class CodeLineStats : BasicStats, IFormgenFileProperties
@@ -14,7 +15,7 @@ public class CodeLineStats : BasicStats, IFormgenFileProperties
     public int Prompts { get; set; }
     public int PostPrompts { get; set; }
 
-    public new StackPanel GetUIElements()
+    public new UIElement GetUIElements()
     {
         var statsPanel = new StackPanel
         {
@@ -57,6 +58,12 @@ public class CodeLineStats : BasicStats, IFormgenFileProperties
             Margin = new Thickness(5, 10, 0, 0)
         });
 
-        return statsPanel;
+        return new Border()
+        {
+            Child = statsPanel,
+            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(3)
+        };
     }
 }

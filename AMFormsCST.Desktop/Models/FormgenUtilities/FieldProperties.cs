@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormField;
 
@@ -15,5 +16,5 @@ public class FieldProperties : IFormgenFileProperties
     public string SampleData { get; set; } = string.Empty;
     public IFormgenFileSettings Settings { get; set; } = new FieldSettings();
 
-    public StackPanel GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
+    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
 }

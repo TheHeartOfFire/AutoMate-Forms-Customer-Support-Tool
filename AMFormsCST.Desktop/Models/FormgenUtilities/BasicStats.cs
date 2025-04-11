@@ -17,12 +17,22 @@ public class BasicStats : IFormgenFileProperties
     public int Total { get; set; }
     public IFormgenFileSettings Settings { get; set; } = new PageSettings();
 
-    public StackPanel GetUIElements() => new()
+    public UIElement GetUIElements() => new Border()
     {
-        Children = {
-            
-            new Label { Content = $"Total: {Total}" },
-    }
+        Child = new StackPanel 
+        {
+            Children =
+            {
+                new Label
+                {
+                    Content = $"Total: {Total}",
+                    Margin = new Thickness(5)
+                }
+            }
+        },
+        BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
+        BorderThickness = new Thickness(1),
+        CornerRadius = new CornerRadius(3)
     };
 
     public static StackPanel GetSettingsAndPropertiesUIElements(IFormgenFileProperties properties)
@@ -67,16 +77,29 @@ public class BasicStats : IFormgenFileProperties
         {
             settingsPanel.Children.Add(ParseProperty(properties.Settings, property));
         }
+        var propBorder = new Border
+        {
+            Child = propertiesPanel,
+            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(3)
+        };
+        var SettingsBorder = new Border()
+        {
+            Child = settingsPanel,
+            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(3)
+        }; 
 
         var output = new StackPanel
         {
             Children =
             {
-                propertiesPanel,
-                settingsPanel
+                propBorder,
+                SettingsBorder
 
-            },
-            Orientation = Orientation.Horizontal
+            }
         };
 
         if (properties is CodeLineProperties codeLineProps)

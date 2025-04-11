@@ -66,6 +66,6 @@ public class FormProperties : IFormgenFileProperties
             _ => "Unknown",
         };
 
-    public StackPanel GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
+    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
 
 }

@@ -104,8 +104,8 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
                 RenameImageCheckBox.IsChecked = false;
             }
-            RegenerateUUIDTextBox.Text = ViewModel.FormgenUtils.ParsedFormgenFile?.Settings.UUID;
-
+            FileViewer.Visibility = Visibility.Visible;
+            ViewModel.Uuid = ViewModel.FormgenUtils?.ParsedFormgenFile?.Settings.UUID ?? string.Empty;
             RenameControlsStackPanel.Visibility = Visibility.Visible;
             UUIDStackPanel.Visibility = Visibility.Visible;
             RenameStackPanel.Visibility = Visibility.Visible;
@@ -117,7 +117,7 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
         private void RegenerateUUIDButtonClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.FormgenUtils.uu;
+            ViewModel.RegenerateUUID();
         }
 
 

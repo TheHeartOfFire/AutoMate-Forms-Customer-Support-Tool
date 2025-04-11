@@ -155,4 +155,13 @@ public class FormgenUtils(FormgenUtilsProperties properties) : IFormgenUtils
         newDoc.LoadXml(recipient.GenerateXML());
         newDoc.Save(fromFilePath);
     }
+    public void RegenerateUUID()
+    {
+        if (_formgenXml?.DocumentElement is null) return;
+
+        var uuid = Guid.NewGuid().ToString();
+
+        _formgenXml.DocumentElement.Attributes[1].Value = uuid;
+        if (ParsedFormgenFile != null) ParsedFormgenFile.Settings.UUID = uuid;
+    }
 }

@@ -54,43 +54,63 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
         private void OpenButtonClick(object sender, RoutedEventArgs e)
         {
-            var path = GetFolderPath(SpecialFolder.MyComputer);
-#if DEBUG
-            var entryAssembly = Assembly.GetEntryAssembly()?.Location;
-            var dir = Path.GetDirectoryName(entryAssembly);
-            if (dir is null) return;
-            dir = dir[..dir.LastIndexOf('\\')]
-                [..dir.LastIndexOf('\\')]
-                [..dir.LastIndexOf('\\')];
-            path = dir +
-                "\\SampleData\\Formgen Sample Data";
-
-#endif
-
-            var dialog = new OpenFileDialog
-            {
-                InitialDirectory = path,
-                Filter = "Formgen Files (*.formgen)|*.formgen"
-            };
+            var dialog = FormgenUtilitiesViewModel.OpenWindow;
 
             if (dialog.ShowDialog() == false) return; 
             ProgressRing.Visibility = Visibility.Visible;
+
             ViewModel.FormgenUtils.OpenFile(dialog.FileName);
+
+            LoadTreeView();
+            ToggleVisibility(dialog.FileName[..^7]);
+
+            RenameFormgenFileTextBox.Text = ViewModel.FormgenUtils.ParsedFormgenFile?.Title;
+            ViewModel.Uuid = ViewModel.FormgenUtils?.ParsedFormgenFile?.Settings.UUID ?? string.Empty;
+            OpenButtonIcon.FontSize = 20;
+            PropertiesStackPanel.Children.Clear();
+
+            ProgressRing.Visibility = Visibility.Collapsed;
+        }
+
+        private void RegenerateUUIDButtonClick(object sender, RoutedEventArgs e)
+        {
+            if(FormgenUtilitiesViewModel.Confirm(
+                "Are you sure you want to change the UUID for this form. Formgen will no longer recognize this as the same form.",
+                "Update UUID") is System.Windows.MessageBoxResult.No) return;
+
+            ViewModel.RegenerateUUID();
+        }
+
+
+        private void FormgenFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (FormgenFileTreeView.SelectedItem is not TreeItemNodeViewModel item) return;
+
+            PropertiesStackPanel.Children.Clear();
+
+            PropertiesStackPanel.Children.Add(item.Properties.GetUIElements());
+
+        }
+
+        private void LoadTreeView()
+        {
             if (FormgenFileTreeView.ItemsSource is null)
                 FormgenFileTreeView.Items.Clear();
+
             var rootNode = new TreeItemNodeViewModel();
             rootNode.Initialize(ViewModel.FormgenUtils.ParsedFormgenFile!);
             FormgenFileTreeView.ItemsSource = new[] { rootNode };
+        }
 
-            RenameFormgenFileTextBox.Text = ViewModel.FormgenUtils.ParsedFormgenFile?.Title;
-
+        private void ToggleVisibility(string path)
+        {   
             var extension = "pdf";
 
             if (ViewModel.FormgenUtils.ParsedFormgenFile?.FormType
                 is Format.LegacyImpact or Format.LegacyLaser)
                 extension = "jpg";
 
-            if (File.Exists(dialog.FileName[..^7] + extension))
+            if (File.Exists(path + extension))
             {
                 ImageFoundSuccessIcon.Visibility = Visibility.Visible;
                 ImageFoundFailedIcon.Visibility = Visibility.Collapsed;
@@ -105,30 +125,36 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
                 RenameImageCheckBox.IsChecked = false;
             }
             FileViewer.Visibility = Visibility.Visible;
-            ViewModel.Uuid = ViewModel.FormgenUtils?.ParsedFormgenFile?.Settings.UUID ?? string.Empty;
+
             RenameControlsStackPanel.Visibility = Visibility.Visible;
             UUIDStackPanel.Visibility = Visibility.Visible;
             RenameStackPanel.Visibility = Visibility.Visible;
             RegenerateUUIDButton.Visibility = Visibility.Visible;
-            OpenButtonIcon.FontSize = 20;
-            PropertiesStackPanel.Children.Clear();
-            ProgressRing.Visibility = Visibility.Collapsed;
+            SaveButton.Visibility = Visibility.Visible;
+
+        }
+        private void SaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            var dialog = FormgenUtilitiesViewModel.SaveWindow;
+
+            if (dialog.ShowDialog() == false) return;
+
+            FormgenUtilitiesViewModel.Confirm($"You are about to save your changes to {RenameFormgenFileTextBox.Text}. " +
+                $"A backup will be created of your original file in case you change your mind. Do you wish to proceed?",
+               "Save");
+
+            ViewModel.SaveFormgenFile(dialog.FolderName, 
+                !RenameFormgenFileTextBox.Text.Equals(ViewModel.FormgenUtils?.ParsedFormgenFile?.Title) ? RenameFormgenFileTextBox.Text : null,
+                RenameImageCheckBox.IsChecked is true && ImageFoundSuccessIcon.Visibility is Visibility.Visible);
         }
 
-        private void RegenerateUUIDButtonClick(object sender, RoutedEventArgs e)
+        private void RestoreButtonClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.RegenerateUUID();
-        }
+            var dialog = FormgenUtilitiesViewModel.SaveWindow;
 
+            if (dialog.ShowDialog() == false) return;
 
-        private void FormgenFileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (FormgenFileTreeView.SelectedItem is not TreeItemNodeViewModel item) return;
-
-            PropertiesStackPanel.Children.Clear();
-
-            PropertiesStackPanel.Children.Add(item.Properties.GetUIElements());
-
+            ViewModel.SaveFormgenFile(dialog.FolderName);
         }
     }
 }

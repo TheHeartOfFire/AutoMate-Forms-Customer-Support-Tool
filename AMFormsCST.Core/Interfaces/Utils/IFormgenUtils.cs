@@ -9,13 +9,13 @@ public interface IFormgenUtils
     void ClonePrompt(CodeLine[] selected);
     void CloseFile();
     void CopyPromptsTo(string fromFilePath);
-    void CreateBackup(string uuid);
+    void CreateBackup();
     void EditPrompts(CodeLine[] prompts);
     CodeLine[] GetCodeLines(CodeLineSettings.CodeType type);
     CodeLine[] GetPrompts();
     void LoadBackup(string backupPath);
     void OpenFile(string filePath);
-    void RenameFile(string newName, bool hasImageFile, bool renameImage);
+    void RenameFile(string newName, bool renameImage);
     void SaveFile(string filePath);
     void RegenerateUUID();
 }

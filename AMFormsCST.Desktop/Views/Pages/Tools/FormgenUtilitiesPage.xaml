@@ -34,6 +34,12 @@
                     <ui:Button Padding="2" Click="OpenButtonClick" >
                         <ui:SymbolIcon x:Name="OpenButtonIcon" Symbol="FolderOpen24" FontSize="64"/>
                     </ui:Button>
+                    <ui:Button x:Name="SaveButton" Padding="2" Click="SaveButtonClick" Visibility="Collapsed">
+                        <ui:SymbolIcon x:Name="SaveButtonIcon" Symbol="Save16" FontSize="20" />
+                    </ui:Button>
+                    <ui:Button x:Name="RestoreButton" Padding="2" Click="RestoreButtonClick" Visibility="Visible">
+                        <ui:SymbolIcon x:Name="RestoreButtonIcon" Symbol="History16" FontSize="20" />
+                    </ui:Button>
                 </StackPanel>
                 <StackPanel x:Name="RenameStackPanel" Orientation="Horizontal" Visibility="{Binding ViewModel.DebugVisibility}">
                     <Label Content="Rename" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0,0,10,4" />

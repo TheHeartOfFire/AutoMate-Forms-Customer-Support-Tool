@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Core.Interfaces.BestPractices;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.BestPractices;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Utils;
 using System;
@@ -8,14 +10,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Core;
-public class SupportTool
+public class SupportTool : ISupportTool
 {
-    public BestPracticeEnforcer Enforcer { get; set; }
-    public CodeBlocks CodeBlocks { get; set; } = new();
-    public FormgenUtils FormgenUtils { get; set; }
-    public Notebook Notebook { get; set; } = new();
+    public IBestPracticeEnforcer Enforcer { get; set; }
+    public ICodeBlocks CodeBlocks { get; set; }
+    public IFormgenUtils FormgenUtils { get; set; }
+    public INotebook Notebook { get; set; }
     public IReadOnlyCollection<ITextTemplateVariable> Variables { get; private set; }
-    private Properties _properties = new();
+    private readonly Properties _properties = new();
 
     #region To Become Settings
     private string _extSeparator = "x ";
@@ -23,8 +25,11 @@ public class SupportTool
 
     public SupportTool(IFormNameBestPractice formNameBestPractice)
     {
-        FormgenUtils = new(_properties.FormgenUtils);
-        Enforcer = new(formNameBestPractice);
+        _properties = new Properties();
+        CodeBlocks = new CodeBlocks();
+        Notebook = new Notebook();
+        FormgenUtils = new FormgenUtils(_properties.FormgenUtils);
+        Enforcer = new BestPracticeEnforcer(formNameBestPractice);
         Variables = RegisterVariables();
     }
 

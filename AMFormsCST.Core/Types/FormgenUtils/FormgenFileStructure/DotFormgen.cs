@@ -9,16 +9,16 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
     public class DotFormgen
     {
         public DotFormgenSettings Settings { get; set; }
-        public List<FormPage> Pages { get; set; } = new();
+        public List<FormPage> Pages { get; set; } = [];
         public string? Title { get; set; }
         public bool TradePrompt { get; set; }
         public Format FormType { get; set; }
         public bool SalesPersonPrompt { get; set; }
         public string? Username { get; set; }
         public string? BillingName { get; set; }
-        public List<CodeLine> CodeLines { get; set; } = new();
+        public List<CodeLine> CodeLines { get; set; } = [];
         public FormCategory Category { get; set; }
-        public List<string> States { get; set; } = new();
+        public List<string> States { get; set; } = [];
 
         public enum Format
         {

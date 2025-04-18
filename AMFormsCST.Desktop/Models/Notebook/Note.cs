@@ -8,12 +8,19 @@ using System.Threading.Tasks;
 namespace AMFormsCST.Desktop.Models.Notebook;
 public class Note
 {
-    public string? CaseNumber { get; set; }
-    public string? Notes { get; set; }
+    public string CaseNumber { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
     public ObservableCollection<Company> Companies { get; set; } = [ new() ];
     public Company? SelectedCompany { get; set; }
     public ObservableCollection<Contact> Contacts { get; set; } = [ new() ];
     public Contact? SelectedContact { get; set; }
     public ObservableCollection<Form> Forms { get; set; } = [ new() ];
     public Form? SelectedForm { get; set; }
+
+    public Note()
+    {
+        SelectedCompany = Companies.FirstOrDefault();
+        SelectedContact = Contacts.FirstOrDefault();
+        SelectedForm = Forms.FirstOrDefault();
+    }
 }

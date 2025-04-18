@@ -28,6 +28,18 @@ public partial class DashboardPage : INavigableView<DashboardViewModel>
         ViewModel = viewModel;
         DataContext = this;
 
+        ViewModel.SelectedNote = ViewModel.Notes.FirstOrDefault();
+
         InitializeComponent();
+    }
+
+    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        DemoBox.Text = ViewModel.SelectedNote?.Notes ?? string.Empty;
+    }
+
+    private void ToggleButton_DragEnter(object sender, DragEventArgs e)
+    {
+
     }
 }

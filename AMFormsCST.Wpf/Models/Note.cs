@@ -16,4 +16,6 @@ public class Note
     public Contact? SelectedContact { get; set; }
     public ObservableCollection<Form> Forms { get; set; } = [ new() ];
     public Form? SelectedForm { get; set; }
+    public Guid Id { get; } = Guid.NewGuid();
+    public bool IsSelected { get; set; } = false;
 }

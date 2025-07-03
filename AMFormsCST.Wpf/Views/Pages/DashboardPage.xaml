@@ -7,7 +7,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
       xmlns:pages="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
       mc:Ignorable="d"
-      d:DesignHeight="650" d:DesignWidth="1100"
+      d:DesignHeight="800" d:DesignWidth="1100"
       Title="DashboardPage"
       d:DataContext="{d:DesignInstance pages:DashboardViewModel, 
                                        IsDesignTimeCreatable=False}">
@@ -25,9 +25,28 @@
             <StackPanel Orientation="Horizontal">
                 <ui:SymbolIcon Symbol="BuildingPeople20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
                 <StackPanel>
-                    <StackPanel x:Name="DealerNameButtonsStackPanel" Orientation="Horizontal">
-                        <ToggleButton Content="Enter a dealership name..." IsEnabled="False"/>
-                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding ViewModel.SelectedNote.Companies}" x:Name="DealerButtons">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Content="{Binding Name, TargetNullValue=Enter a Dealership name..., FallbackValue=Enter a Dealership name...}"
+                        IsChecked="{Binding IsSelected}"
+                        Command="{Binding DataContext.ViewModel.CompanyClickedCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                        CommandParameter="{Binding }"
+                        Margin="0,0,5,0" 
+                        MinWidth="150"
+                        GroupName="Cases"/>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Resources>
+                            <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                        </ItemsControl.Resources>
+                    </ItemsControl>
                     <StackPanel x:Name="CompanyNumberButtonsStackPanel" Orientation="Horizontal" Margin="0,10,0,0">
                         <ToggleButton Content="Enter a company number..." IsEnabled="False"/>
                     </StackPanel>
@@ -102,17 +121,56 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
-        <StackPanel x:Name="CaseNumberButtonsStackPanel" Orientation="Horizontal">
-            <ToggleButton Content="Enter a case number..." IsEnabled="False"/>
+        <StackPanel x:Name="CaseNumberButtonsStackPanel" Orientation="Horizontal" Grid.ColumnSpan="2">
+
+            <ItemsControl ItemsSource="{Binding ViewModel.Notes}" x:Name="CaseButtons">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton Content="{Binding CaseNumber, TargetNullValue=Enter a case number..., FallbackValue=Enter a case number...}"
+                                    IsChecked="{Binding IsSelected}"
+                                    Command="{Binding DataContext.ViewModel.NoteClickedCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                    CommandParameter="{Binding Id}"
+                                    Margin="0,0,5,0" 
+                                    MinWidth="150"
+                                    GroupName="Cases"/>
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.Resources>
+                    <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </ItemsControl.Resources>
+            </ItemsControl>
+
+            <!--<ToggleButton Content="{Binding ViewModel.SelectedNote.CaseNumber, TargetNullValue=Enter a case number..., FallbackValue=Enter a case number...}" IsEnabled="False"/>-->
+            <!--<ui:Button Margin="0,0,5,0">
+                <ui:SymbolIcon Symbol="CommentAdd12" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FF00D003"/>
+            </ui:Button>
+            <ui:Button Margin="0,0,5,0">
+                <ui:SymbolIcon Symbol="CommentLightning20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FF00D003"/>
+            </ui:Button>-->
+            <ui:Button Margin="0,0,5,0">
+                <ui:SymbolIcon Symbol="CommentDismiss20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FFD00000"/>
+            </ui:Button>
         </StackPanel>
         <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Case #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    <ui:TextBox Text="{Binding ViewModel.SelectedNote.CaseNumber, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" />
+                    <ui:NumberBox Text="{Binding ViewModel.SelectedNote.CaseNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" PlaceholderText="Enter a case number..." MaxDecimalPlaces="0" Minimum="0" Maximum="1000000000" SpinButtonPlacementMode="Hidden" />
                 </StackPanel>
                 <Label Content="Notes"  Margin=" 0, 25, 0, 0"/>
-                <ui:TextBox Text="{Binding ViewModel.SelectedNote.Notes, Mode=TwoWay}" AcceptsReturn="True" MinHeight="250" ClearButtonEnabled="True" MinWidth="500"/>
+                <ui:TextBox Text="{Binding ViewModel.SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="250" ClearButtonEnabled="True" MinWidth="500"/>
+                <StackPanel Visibility="{Binding ViewModel.DebugVisibility}">
+                    <Label Content="Case UUID:"/>
+                    <Label Content="{Binding ViewModel.SelectedNote.Id}"/>
+                    <Label Content="IsSelected:"/>
+                    <Label Content="{Binding ViewModel.SelectedNote.IsSelected}"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Grid>

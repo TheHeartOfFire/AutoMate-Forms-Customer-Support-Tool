@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-public class Form
+public class Form : ISelectable
 {
     public string? Name { get; set; } = string.Empty;
     public string? Notes { get; set; } = string.Empty;
@@ -19,6 +19,16 @@ public class Form
     {
         LegacyImpact,
         Pdf
+    }
+    public Guid Id { get; } = Guid.NewGuid();
+    public bool IsSelected { get; private set; } = false;
+    public void Select()
+    {
+        IsSelected = true;
+    }
+    public void Deselect()
+    {
+        IsSelected = false;
     }
 
 }

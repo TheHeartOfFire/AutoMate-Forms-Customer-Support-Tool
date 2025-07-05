@@ -1,5 +1,6 @@
 ﻿using AMFormsCST.Desktop.Models;
 using AMFormsCST.Desktop.ViewModels.Pages;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,9 @@ namespace AMFormsCST.Desktop.Views.Pages;
 public partial class DashboardPage : INavigableView<DashboardViewModel>
 {
     public DashboardViewModel ViewModel { get; }
-
+    private int _detailsColumnIconSize = 24;
+    public double DetailsColumnSize => DetailsColumn.ActualWidth - _detailsColumnIconSize; 
+    
     public DashboardPage(DashboardViewModel viewModel)
     {
         ViewModel = viewModel;

@@ -5,13 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-public class Contact
+public class Contact : ISelectable
 {
     public string? Name { get; set; } = string.Empty;
     public string? Email { get; set; } = string.Empty;
     public string? Phone { get; set; } = string.Empty;
     public string? PhoneExtension { get; set; } = string.Empty;
     public string? PhoneExtensionDelimiter { get; set; } = " ";
+    public Guid Id { get; } = Guid.NewGuid();
+    public bool IsSelected { get; private set; } = false;
+    public void Select()
+    {
+        IsSelected = true;
+    }
+    public void Deselect()
+    {
+        IsSelected = false;
+    }
 
     public string GetPhone()
     {

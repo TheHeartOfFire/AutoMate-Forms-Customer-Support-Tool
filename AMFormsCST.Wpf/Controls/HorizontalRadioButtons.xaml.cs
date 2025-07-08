@@ -80,7 +80,6 @@ public partial class HorizontalRadioButtons : UserControl
         set { SetValue(ContentBindingPathProperty, value); }
     }
 
-    // NEW: Dependency Property for the content's FallbackValue
     public static readonly DependencyProperty ContentFallbackValueProperty =
         DependencyProperty.Register(
             "ContentFallbackValue",
@@ -92,6 +91,41 @@ public partial class HorizontalRadioButtons : UserControl
     {
         get { return (string)GetValue(ContentFallbackValueProperty); }
         set { SetValue(ContentFallbackValueProperty, value); }
+    }
+
+    public static readonly DependencyProperty GroupNameProperty =
+        DependencyProperty.Register(
+            nameof(GroupName),      // The name of the property
+            typeof(string),         // The type of the property
+            typeof(HorizontalRadioButtons), // The type of the owner class
+            new PropertyMetadata(string.Empty)); // Default value, or you can use null
+
+
+    public string GroupName
+    {
+        get { return (string)GetValue(GroupNameProperty); }
+        set { SetValue(GroupNameProperty, value); }
+    }
+
+    public static readonly DependencyProperty RefreshTriggerProperty =
+        DependencyProperty.Register(
+            "RefreshTrigger",
+            typeof(object),
+            typeof(HorizontalRadioButtons),
+            new PropertyMetadata(null));
+
+    public object RefreshTrigger
+    {
+        get { return GetValue(RefreshTriggerProperty); }
+        set { SetValue(RefreshTriggerProperty, value); }
+    }
+    public static readonly DependencyProperty DeleteCommandProperty =
+    DependencyProperty.Register(nameof(DeleteCommand), typeof(ICommand), typeof(HorizontalRadioButtons), new PropertyMetadata(null));
+
+    public ICommand DeleteCommand
+    {
+        get { return (ICommand)GetValue(DeleteCommandProperty); }
+        set { SetValue(DeleteCommandProperty, value); }
     }
 }
 

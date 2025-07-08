@@ -1,19 +1,28 @@
-﻿using System;
+﻿using AMFormsCST.Desktop.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-public class Contact : ISelectable
+public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 {
-    public string? Name { get; set; } = string.Empty;
-    public string? Email { get; set; } = string.Empty;
-    public string? Phone { get; set; } = string.Empty;
-    public string? PhoneExtension { get; set; } = string.Empty;
-    public string? PhoneExtensionDelimiter { get; set; } = " ";
+    [ObservableProperty]
+    private string? _name = string.Empty;
+    [ObservableProperty]
+    private string? _email = string.Empty;
+    [ObservableProperty]
+    private string? _phone = string.Empty;
+    [ObservableProperty]
+    private string? _phoneExtension = string.Empty;
+    [ObservableProperty]
+    private string? _phoneExtensionDelimiter = " ";
     public Guid Id { get; } = Guid.NewGuid();
-    public bool IsSelected { get; private set; } = false;
+
+    [ObservableProperty]
+    private bool _isSelected = false;
     public void Select()
     {
         IsSelected = true;
@@ -42,4 +51,13 @@ public class Contact : ISelectable
         if (parts.Length > 1)
             PhoneExtension = parts[1];
     }
+    public bool IsBlank { get { return string.IsNullOrEmpty(Name) &&
+                                 string.IsNullOrEmpty(Email) &&
+                                 string.IsNullOrEmpty(Phone) &&
+                                 string.IsNullOrEmpty(PhoneExtension); } }
+    partial void OnNameChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); }
+    partial void OnEmailChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); }
+    partial void OnPhoneChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); } 
+    partial void OnPhoneExtensionChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); } 
+
 }

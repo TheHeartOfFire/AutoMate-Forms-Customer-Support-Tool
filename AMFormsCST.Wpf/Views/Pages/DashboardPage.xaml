@@ -8,7 +8,7 @@
       xmlns:pages="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
       xmlns:controls="clr-namespace:AMFormsCST.Desktop.Controls"
       mc:Ignorable="d"
-      d:DesignHeight="800" d:DesignWidth="1100"
+      d:DesignHeight="900" d:DesignWidth="1200"
       Title="DashboardPage"
       d:DataContext="{d:DesignInstance pages:DashboardViewModel, 
                                        IsDesignTimeCreatable=False}" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
@@ -24,171 +24,214 @@
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
             <WrapPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Stretch" >
+
                 <Separator/>
                 <Grid Margin="0,10,0,0" HorizontalAlignment="Left" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <ui:SymbolIcon Symbol="BuildingPeople20" Filled="True" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="64" x:Name="CompaniesIcon"/>
                     <WrapPanel Orientation="Vertical" HorizontalAlignment="Stretch" Grid.Column="1">
-                        <controls:HorizontalRadioButtons ItemsSource="{Binding ViewModel.SelectedNote.Companies}" 
-                                                         RadioButtonCommand="{Binding ViewModel.DealerClickedCommand}" 
-                                                         CommandParameterPath="DataContext"
-                                                         ContentBindingPath="Name"
-                                                         ContentFallbackValue="Enter a Dealership Name..."/>
 
-                        <controls:HorizontalRadioButtons ItemsSource="{Binding ViewModel.SelectedNote.Companies}" 
-                                     RadioButtonCommand="{Binding ViewModel.CompanyClickedCommand}" 
-                                     CommandParameterPath="Id"
-                                                         ContentBindingPath="CompanyCode"
-                                                         ContentFallbackValue="Enter a Company Number..."/>
+                        <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Dealers}" 
+                                                         RadioButtonCommand="{Binding DealerClickedCommand}" 
+                                                         CommandParameterPath="DataContext"
+                                                         ContentBindingPath="CompositeDealerName"
+                                                         ContentFallbackValue="Enter a Dealership Name..."
+                                                         GroupName="DealerNames"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+
+                        <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedDealer.Companies}" 
+                                                         RadioButtonCommand="{Binding CompanyClickedCommand}" 
+                                                         CommandParameterPath="DataContext"
+                                                         ContentBindingPath="CompositeCompanyName"
+                                                         ContentFallbackValue="Enter a Company Number..."
+                                                         GroupName="CompanyNames"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
 
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="95,0,0,0"/>
+                            <Label Content="Dealer/Group Name: " VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="8,0,0,0"/>
                         </StackPanel>
+
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                             <Label Content="Server ID: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.ServerCode, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" Margin="77,0,0,0" />
+                            <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.ServerCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" Margin="77,0,0,0" />
                         </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Label Content="Company Name: " VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.SelectedCompany.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="32,0,0,0"/>
+                        </StackPanel>
+
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                             <Label Content="Company Number(s): " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedCompany.CompanyCode, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="5,0,0,0"/>
+                            <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.SelectedCompany.CompanyCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="4,0,0,0"/>
                         </StackPanel>
+
                     </WrapPanel>
                 </Grid>
+
                 <Separator Margin="0,10,0,0"/>
-                <StackPanel Orientation="Horizontal" Margin="0,25,0,0">
-                    <ui:SymbolIcon Symbol="ContactCardGroup16" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
-                    <StackPanel>
-                        <controls:HorizontalRadioButtons ItemsSource="{Binding ViewModel.SelectedNote.Contacts}" 
-             RadioButtonCommand="{Binding ViewModel.ContactClickedCommand}" 
-             CommandParameterPath="Id"
-                                 ContentBindingPath="Name"
-                                 ContentFallbackValue="Enter a Contact Name..."/>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Email: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Email, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="23,0,0,0" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Phone #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.Phone, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="5,0,0,0"/>
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtensionDelimiter, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" Margin="15,0,15,0"/>
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedContact.PhoneExtension, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
+                <WrapPanel Orientation="Horizontal" Margin="0,25,0,0">
+                    <Grid Margin="0,10,0,0" HorizontalAlignment="Left" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="ContactCardGroup16" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
+
+                        <WrapPanel Orientation="Vertical" HorizontalAlignment="Stretch" Grid.Column="1">
+                            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Contacts}" 
+                                                         RadioButtonCommand="{Binding ContactClickedCommand}" 
+                                                         CommandParameterPath="DataContext"
+                                                         ContentBindingPath="Name"
+                                                         ContentFallbackValue="Enter a Contact Name..."
+                                                         GroupName="ContactNames"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Email: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="23,0,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Phone #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="128" Margin="5,0,0,0"/>
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedContact.PhoneExtensionDelimiter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" Margin="15,0,15,0"/>
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedContact.PhoneExtension, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </Grid>
+
+                </WrapPanel>
+
                 <Separator Margin="0,10,0,0"/>
-                <StackPanel Orientation="Horizontal" Margin="0,25,0,0">
-                    <ui:SymbolIcon Symbol="FormMultiple20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
-                    <StackPanel>
-                        <controls:HorizontalRadioButtons ItemsSource="{Binding ViewModel.SelectedNote.Forms}" 
-             RadioButtonCommand="{Binding ViewModel.FormClickedCommand}" 
-             CommandParameterPath="Id"
-                                 ContentBindingPath="Name"
-                                 ContentFallbackValue="Enter a Form Name..."/>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedForm.Name, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Deal#: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedForm.SelectedTestDeal.DealNumber, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="20,0,0,0" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Notes: " VerticalAlignment="Top" HorizontalAlignment="Center" />
-                            <ui:TextBox Text="{Binding ViewModel.SelectedNote.SelectedForm.Notes, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" AcceptsReturn="True" MinHeight="100"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Label Content="Pdf" VerticalAlignment="Center"/>
-                            <ui:ToggleSwitch Margin="5,0,5,0"/>
-                            <Label Content="Impact" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <ToggleButton Margin="0,0,5,0" IsChecked="{Binding ViewModel.SelectedNote.SelectedForm.Notable, Mode=TwoWay}">
-                                <ui:SymbolIcon Symbol="Note24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
-                            </ToggleButton>
-                            <ui:Button Margin="0,0,5,0"> <!--To open Form related Templates-->
-                                <ui:SymbolIcon Symbol="MailTemplate24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
-                            </ui:Button>
-                            <ui:Button Margin="0,0,5,0"> <!--To open Code Snippets-->
-                                <ui:SymbolIcon Symbol="Code20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
-                            </ui:Button>
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
+                <WrapPanel Orientation="Horizontal" Margin="0,25,0,0">
+                    <Grid Margin="0,10,0,0" HorizontalAlignment="Left" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="FormMultiple20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="64"/>
+
+                        <WrapPanel Orientation="Vertical" HorizontalAlignment="Stretch" Grid.Column="1">
+                            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Forms}" 
+                                                         RadioButtonCommand="{Binding FormClickedCommand}" 
+                                                         CommandParameterPath="DataContext"
+                                                         ContentBindingPath="Name"
+                                                         ContentFallbackValue="Enter a Form Name..."
+                                                         GroupName="FormNames"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedForm.TestDeals}" 
+                                                         RadioButtonCommand="{Binding DealClickedCommand}" 
+                                                         CommandParameterPath="DataContext"
+                                                         ContentBindingPath="DealNumber"
+                                                         ContentFallbackValue="Enter a Deal Number..."
+                                                         GroupName="TestDeals"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Deal#: " VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedForm.SelectedTestDeal.DealNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="20,0,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <Label Content="Notes: " VerticalAlignment="Top" HorizontalAlignment="Center" />
+                                <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="19,0,0,0" AcceptsReturn="True" MinHeight="100"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,15">
+                                <Label Content="Pdf" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="5,0,5,0"/>
+                                <Label Content="Impact" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <ToggleButton Margin="0,0,5,0" IsChecked="{Binding SelectedNote.SelectedForm.Notable, Mode=TwoWay}">
+                                    <ui:SymbolIcon Symbol="Note24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                                </ToggleButton>
+                                <ui:Button Margin="0,0,5,0">
+                                    <!--To open Form related Templates-->
+                                    <ui:SymbolIcon Symbol="MailTemplate24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                                </ui:Button>
+                                <ui:Button Margin="0,0,5,0">
+                                    <!--To open Code Snippets-->
+                                    <ui:SymbolIcon Symbol="Code20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                                </ui:Button>
+                            </StackPanel>
+
+                        </WrapPanel>
+                    </Grid>
+                </WrapPanel>
             </WrapPanel>
         </ScrollViewer>
-        <StackPanel x:Name="CaseNumberButtonsStackPanel" Orientation="Horizontal" Grid.ColumnSpan="2">
-
-            <ItemsControl ItemsSource="{Binding ViewModel.Notes}" x:Name="CaseButtons">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <RadioButton Content="{Binding CaseNumber, TargetNullValue=Enter a case number..., FallbackValue=Enter a case number...}"
-                                    IsChecked="{Binding IsSelected, Mode=OneWay}"
-                                    Command="{Binding DataContext.ViewModel.NoteClickedCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                    CommandParameter="{Binding Id}"
-                                    Margin="0,0,5,0" 
-                                    MinWidth="150"
-                                    GroupName="Cases"/>
-
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.Resources>
-                    <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
-                </ItemsControl.Resources>
-            </ItemsControl>
-
-            <ui:Button Margin="0,0,5,0">
-                <ui:SymbolIcon Symbol="CommentAdd12" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FF00D003"/>
-            </ui:Button>
-            <ui:Button Margin="0,0,5,0">
-                <ui:SymbolIcon Symbol="CommentLightning20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FF00D003"/>
-            </ui:Button>
-            <ui:Button Margin="0,0,5,0">
-                <ui:SymbolIcon Symbol="CommentDismiss20" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" Foreground="#FFD00000"/>
-            </ui:Button>
-        </StackPanel>
+        
+        <controls:HorizontalRadioButtons ItemsSource="{Binding Notes}" 
+                             RadioButtonCommand="{Binding NoteClickedCommand}" 
+                             CommandParameterPath="Id"
+                             ContentBindingPath="CaseNumber"
+                             ContentFallbackValue="Enter a Case Number..."
+                             GroupName="CaseNumbers"
+                                 RefreshTrigger="{Binding UiRefreshCounter}"
+                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+            
+        
         <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Case #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    <ui:NumberBox Text="{Binding ViewModel.SelectedNote.CaseNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" PlaceholderText="Enter a case number..." MaxDecimalPlaces="0" Minimum="0" Maximum="1000000000" SpinButtonPlacementMode="Hidden" />
+                    <ui:NumberBox Text="{Binding SelectedNote.CaseNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" PlaceholderText="Enter a case number..." MaxDecimalPlaces="0" Minimum="0" Maximum="1000000000" SpinButtonPlacementMode="Hidden" />
                 </StackPanel>
                 <Label Content="Notes"  Margin=" 0, 25, 0, 0"/>
-                <ui:TextBox Text="{Binding ViewModel.SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="250" ClearButtonEnabled="True" MinWidth="500"/>
-                <StackPanel Visibility="{Binding ViewModel.DebugVisibility}">
+                <ui:TextBox Text="{Binding SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" MinHeight="250" ClearButtonEnabled="True" MinWidth="500"/>
+                <StackPanel Visibility="{Binding DebugVisibility}">
                     <Label Content="DEBUG PANEL" Margin="0,10,0,0"/>
                     <Separator/>
                     <Label Content="Case Details" Margin="0,10,0,0"/>
                     <Separator/>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="UUID: "/>
-                        <Label Content="{Binding ViewModel.SelectedNote.Id}"/>
+                        <Label Content="{Binding SelectedNote.Id}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="IsSelected: "/>
-                        <Label Content="{Binding ViewModel.SelectedNote.IsSelected}"/>
+                        <Label Content="{Binding SelectedNote.IsSelected}"/>
+                    </StackPanel>
+                    <Label Content="Dealer Details" Margin="0,10,0,0"/>
+                    <Separator/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="UUID: "/>
+                        <Label Content="{Binding SelectedNote.SelectedDealer.Id}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="IsSelected: "/>
+                        <Label Content="{Binding SelectedNote.SelectedDealer.IsSelected}"/>
                     </StackPanel>
                     <Label Content="Company Details" Margin="0,10,0,0"/>
                     <Separator/>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="UUID: "/>
-                        <Label Content="{Binding ViewModel.SelectedNote.SelectedCompany.Id}"/>
+                        <Label Content="{Binding SelectedNote.SelectedDealer.SelectedCompany.Id}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="IsSelected: "/>
-                        <Label Content="{Binding ViewModel.SelectedNote.SelectedCompany.IsSelected}"/>
+                        <Label Content="{Binding SelectedNote.SelectedDealer.SelectedCompany.IsSelected}"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

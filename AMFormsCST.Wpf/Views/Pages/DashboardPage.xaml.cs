@@ -30,7 +30,7 @@ public partial class DashboardPage : INavigableView<DashboardViewModel>
     public DashboardPage(DashboardViewModel viewModel)
     {
         ViewModel = viewModel;
-        DataContext = this;
+        DataContext = ViewModel;
 
         InitializeComponent();
     }

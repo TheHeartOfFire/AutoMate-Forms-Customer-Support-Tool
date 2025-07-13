@@ -1,4 +1,6 @@
-﻿namespace AMFormsCST.Core.Interfaces.CodeBlocks;
+﻿using AMFormsCST.Core.Interfaces.CodeBlocks;
+
+namespace AMFormsCST.Core.Interfaces.Utils;
 public interface ICodeBlocks
 {
     IList<ICodeBase> CustomBlocks { get; set; }

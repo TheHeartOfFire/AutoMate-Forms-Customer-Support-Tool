@@ -1,13 +1,14 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.Xml;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Core.Utils;
-public class FormgenUtils(FormgenUtilsProperties properties)
+public class FormgenUtils(FormgenUtilsProperties properties) : IFormgenUtils
 {
     public DotFormgen? ParsedFormgenFile { get; private set; }
-    public string? FileName => _formgenXml.BaseURI[(_formgenXml.BaseURI.LastIndexOf('\\') + 1)..^8];
+    public string? FileName => _formgenXml.BaseURI[(_formgenXml.BaseURI.LastIndexOf('/') + 1)..^8];
 
     private XmlDocument _formgenXml = new();
     private FormgenUtilsProperties _properties = properties;
@@ -20,27 +21,22 @@ public class FormgenUtils(FormgenUtilsProperties properties)
         ParsedFormgenFile = new DotFormgen(_formgenXml.DocumentElement);
 
     }
-    public void RenameFile(string newName, bool hasImageFile, bool renameImage)
+    public void RenameFile(string newName, bool renameImage)
     {
         if (ParsedFormgenFile is null) return;
         if (_formgenXml is null || _formgenXml.BaseURI is null) return;
 
-        var oldName = _formgenXml.BaseURI[(_formgenXml.BaseURI.LastIndexOf('/') + 1)..^8];
+        var oldName = FileName;
         var fileDir = _formgenXml.BaseURI.Replace("file:///", string.Empty);
         fileDir = fileDir[..(fileDir.LastIndexOf('/') + 1)];
 
-        CreateBackup(ParsedFormgenFile.Settings.UUID);
+        CreateBackup();
 
         ParsedFormgenFile.Title = newName;
 
-        var xml = ParsedFormgenFile.GenerateXML();
-        if (xml != null) _formgenXml.LoadXml(xml);
 
-        _formgenXml.Save(fileDir + oldName + ".formgen");
 
-        File.Move(fileDir + oldName + ".formgen", fileDir + newName + ".formgen");
-
-        if (hasImageFile && renameImage)
+        if (renameImage)
         {
             if (ParsedFormgenFile!.FormType == Format.Pdf)
             {
@@ -52,17 +48,19 @@ public class FormgenUtils(FormgenUtilsProperties properties)
             }
         }
 
+
+        _formgenXml.Save(fileDir + oldName + ".formgen");
+        File.Move(fileDir + oldName + ".formgen", fileDir + newName + ".formgen");
         _formgenXml.Load(fileDir + newName + ".formgen");
 
-        if (_formgenXml.DocumentElement is null) return;
-
-        ParsedFormgenFile = new DotFormgen(_formgenXml.DocumentElement);
+        //ParsedFormgenFile = new DotFormgen(_formgenXml.DocumentElement);
+        //SaveFile(fileDir + newName + ".formgen");
     }
     public void SaveFile(string filePath)
     {
         if (_formgenXml is null || ParsedFormgenFile is null) return;
 
-        CreateBackup(ParsedFormgenFile.Settings.UUID);
+        CreateBackup();
 
         var xml = ParsedFormgenFile.GenerateXML();
 
@@ -76,10 +74,10 @@ public class FormgenUtils(FormgenUtilsProperties properties)
         ParsedFormgenFile = null;
     }
 
-    public void CreateBackup(string uuid)
+    public void CreateBackup()
     {
         if (ParsedFormgenFile is null || _formgenXml is null) return;
-        IO.BackupFormgenFile(uuid, _formgenXml, _properties.BackupRetentionQty);
+        IO.BackupFormgenFile(ParsedFormgenFile.Settings.UUID, _formgenXml, _properties.BackupRetentionQty);
     }
     public void LoadBackup(string backupPath)
     {
@@ -144,7 +142,7 @@ public class FormgenUtils(FormgenUtilsProperties properties)
         if (ParsedFormgenFile is null) return;
         if (recipient.Pages.Count != ParsedFormgenFile.Pages.Count) return;
 
-        CreateBackup(recipient.Settings.UUID);
+        CreateBackup();
 
         _formgenXml?.Save(IO.BackupFormgenFilePath(recipient.Settings.UUID));
 
@@ -153,5 +151,14 @@ public class FormgenUtils(FormgenUtilsProperties properties)
 
         newDoc.LoadXml(recipient.GenerateXML());
         newDoc.Save(fromFilePath);
+    }
+    public void RegenerateUUID()
+    {
+        if (_formgenXml?.DocumentElement is null) return;
+
+        var uuid = Guid.NewGuid().ToString();
+
+        _formgenXml.DocumentElement.Attributes[1].Value = uuid;
+        if (ParsedFormgenFile != null) ParsedFormgenFile.Settings.UUID = uuid;
     }
 }

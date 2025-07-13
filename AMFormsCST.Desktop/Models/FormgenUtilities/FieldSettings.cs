@@ -1,0 +1,46 @@
+﻿using AMFormsCST.Desktop.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSettings;
+
+namespace AMFormsCST.Desktop.Models.FormgenUtilities;
+public class FieldSettings : IFormgenFileSettings
+{
+    public int DecimalPlaces { get; set; }
+    public bool DisplayPartial { get; set; }
+    public int EndIndex { get; set; }
+    public int FontSize { get; set; }
+    public Alignment FontAlignment { get; set; }
+    public int ID { get; set; }
+    public Point ImpactPosition { get; set; }
+    public int Kerning { get; set; }
+    public Rectangle LaserRect { get; set; }
+    public int Length { get; set; }
+    public bool ManualSize { get; set; }
+    public bool Bold { get; set; }
+    public bool ShrinkToFit { get; set; }
+    public int StartIndex { get; set; }
+    public FieldType Type { get; set; }
+
+    public string GetFontAlignment() => FontAlignment switch
+    {
+        Alignment.LEFT => "LEFT",
+        Alignment.CENTER => "CENTER",
+        Alignment.RIGHT => "RIGHT",
+        _ => "LEFT"
+    };
+
+    public string GetFieldType() => Type switch
+    {
+        FieldType.TEXT => "TEXT",
+        FieldType.NUMERIC => "NUMERIC",
+        FieldType.SIGNATURE => "SIGNATURE",
+        FieldType.INITIALS => "INITIALS",
+        _ => "TEXT"
+    };
+    
+}

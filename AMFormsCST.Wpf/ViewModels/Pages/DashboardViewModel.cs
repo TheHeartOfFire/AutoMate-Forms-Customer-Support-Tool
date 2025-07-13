@@ -48,7 +48,7 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [ObservableProperty]
-    private bool _isDebugMode = true;
+    private bool _isDebugMode = false;
 
     [ObservableProperty]
     private Visibility _debugVisibility = Visibility.Collapsed; 
@@ -102,6 +102,9 @@ public partial class DashboardViewModel : ViewModel
         //SelectedNote.Forms.Add(new Form { Name = "Form 3" });
         //SelectedNote.SelectedForm = SelectedNote.Forms[0];
         //SelectedNote.SelectedForm.Select();
+#if DEBUG
+        IsDebugMode = true;
+#endif
 
         if (IsDebugMode) _debugVisibility = Visibility.Visible;
     }

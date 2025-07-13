@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Interfaces.BestPractices;
-public interface IFormNameBestPractice
+public interface IFormModel
 {
-    string Generate();
-    IFormModel Model { get; set; }
 }

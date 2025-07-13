@@ -17,7 +17,7 @@ namespace AMFormsCST.Desktop.ViewModels;
 public partial class MainWindowViewModel : ViewModel
 {
     [ObservableProperty]
-    private string _applicationTitle = "AutoMate Forms Customer Support Tool";
+    private string _applicationTitle = string.Empty;
 
     [ObservableProperty]
     private ObservableCollection<object> _menuItems =

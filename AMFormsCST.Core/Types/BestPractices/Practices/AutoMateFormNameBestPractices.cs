@@ -11,10 +11,11 @@ using static AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel;
 namespace AMFormsCST.Core.Types.BestPractices.Practices;
 public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameBestPractice
 {
-    public AutoMateFormModel Model { get; } = model;
+    public IFormModel Model { get; set; } = model;
 
     public string Generate()
     {
+        var model = Model as AutoMateFormModel;
         var sb = new StringBuilder();
 
         var outerOpen = " [";
@@ -22,7 +23,7 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
         var innerOpen = '(';
         var innerClose = ')';
 
-        if (Model.Format is FormFormat.LegacyImpact)
+        if (model.Format is FormFormat.LegacyImpact)
         {
             outerOpen = " (";
             outerClose = ')';
@@ -30,45 +31,45 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
             innerClose = ']';
         }
         // Pre-Encapsulation
-        sb.Append(Model.State);
+        sb.Append(model.State);
 
-        if (!Model.State.Equals(string.Empty))
+        if (!model.State.Equals(string.Empty))
             sb.Append(' ');
 
-        if(Model.IsLAW)
+        if(model.IsLAW)
             sb.Append("LAW ");
 
-        var coBank = Model.Company + Model.Bank;
+        var coBank = model.Company + model.Bank;
 
         sb.Append(coBank);
 
         if (!coBank.Equals(string.Empty))
             sb.Append(' ');
 
-        sb.Append(Model.Name);
+        sb.Append(model.Name);
 
-        if (!Model.Name.Equals(string.Empty))
+        if (!model.Name.Equals(string.Empty))
             sb.Append(' ');
 
         // Encapsulation
-        var hasEncapsulation = !(Model.Code + Model.RevisionDate).Equals(string.Empty);
-        var hasBoth = !Model.Code.Equals(string.Empty) && !Model.RevisionDate.Equals(string.Empty);
+        var hasEncapsulation = !(model.Code + model.RevisionDate).Equals(string.Empty);
+        var hasBoth = !model.Code.Equals(string.Empty) && !model.RevisionDate.Equals(string.Empty);
 
         if (hasEncapsulation)
             sb.Append(outerOpen);
 
-        if (Model.IsLAW && !Model.Code.Equals(string.Empty))
+        if (model.IsLAW && !model.Code.Equals(string.Empty))
             sb.Append("LAW ");
 
-        sb.Append(Model.Code);
+        sb.Append(model.Code);
 
-        if (!Model.Code.Equals(string.Empty))
+        if (!model.Code.Equals(string.Empty))
             sb.Append(' ');
 
         if (hasBoth)
             sb.Append(innerOpen);
 
-        sb.Append(Model.RevisionDate);
+        sb.Append(model.RevisionDate);
 
         if (hasBoth)
             sb.Append(innerClose);
@@ -77,18 +78,18 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
             sb.Append(outerClose);
 
         // Post-Encapsulation
-        var manDeal = Model.Manufacturer + Model.Dealership;
+        var manDeal = model.Manufacturer + model.Dealership;
 
-        if (manDeal.Equals(string.Empty))
+        if (!manDeal.Equals(string.Empty))
             sb.Append($" ({manDeal})");
 
-        if (Model.VehicleType is NewUsed.Used)
+        if (model.VehicleType is SoldTrade.Sold)
             sb.Append(" (SOLD)");
 
-        else if (Model.VehicleType is NewUsed.New)
+        else if (model.VehicleType is SoldTrade.Trade)
             sb.Append(" (TRADE)");
 
-        if (Model.IsCustom)
+        if (model.IsCustom)
             sb.Append(" - Custom");
 
         return sb.ToString().Replace('/', '-');

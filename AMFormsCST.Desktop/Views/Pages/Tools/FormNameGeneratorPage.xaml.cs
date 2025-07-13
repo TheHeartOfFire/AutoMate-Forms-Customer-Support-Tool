@@ -28,7 +28,7 @@ public partial class FormNameGeneratorPage : Page
     public FormNameGeneratorPage(FormNameGeneratorViewModel viewModel)
     {
         ViewModel = viewModel;
-        DataContext = this;
+        DataContext = ViewModel;
 
         InitializeComponent();
     }

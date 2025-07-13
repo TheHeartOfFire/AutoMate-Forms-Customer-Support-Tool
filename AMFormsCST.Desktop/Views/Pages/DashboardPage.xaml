@@ -5,12 +5,12 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
-      xmlns:pages="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
+      xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
       xmlns:controls="clr-namespace:AMFormsCST.Desktop.Controls"
       mc:Ignorable="d"
       d:DesignHeight="900" d:DesignWidth="1200"
       Title="DashboardPage"
-      d:DataContext="{d:DesignInstance pages:DashboardViewModel, 
+      d:DataContext="{d:DesignInstance viewModels:DashboardViewModel, 
                                        IsDesignTimeCreatable=False}" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
     
     <Grid ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="OutermostGrid">

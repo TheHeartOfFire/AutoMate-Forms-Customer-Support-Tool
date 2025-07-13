@@ -6,16 +6,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\Solera_Logo_Symbol_Only.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Assets\amlogo.png" />
+    <None Remove="Assets\Solera_Logo_Full.png" />
+    <None Remove="Assets\Solera_Logo_Symbol_Only.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\AMLogo.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\Solera_Logo_Symbol_Only.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +40,8 @@
 
   <ItemGroup>
     <Resource Include="Assets\AMLogo.png" />
+    <Resource Include="Assets\Solera_Logo_Full.png" />
+    <Resource Include="Assets\Solera_Logo_Symbol_Only.png" />
   </ItemGroup>
 
   <ItemGroup>

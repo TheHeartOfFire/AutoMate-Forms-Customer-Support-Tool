@@ -42,7 +42,7 @@
                                                          ContentFallbackValue="Enter a Dealership Name..."
                                                          GroupName="DealerNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
 
                         <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedDealer.Companies}" 
                                                          RadioButtonCommand="{Binding CompanyClickedCommand}" 
@@ -51,7 +51,7 @@
                                                          ContentFallbackValue="Enter a Company Number..."
                                                          GroupName="CompanyNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
 
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -94,7 +94,7 @@
                                                          ContentFallbackValue="Enter a Contact Name..."
                                                          GroupName="ContactNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
@@ -134,7 +134,7 @@
                                                          ContentFallbackValue="Enter a Form Name..."
                                                          GroupName="FormNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
                             <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedForm.TestDeals}" 
                                                          RadioButtonCommand="{Binding DealClickedCommand}" 
                                                          CommandParameterPath="DataContext"
@@ -142,7 +142,7 @@
                                                          ContentFallbackValue="Enter a Deal Number..."
                                                          GroupName="TestDeals"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" />
@@ -189,7 +189,7 @@
                              ContentFallbackValue="Enter a Case Number..."
                              GroupName="CaseNumbers"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemCommand}"/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}"/>
             
         
         <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">

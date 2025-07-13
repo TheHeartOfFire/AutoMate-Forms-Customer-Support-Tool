@@ -177,7 +177,7 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void DeleteItem(object itemToDelete)
+    private void OnDeleteItemClicked(object itemToDelete)
     {
         if (itemToDelete == null) return;
 
@@ -192,6 +192,7 @@ public partial class DashboardViewModel : ViewModel
             if (isDeletingSelected)
             {
                 SelectedNote = Notes.FirstOrDefault();
+                SelectedNote.Select();
             }
         }
         // Check if the item is a Dealer
@@ -202,7 +203,8 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectedDealer = SelectedNote.Dealers.FirstOrDefault();
+                SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault());
+                SelectedNote.SelectedDealer?.Select();
             }
         }
         // Check if the item is a Company
@@ -213,7 +215,8 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectedDealer.SelectedCompany = SelectedNote.SelectedDealer.Companies.FirstOrDefault();
+                SelectedNote.SelectedDealer.SelectCompany(SelectedNote.SelectedDealer.Companies.FirstOrDefault());
+                SelectedNote.SelectedDealer.SelectedCompany?.Select();
             }
         }
         // Add similar blocks for Contact and Form...
@@ -224,7 +227,8 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectedContact = SelectedNote.Contacts.FirstOrDefault();
+                SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault());
+                SelectedNote.SelectedContact?.Select();
             }
         }
         else if (itemToDelete is Form formToDelete)
@@ -234,7 +238,8 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectedForm = SelectedNote.Forms.FirstOrDefault();
+                SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault());
+                SelectedNote.SelectedForm?.Select();
             }
         }
     }

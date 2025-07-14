@@ -16,7 +16,8 @@ public class Note : INote
     public string? FormsText { get; set; }
     public string? DealText { get; set; }
 
-    private readonly Guid _id = Guid.NewGuid();
+    public Guid _id = Guid.NewGuid();
+    public Guid Id => _id;
 
     public static Note Clone(Note note) => new()
     {
@@ -33,7 +34,42 @@ public class Note : INote
         DealText = note.DealText
     };
 
-    internal string Dump() =>
+
+    public Note()
+    {
+        
+    }
+    public Note(Guid id)
+    {
+        _id = id;
+    }
+
+    #region Interface Implementation
+    public bool Equals(INote? other)
+    {
+        if (other == null) return false;
+        return _id == other.Id;
+    }
+    public override bool Equals(object? obj)
+    {
+        if (obj is INote note)
+            return Equals(note);
+        return false;
+    }
+    public override int GetHashCode()
+    {
+        return _id.GetHashCode();
+    }
+
+    public bool Equals(INote? x, INote? y)
+    {
+        if (x is null || y is null) return false;
+        return x.Id == y.Id;
+    }
+
+    public int GetHashCode([DisallowNull] INote obj) => obj.Id.GetHashCode();
+
+    public string Dump() =>
         $"ServerId: {ServerId}\n" +
         $"Companies: {Companies}\n" +
         $"Dealership: {Dealership}\n" +
@@ -46,33 +82,6 @@ public class Note : INote
         $"FormsText: {FormsText}\n" +
         $"DealText: {DealText}\n" +
         $"Id: {_id}";
-
-
-    #region Interface Implementation
-    public bool Equals(Note? other)
-    {
-        if (other == null) return false;
-        return _id == other._id;
-    }
-    public override bool Equals(object? obj)
-    {
-        if (obj is Note note)
-            return Equals(note);
-        return false;
-    }
-    public override int GetHashCode()
-    {
-        return _id.GetHashCode();
-    }
-
-    public bool Equals(Note? x, Note? y)
-    {
-        if (x is null || y is null) return false;
-        return x._id == y._id;
-    }
-
-    public int GetHashCode([DisallowNull] Note obj) => obj._id.GetHashCode();
-
     #endregion
 
 }

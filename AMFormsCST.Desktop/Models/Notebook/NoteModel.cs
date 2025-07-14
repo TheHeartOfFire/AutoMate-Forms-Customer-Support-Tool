@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class Note : ObservableObject, ISelectable, IBlankMaybe
+public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 {
     [ObservableProperty]
     private string? _caseNumber = string.Empty;
@@ -22,7 +22,7 @@ public partial class Note : ObservableObject, ISelectable, IBlankMaybe
     public ObservableCollection<Dealer> Dealers { get; set; }
     
     private readonly DashboardViewModel _viewModel;
-    public Note(DashboardViewModel viewModel)
+    public NoteModel(DashboardViewModel viewModel)
     {
         _viewModel = viewModel;
 
@@ -224,4 +224,26 @@ public partial class Note : ObservableObject, ISelectable, IBlankMaybe
         foreach (var form in Forms) { ((ObservableObject)form).PropertyChanged += ChildItem_IsBlankChanged; }
     }
 
+    public static implicit operator Core.Types.Notebook.Note(NoteModel note)
+    {
+        if (note is null)
+        {
+            return null;
+        }
+
+        return new Core.Types.Notebook.Note(note.Id)
+        {
+            ServerId = note.SelectedDealer?.ServerCode,
+            Companies = string.Join(", ", note.SelectedDealer.Companies.Select(d => d.CompanyCode)),
+            Dealership = note.SelectedDealer?.Name,
+            ContactName = note.SelectedContact?.Name,
+            Email = note.SelectedContact?.Email,
+            Phone = note.SelectedContact?.Phone,
+            PhoneExt = note.SelectedContact?.PhoneExtension,
+            NotesText = note.Notes,
+            CaseText = note.CaseNumber,
+            FormsText = note.SelectedForm?.Name,
+            DealText = note.SelectedForm?.SelectedTestDeal?.DealNumber
+        };
+    }
 }

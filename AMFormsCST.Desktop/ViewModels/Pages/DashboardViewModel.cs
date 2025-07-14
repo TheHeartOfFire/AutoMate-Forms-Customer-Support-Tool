@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Utils;
+﻿using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,10 +13,10 @@ namespace AMFormsCST.Desktop.ViewModels.Pages;
 public partial class DashboardViewModel : ViewModel
 {
     [ObservableProperty]
-    private ObservableCollection<Note> _notes = [];
+    private ObservableCollection<NoteModel> _notes = [];
 
-    private Note _selectedNote;
-    public Note SelectedNote
+    private NoteModel _selectedNote;
+    public NoteModel SelectedNote
     {
         get => _selectedNote;
         set
@@ -40,9 +41,9 @@ public partial class DashboardViewModel : ViewModel
 
                 // Manually trigger updates for all dependent properties
                 // in case the initial state needs to be wired up
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(Note.SelectedDealer)));
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(Note.SelectedContact)));
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(Note.SelectedForm)));
+                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedDealer)));
+                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedContact)));
+                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedForm)));
             
         }
     }
@@ -57,54 +58,22 @@ public partial class DashboardViewModel : ViewModel
     public int UiRefreshCounter
     {
         get => _uiRefreshCounter;
-        private set => SetProperty(ref _uiRefreshCounter, value); // Assumes SetProperty raises PropertyChanged
+        private set => SetProperty(ref _uiRefreshCounter, value); 
     }
 
 
     public DashboardViewModel()
     {
-        //// Initialize the Notes collection with a default Note if needed
-        Notes.Add(new Note(this));
-        //if (Notes.Count == 0)
-        //{
-        //    Notes.Add(new Note(this));
-        //    Notes.Add(new Note(this));
-        //    Notes.Add(new Note(this));
-        //}
-        //// Set the initial selected note to the first one in the collection
+        Notes.Add(new NoteModel(this));
+
         SelectedNote = Notes[0];
         Notes[0].Select();
 
-        //SelectedNote.Dealers.Clear();
-        //SelectedNote.Dealers.Add(new Dealer(this) { Name = "Default Dealer 1" });
-        //SelectedNote.Dealers.Add(new Dealer(this) { Name = "Default Dealer 2" });
-        //SelectedNote.Dealers.Add(new Dealer(this) { Name = "Default Dealer 3" });
-        //SelectedNote.SelectedDealer = SelectedNote.Dealers[0];
-        //SelectedNote.SelectedDealer.Select();
-
-        //SelectedNote.SelectedDealer.Companies.Clear();
-        //SelectedNote.SelectedDealer.Companies.Add(new Company { Name = "Default Company 1" });
-        //SelectedNote.SelectedDealer.Companies.Add(new Company { Name = "Default Company 2" });
-        //SelectedNote.SelectedDealer.Companies.Add(new Company { Name = "Default Company 3" });
-        //SelectedNote.SelectedDealer.SelectedCompany = SelectedNote.SelectedDealer.Companies[0];
-        //SelectedNote.SelectedDealer.SelectedCompany.Select();
-
-        //SelectedNote.Contacts.Clear();
-        //SelectedNote.Contacts.Add(new Contact { Name = "Contact 1" });
-        //SelectedNote.Contacts.Add(new Contact { Name = "Contact 2" });
-        //SelectedNote.Contacts.Add(new Contact { Name = "Contact 3" });
-        //SelectedNote.SelectedContact = SelectedNote.Contacts[0];
-        //SelectedNote.SelectedContact.Select();
-
-        //SelectedNote.Forms.Clear();
-        //SelectedNote.Forms.Add(new Form { Name = "Form 1" });
-        //SelectedNote.Forms.Add(new Form { Name = "Form 2" });
-        //SelectedNote.Forms.Add(new Form { Name = "Form 3" });
-        //SelectedNote.SelectedForm = SelectedNote.Forms[0];
-        //SelectedNote.SelectedForm.Select();
+        #region DEBUG
 #if DEBUG
         IsDebugMode = true;
 #endif
+        #endregion
 
         if (IsDebugMode) _debugVisibility = Visibility.Visible;
     }
@@ -185,7 +154,7 @@ public partial class DashboardViewModel : ViewModel
         if (itemToDelete == null) return;
 
         // Check if the item is a Note
-        if (itemToDelete is Note noteToDelete)
+        if (itemToDelete is NoteModel noteToDelete)
         {
             // Check if we are deleting the currently selected note
             bool isDeletingSelected = SelectedNote == noteToDelete;
@@ -270,14 +239,14 @@ public partial class DashboardViewModel : ViewModel
 
         if (SelectedNote is null) return;
 
-        if (propertyName == nameof(Note.CaseNumber) ||
+        if (propertyName == nameof(NoteModel.CaseNumber) ||
             propertyName == nameof(Dealer.ServerCode) ||
             propertyName == nameof(Company.CompanyCode) ||
             propertyName == nameof(Contact.Name) ||
             propertyName == nameof(Form.Name) ||
             propertyName == nameof(TestDeal.DealNumber) ||
             propertyName == nameof(TestDeal.Purpose) ||
-            propertyName == nameof(Note.Notes) ||
+            propertyName == nameof(NoteModel.Notes) ||
             propertyName == nameof(Dealer.Name) ||
             propertyName == nameof(Contact.Email) ||
             propertyName == nameof(Contact.Phone) ||
@@ -285,13 +254,14 @@ public partial class DashboardViewModel : ViewModel
             propertyName == nameof(Form.Notes))
         {
             UiRefreshCounter++;
+            UpdateNotebook();
         }
 
         if (propertyName == nameof(IBlankMaybe.IsBlank))
         {
-            if (sender is Note)
+            if (sender is NoteModel)
             {
-                EnsureBlankItem(Notes, () => new Note(this));
+                EnsureBlankItem(Notes, () => new NoteModel(this));
             }
             else if (sender is Dealer)
             {
@@ -336,10 +306,10 @@ public partial class DashboardViewModel : ViewModel
         }
 
         
-        if (propertyName == nameof(Note.SelectedDealer))
+        if (propertyName == nameof(NoteModel.SelectedDealer))
         {
             // The selected dealer has changed. We need to listen to the new one.
-            var note = sender as Note;
+            var note = sender as NoteModel;
             if (note != null)
             {
                 // This assumes the Dealer object also has a PropertyChanged event
@@ -350,7 +320,7 @@ public partial class DashboardViewModel : ViewModel
         }
 
         // Add similar logic for SelectedCompany, SelectedContact, etc.
-        if (propertyName == nameof(Note.SelectedDealer))
+        if (propertyName == nameof(NoteModel.SelectedDealer))
         {
             if (SelectedNote?.SelectedDealer != null)
             {
@@ -363,11 +333,11 @@ public partial class DashboardViewModel : ViewModel
         {
             // If Company had nested collections, you'd add EnsureBlankItem for them here.
         }
-        else if (propertyName == nameof(Note.SelectedContact))
+        else if (propertyName == nameof(NoteModel.SelectedContact))
         {
             // If Contact had nested collections, add EnsureBlankItem for them here.
         }
-        else if (propertyName == nameof(Note.SelectedForm))
+        else if (propertyName == nameof(NoteModel.SelectedForm))
         {
             if (SelectedNote?.SelectedForm != null)
             {
@@ -379,6 +349,17 @@ public partial class DashboardViewModel : ViewModel
             // If TestDeal had nested collections, add EnsureBlankItem for them here.
         }
     }
+
+    private void UpdateNotebook()
+    {
+        SupportTool.SupportToolInstance.Notebook.Notes.Clear();
+        foreach (var note in Notes)
+        {
+            SupportTool.SupportToolInstance.Notebook.AddNote((Note)note, false);
+        }
+        SupportTool.SupportToolInstance.Notebook.SelectNote((Note)SelectedNote);
+    }
+
     private void EnsureBlankItem<T>(ObservableCollection<T> collection, Func<T> factory)
     where T : class, IBlankMaybe, INotifyPropertyChanged
     {

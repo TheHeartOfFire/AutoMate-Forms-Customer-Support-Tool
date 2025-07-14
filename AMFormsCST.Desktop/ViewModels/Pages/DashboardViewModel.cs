@@ -21,7 +21,6 @@ public partial class DashboardViewModel : ViewModel
         get => _selectedNote;
         set
         {
-                // Unsubscribe from the old note before replacing it
                 if (_selectedNote != null)
                 {
                     _selectedNote.PropertyChanged -= OnModelPropertyChanged;
@@ -29,7 +28,6 @@ public partial class DashboardViewModel : ViewModel
 
                 SetProperty(ref _selectedNote, value);
 
-                // Subscribe to the new note
                 if (_selectedNote != null)
                 {
                     _selectedNote.PropertyChanged += OnModelPropertyChanged; 
@@ -39,8 +37,6 @@ public partial class DashboardViewModel : ViewModel
                 EnsureBlankItem(_selectedNote.Forms, () => new Form(this));
             }
 
-                // Manually trigger updates for all dependent properties
-                // in case the initial state needs to be wired up
                 OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedDealer)));
                 OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedContact)));
                 OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedForm)));
@@ -66,7 +62,7 @@ public partial class DashboardViewModel : ViewModel
     {
         Notes.Add(new NoteModel(this));
 
-        SelectedNote = Notes[0];
+        _selectedNote = Notes[0];
         Notes[0].Select();
 
         #region DEBUG
@@ -153,21 +149,18 @@ public partial class DashboardViewModel : ViewModel
     {
         if (itemToDelete == null) return;
 
-        // Check if the item is a Note
         if (itemToDelete is NoteModel noteToDelete)
         {
-            // Check if we are deleting the currently selected note
             bool isDeletingSelected = SelectedNote == noteToDelete;
             Notes.Remove(noteToDelete);
 
-            // If the selected note was deleted, select the first one in the list
-            if (isDeletingSelected)
+            SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(this);
+            if (isDeletingSelected && Notes.Count > 0)
             {
-                SelectedNote = Notes.FirstOrDefault();
+                SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(this);
                 SelectedNote.Select();
             }
         }
-        // Check if the item is a Dealer
         else if (itemToDelete is Dealer dealerToDelete)
         {
             bool isDeletingSelected = SelectedNote.SelectedDealer == dealerToDelete;
@@ -175,23 +168,21 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault());
+                SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault() ?? new Dealer(this));
                 SelectedNote.SelectedDealer?.Select();
             }
         }
-        // Check if the item is a Company
-        else if (itemToDelete is Company companyToDelete)
+        else if (itemToDelete is Company companyToDelete && SelectedNote.SelectedDealer is not null)
         {
             bool isDeletingSelected = SelectedNote.SelectedDealer.SelectedCompany == companyToDelete;
             SelectedNote.SelectedDealer.Companies.Remove(companyToDelete);
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectedDealer.SelectCompany(SelectedNote.SelectedDealer.Companies.FirstOrDefault());
+                SelectedNote.SelectedDealer.SelectCompany(SelectedNote.SelectedDealer.Companies.FirstOrDefault() ?? new Company());
                 SelectedNote.SelectedDealer.SelectedCompany?.Select();
             }
         }
-        // Add similar blocks for Contact and Form...
         else if (itemToDelete is Contact contactToDelete)
         {
             bool isDeletingSelected = SelectedNote.SelectedContact == contactToDelete;
@@ -199,7 +190,7 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault());
+                SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault() ?? new Contact());
                 SelectedNote.SelectedContact?.Select();
             }
         }
@@ -210,7 +201,7 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault());
+                SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault() ?? new Form(this));
                 SelectedNote.SelectedForm?.Select();
             }
         }
@@ -233,8 +224,9 @@ public partial class DashboardViewModel : ViewModel
     {
         UiRefreshCounter++;
     }
-    public void OnModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+    public void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if(sender is null || e is null || e.PropertyName is null) return;
         string propertyName = e.PropertyName;
 
         if (SelectedNote is null) return;
@@ -305,21 +297,11 @@ public partial class DashboardViewModel : ViewModel
 
         }
 
-        
         if (propertyName == nameof(NoteModel.SelectedDealer))
         {
-            // The selected dealer has changed. We need to listen to the new one.
             var note = sender as NoteModel;
-            if (note != null)
-            {
-                // This assumes the Dealer object also has a PropertyChanged event
-                // and you can subscribe/unsubscribe from it.
-                // You will need to manage the "old" dealer to unsubscribe.
-                // This often requires storing the old dealer temporarily.
-            }
         }
 
-        // Add similar logic for SelectedCompany, SelectedContact, etc.
         if (propertyName == nameof(NoteModel.SelectedDealer))
         {
             if (SelectedNote?.SelectedDealer != null)
@@ -327,26 +309,12 @@ public partial class DashboardViewModel : ViewModel
                 EnsureBlankItem(SelectedNote.SelectedDealer.Companies, () => new Company());
             }
         }
-        // Add similar checks for other Selected properties if they manage nested collections.
-        // This is where you put EnsureBlankItem for the *next level down* when a selection changes.
-        else if (propertyName == nameof(Dealer.SelectedCompany))
-        {
-            // If Company had nested collections, you'd add EnsureBlankItem for them here.
-        }
-        else if (propertyName == nameof(NoteModel.SelectedContact))
-        {
-            // If Contact had nested collections, add EnsureBlankItem for them here.
-        }
         else if (propertyName == nameof(NoteModel.SelectedForm))
         {
             if (SelectedNote?.SelectedForm != null)
             {
                 EnsureBlankItem(SelectedNote.SelectedForm.TestDeals, () => new TestDeal());
             }
-        }
-        else if (propertyName == nameof(Form.SelectedTestDeal))
-        {
-            // If TestDeal had nested collections, add EnsureBlankItem for them here.
         }
     }
 
@@ -365,31 +333,24 @@ public partial class DashboardViewModel : ViewModel
     {
         if (collection == null) return;
 
-        // 1. Find all blank items currently in the collection.
-        //    Use .ToList() to create a safe copy to iterate over.
         var blankItems = collection.Where(item => item.IsBlank).ToList();
 
-        // 2. If there are multiple blanks, consolidate them down to one.
         if (blankItems.Count > 1)
         {
-            // Keep the first one, remove the rest.
             foreach (var extraBlank in blankItems.Skip(1))
             {
                 collection.Remove(extraBlank);
             }
         }
 
-        // 3. Now, get the single remaining blank item (or null if none exist).
         var theOneBlank = collection.FirstOrDefault(item => item.IsBlank);
 
-        // 4. If no blank item exists at all, create one and add it to the end.
         if (theOneBlank == null)
         {
             var newItem = factory();
             newItem.PropertyChanged += OnModelPropertyChanged;
             collection.Add(newItem);
         }
-        // 5. If a blank item DOES exist, make sure it's at the end of the list.
         else
         {
             int blankIndex = collection.IndexOf(theOneBlank);

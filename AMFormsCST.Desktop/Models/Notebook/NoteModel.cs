@@ -42,9 +42,9 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         SubscribeToInitialChildren();
 
         
-        SelectDealer(Dealers.FirstOrDefault());
-        SelectContact(Contacts.FirstOrDefault());
-        SelectForm(Forms.FirstOrDefault());
+        SelectDealer(Dealers.FirstOrDefault() ?? new Dealer(_viewModel));
+        SelectContact(Contacts.FirstOrDefault() ?? new Contact());
+        SelectForm(Forms.FirstOrDefault() ?? new Form(_viewModel));
     }
 
     private Dealer? _selectedDealer; 
@@ -95,7 +95,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     private Form? _selectedForm;
     public Form SelectedForm
     {
-        get => _selectedForm;
+        get => _selectedForm ?? Forms[0];
         set
         {
             // Unsubscribe from the old form
@@ -172,7 +172,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
         foreach (var form in Forms) form.Deselect();
 
-        SelectedForm = Forms.FirstOrDefault(c => c.Id == selectedForm.Id);
+        SelectedForm = Forms.FirstOrDefault(c => c.Id == selectedForm.Id) ?? new Form(_viewModel);
         SelectedForm?.Select();
     }
     partial void OnCaseNumberChanged(string? value)
@@ -228,13 +228,15 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     {
         if (note is null)
         {
-            return null;
+            return new Core.Types.Notebook.Note();
         }
-
+        string companiesText = note.SelectedDealer?.Companies?.Select(d => d.CompanyCode) != null
+                           ? string.Join(", ", note.SelectedDealer.Companies.Select(d => d.CompanyCode))
+                           : string.Empty;
         return new Core.Types.Notebook.Note(note.Id)
         {
             ServerId = note.SelectedDealer?.ServerCode,
-            Companies = string.Join(", ", note.SelectedDealer.Companies.Select(d => d.CompanyCode)),
+            Companies = companiesText,
             Dealership = note.SelectedDealer?.Name,
             ContactName = note.SelectedContact?.Name,
             Email = note.SelectedContact?.Email,

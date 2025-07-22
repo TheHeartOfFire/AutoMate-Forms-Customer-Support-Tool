@@ -16,6 +16,8 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
     public string Generate()
     {
         var model = Model as AutoMateFormModel;
+        if (model == null)
+            throw new ArgumentException("Model must be of type AutoMateFormModel", nameof(Model));
         var sb = new StringBuilder();
 
         var outerOpen = " [";

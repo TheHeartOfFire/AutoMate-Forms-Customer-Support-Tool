@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
-public interface INote : IEquatable<Note>, IEqualityComparer<Note>
+public interface INote : IEquatable<INote>, IEqualityComparer<INote>
 {
     string? CaseText { get; set; }
     string? Companies { get; set; }
@@ -14,10 +14,12 @@ public interface INote : IEquatable<Note>, IEqualityComparer<Note>
     string? NotesText { get; set; }
     string? Phone { get; set; }
     string? ServerId { get; set; }
+    Guid Id { get; }
 
-    new bool Equals(Note? other);
-    new bool Equals(Note? x, Note? y);
+    new bool Equals(INote? other);
+    new bool Equals(INote? x, INote? y);
     bool Equals(object? obj);
     int GetHashCode();
-    new int GetHashCode([DisallowNull] Note obj);
+    new int GetHashCode([DisallowNull] INote obj);
+    string Dump();
 }

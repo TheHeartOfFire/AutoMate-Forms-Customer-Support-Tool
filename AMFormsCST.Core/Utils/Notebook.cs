@@ -1,11 +1,12 @@
-﻿using AMFormsCST.Core.Interfaces.Utils;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.Notebook;
 
 namespace AMFormsCST.Core.Utils;
 public class Notebook : INotebook
 {
-    public IList<Note> Notes { get; private set; } = [new Note()];
-    public Note CurrentNote { get; private set; }
+    public IList<INote> Notes { get; set; } = [new Note()];
+    public INote CurrentNote { get; set; }
 
     public Notebook()
     {
@@ -13,7 +14,7 @@ public class Notebook : INotebook
     }
 
     public void AddNote(bool select = false) => AddNote(new Note(), select);
-    public void AddNote(Note note, bool select = false)
+    public void AddNote(INote note, bool select = false)
     {
         Notes.Add(note);
 
@@ -22,7 +23,7 @@ public class Notebook : INotebook
 
     }
 
-    public void RemoveNote(Note note)
+    public void RemoveNote(INote note)
     {
         ErrorHandler.Notes.NoteNotFoundErrorCheck(note, Notes);
         Notes.Remove(note);
@@ -47,13 +48,13 @@ public class Notebook : INotebook
         Notes.Add(CurrentNote);
     }
 
-    public void SelectNote(Note note)
+    public void SelectNote(INote note)
     {
         ErrorHandler.Notes.NoteNotFoundErrorCheck(note, Notes);
         CurrentNote = note;
     }
 
-    public void SwapNotes(Note note1, Note note2)
+    public void SwapNotes(INote note1, INote note2)
     {
         ErrorHandler.Notes.NotesNotFoundErrorCheck(note1, note2, Notes);
 
@@ -65,7 +66,7 @@ public class Notebook : INotebook
 
     
 
-    internal void Load(List<Note> notes)
+    internal void Load(IList<INote> notes)
     {
         ErrorHandler.Notes.NoNotesErrorCheck(notes);
 

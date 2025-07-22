@@ -26,15 +26,15 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     {
         _viewModel = viewModel;
 
-        Dealers = new ObservableCollection<Dealer>();
+        Dealers = [];
         Dealers.CollectionChanged += ChildCollection_CollectionChanged;
         Dealers.Add(new Dealer(viewModel)); 
 
-        Contacts = new ObservableCollection<Contact>();
+        Contacts = [];
         Contacts.CollectionChanged += ChildCollection_CollectionChanged;
         Contacts.Add(new Contact()); 
 
-        Forms = new ObservableCollection<Form>();
+        Forms = [];
         Forms.CollectionChanged += ChildCollection_CollectionChanged;
         Forms.Add(new Form(viewModel)); 
 
@@ -219,9 +219,9 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     }
     private void SubscribeToInitialChildren()
     {
-        foreach (var dealer in Dealers) { ((ObservableObject)dealer).PropertyChanged += ChildItem_IsBlankChanged; }
-        foreach (var contact in Contacts) { ((ObservableObject)contact).PropertyChanged += ChildItem_IsBlankChanged; }
-        foreach (var form in Forms) { ((ObservableObject)form).PropertyChanged += ChildItem_IsBlankChanged; }
+        foreach (var dealer in Dealers) { dealer.PropertyChanged += ChildItem_IsBlankChanged; }
+        foreach (var contact in Contacts) { contact.PropertyChanged += ChildItem_IsBlankChanged; }
+        foreach (var form in Forms) { form.PropertyChanged += ChildItem_IsBlankChanged; }
     }
 
     public static implicit operator Core.Types.Notebook.Note(NoteModel note)

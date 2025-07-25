@@ -1,5 +1,4 @@
 ﻿using AMFormsCST.Desktop.ControlsLookup;
-using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using System;
 using System.Collections.Generic;
@@ -19,17 +18,22 @@ using Wpf.Ui.Controls;
 
 namespace AMFormsCST.Desktop.Views.Pages.Tools;
 /// <summary>
-/// Interaction logic for FormNameGeneratorPage.xaml
+/// Interaction logic for CodeSnippetsPage.xaml
 /// </summary>
-[GalleryPage("This utility allows you to generate form names that adhere to current naming conventions.", SymbolRegular.TextT12)]
-public partial class FormNameGeneratorPage : Page
+[GalleryPage("Here you can find some common snippets of code for use in FormGen programming", SymbolRegular.Code20)]
+public partial class CodeSnippetsPage : Page
 {
-    public FormNameGeneratorViewModel ViewModel { get; }
-    public FormNameGeneratorPage(FormNameGeneratorViewModel viewModel)
+    public CodeSnippetsViewModel ViewModel { get; }
+    public CodeSnippetsPage(CodeSnippetsViewModel viewModel)
     {
         ViewModel = viewModel;
         DataContext = ViewModel;
 
         InitializeComponent();
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+
     }
 }

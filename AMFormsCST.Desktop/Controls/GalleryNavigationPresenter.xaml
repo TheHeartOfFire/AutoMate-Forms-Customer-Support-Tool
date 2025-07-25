@@ -21,7 +21,6 @@
                             <DataTemplate DataType="{x:Type models:NavigationCard}">
                                 <ui:CardAction
                                     Width="320"
-                                    Height="90"
                                     Margin="4"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Stretch"

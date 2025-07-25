@@ -22,7 +22,7 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
     /// <summary>
     /// Interaction logic for FormgenUtilitiesPage.xaml
     /// </summary>
-    [GalleryPage("Formgen Utilities", SymbolRegular.DocumentTextToolbox24)]
+    [GalleryPage("Here are a collection of utilities for manipulating .formgen files.", SymbolRegular.DocumentTextToolbox24)]
     public partial class FormgenUtilitiesPage : INavigableView<FormgenUtilitiesViewModel>
     {
         public FormgenUtilitiesViewModel ViewModel { get; }

@@ -24,7 +24,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
 
         public CodeBase AddInput(string description)
         {
-            Inputs.Add(new CodeInput(description, description, Inputs.Count));
+            Inputs.Add(new CodeInput(string.Empty, description, Inputs.Count));
             return this;
         }
         public CodeBase AddInput(int index, string description)
@@ -33,7 +33,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
             foreach (var input in Inputs.Where(input => input.Index >= index))
                 input.Index++;
 
-            Inputs.Add(new CodeInput(description, description, index));
+            Inputs.Add(new CodeInput(string.Empty, description, index));
 
             return this;
         }
@@ -106,7 +106,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
 
             foreach (var input in Inputs)
             {
-                output.Append(input.Value is CodeBase @base ? @base.GetCode() : input.Value);
+                output.Append(input.Value is CodeBase @base ? @base.GetCode() : (string)input.Value == string.Empty ? input.Description : input.Value);
 
                 if (step != Inputs.Count - 1)
                     output.Append(", ");

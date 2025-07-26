@@ -1,4 +1,6 @@
 ﻿using AMFormsCST.Desktop.ControlsLookup;
+using AMFormsCST.Desktop.ViewModels;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +24,12 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools;
 [GalleryPage("This utility allows you to manage your text templates which references the other parts of this program to prefill data", SymbolRegular.MailTemplate24)]
 public partial class TemplatesPage : Page
 {
-    public TemplatesPage()
+    public TemplatesViewModel ViewModel { get; }
+    public TemplatesPage(TemplatesViewModel viewModel)
     {
+        ViewModel = viewModel;
+        DataContext = ViewModel;
+
         InitializeComponent();
     }
 }

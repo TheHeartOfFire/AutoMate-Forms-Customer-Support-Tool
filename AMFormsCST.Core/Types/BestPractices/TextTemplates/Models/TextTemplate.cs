@@ -7,23 +7,23 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-public class TextTemplate(string text, IList<ITextTemplateVariable> variables)
+public class TextTemplate(string text, IList<ITextTemplateVariable> variables) : IEquatable<TextTemplate>
 {
     public string Text { get; } = text;
-    public IList<ITextTemplateVariable> Variables { get; } = variables;
-    private IReadOnlyCollection<string> _aliases => Variables.SelectMany(x => x.Aliases).ToList();
+    private IList<ITextTemplateVariable> Variables { get; } = variables;
+    private IReadOnlyCollection<string> _aliases => [.. Variables.SelectMany(x => x.Aliases)];
 
     private IReadOnlyCollection<string> _prefixes => GetPrefixes();
 
     public string Process()
     {
         var text = Text;
-        foreach (var variable in Variables)
+        foreach (var variable in Variables) 
         {
             var name = variable.Prefix + variable.Name;
             if (!text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase))
             {
-                name = CheckForAlias(text, variable, name);
+                name = CheckForAlias(Text, variable, name);
             }
 
             text = text.Replace(name, variable.GetValue());
@@ -45,7 +45,7 @@ public class TextTemplate(string text, IList<ITextTemplateVariable> variables)
         return name;
     }
 
-    private IReadOnlyCollection<string> GetPrefixes()
+    private List<string> GetPrefixes()
     {
         var prefixes = new List<string>();
 
@@ -54,6 +54,11 @@ public class TextTemplate(string text, IList<ITextTemplateVariable> variables)
                 prefixes.Add(template.Prefix);
 
         return prefixes;
+    }
+
+    public bool Equals(TextTemplate? other)
+    {
+        return other is not null && other.Text.Equals(Text);
     }
 }
 

@@ -5,12 +5,13 @@ using AMFormsCST.Core.Types.Notebook;
 namespace AMFormsCST.Core.Utils;
 public class Notebook : INotebook
 {
-    public IList<INote> Notes { get; set; } = [new Note()];
+    public IList<INote> Notes { get; set; } = IO.LoadNotes();
     public INote CurrentNote { get; set; }
 
     public Notebook()
     {
-        CurrentNote = Notes[0];
+        
+        CurrentNote = Notes.Count > 0 ? Notes[0] : new Note();
     }
 
     public void AddNote(bool select = false) => AddNote(new Note(), select);

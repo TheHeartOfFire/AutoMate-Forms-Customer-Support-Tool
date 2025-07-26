@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Core.Types.Notebook;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+using AMFormsCST.Core.Types.Notebook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,7 @@ internal static class IO
     private static readonly string _rootPath = _appData + "\\AMFormsCST";
     private static readonly string _notesPath = _rootPath + "\\SavedNotes.json";
     internal static readonly string BackupPath = _rootPath + "\\FormgenBackup";
+    private static readonly string _templatesPath = _rootPath + "\\TextTemplates.json";
 
     internal static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
 
@@ -47,7 +50,7 @@ internal static class IO
 
     }
 
-    internal static void SaveNotes(List<Note> notes)
+    internal static void SaveNotes(List<INote> notes)
     {
         var json = System.Text.Json.JsonSerializer.Serialize(notes);
 
@@ -56,14 +59,38 @@ internal static class IO
 
         File.WriteAllText(_notesPath, json);
     }
-    internal static List<Note> LoadNotes()
+    internal static List<INote> LoadNotes()
     {
         if (!File.Exists(_notesPath))
+        {
+            SaveNotes([]);
             return [];
-
+        }
         var json = File.ReadAllText(_notesPath);
 
-        return System.Text.Json.JsonSerializer.Deserialize<List<Note>>(json) ?? new List<Note>();
+        return System.Text.Json.JsonSerializer.Deserialize<List<INote>>(json) ?? [];
     }
 
+    internal static List<TextTemplate> LoadTemplates()
+    {
+
+        if (!File.Exists(_templatesPath))
+        {
+            SaveTemplates([]);
+            return [];
+        }
+
+        var json = File.ReadAllText(_templatesPath);
+
+        return System.Text.Json.JsonSerializer.Deserialize<List<TextTemplate>>(json) ?? [];
+    }
+    internal static void SaveTemplates(List<TextTemplate> templates)
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(templates);
+
+        if (!Directory.Exists(_rootPath))
+            Directory.CreateDirectory(_rootPath);
+
+        File.WriteAllText(_templatesPath, json);
+    }
 }

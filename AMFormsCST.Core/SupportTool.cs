@@ -32,7 +32,7 @@ public class SupportTool : ISupportTool
         Enforcer = new BestPracticeEnforcer(formNameBestPractice);
         Variables = RegisterVariables();
     }
-
+    #region Template Variable Registration
     private List<ITextTemplateVariable> RegisterVariables()
     {
         var variables = new List<ITextTemplateVariable>
@@ -186,7 +186,7 @@ public class SupportTool : ISupportTool
              prefix: "formnamegenerator:",
              description:"Form Name Generator - Form Name",
              aliases: [ "generate", "name", "output" ],
-             getValue: () => Enforcer.FormNameBestPractice.Generate()
+             getValue: () => Enforcer.GetFormName()
             ),
             new TextTemplateVariable(
              properName: "Notes:DealNumber",
@@ -199,4 +199,5 @@ public class SupportTool : ISupportTool
         };
         return variables;
     }
+    #endregion
 }

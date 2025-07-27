@@ -23,10 +23,25 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
         get => _selectedTestDeal;
         set
         {
+            // 1. Unsubscribe from the old TestDeal's events
+            if (_selectedTestDeal != null)
+            {
+                // Ensure TestDeal's PropertyChanged is unsubscribed from the ViewModel
+                // This is crucial for avoiding memory leaks and multiple subscriptions
+                _selectedTestDeal.PropertyChanged -= _viewModel.OnModelPropertyChanged;
+            }
 
             SetProperty(ref _selectedTestDeal, value);
+
+            // 2. Subscribe to the new TestDeal's events
+            if (_selectedTestDeal != null)
+            {
+                // Ensure TestDeal's PropertyChanged is subscribed to the ViewModel
+                _selectedTestDeal.PropertyChanged += _viewModel.OnModelPropertyChanged;
+            }
         }
     }
+    private readonly DashboardViewModel _viewModel;
     [ObservableProperty]
     private bool _notable = true;
     [ObservableProperty]
@@ -73,9 +88,11 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
     {
         OnPropertyChanged(nameof(IsBlank));
     }
-    public Form()
+    public Form(DashboardViewModel viewModel)
     {
-        TestDeals = [];
+        _viewModel = viewModel;
+
+        TestDeals = new ObservableCollection<TestDeal>();
         TestDeals.CollectionChanged += ChildCollection_CollectionChanged;
         TestDeals.Add(new TestDeal()); 
 

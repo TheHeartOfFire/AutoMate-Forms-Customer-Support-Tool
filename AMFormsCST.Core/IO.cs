@@ -1,5 +1,4 @@
-﻿using AMFormsCST.Core.Interfaces.BestPractices;
-using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Types.Notebook;
 using System;

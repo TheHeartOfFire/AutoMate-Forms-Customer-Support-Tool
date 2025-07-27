@@ -25,9 +25,22 @@ namespace AMFormsCST.Desktop.Models
             get => _selectedCompany;
             set
             {
+                // 1. Unsubscribe from the old company
+                if (_selectedCompany != null)
+                {
+                    _selectedCompany.PropertyChanged -= _viewModel.OnModelPropertyChanged;
+                }
+
                 SetProperty(ref _selectedCompany, value);
+
+                // 2. Subscribe to the new company
+                if (_selectedCompany != null)
+                {
+                    _selectedCompany.PropertyChanged += _viewModel.OnModelPropertyChanged;
+                }
             }
         }
+        private readonly DashboardViewModel _viewModel;
         public Guid Id { get; } = Guid.NewGuid();
 
         public bool IsBlank
@@ -57,8 +70,9 @@ namespace AMFormsCST.Desktop.Models
         {
             IsSelected = false;
         }
-        public Dealer()
+        public Dealer(DashboardViewModel viewModel)
         {
+            _viewModel = viewModel;
 
             Companies = new ObservableCollection<Company>();
             Companies.CollectionChanged += ChildCollection_CollectionChanged;

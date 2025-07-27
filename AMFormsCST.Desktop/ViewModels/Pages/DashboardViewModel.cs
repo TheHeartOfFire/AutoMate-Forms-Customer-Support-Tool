@@ -13,7 +13,8 @@ namespace AMFormsCST.Desktop.ViewModels.Pages;
 public partial class DashboardViewModel : ViewModel
 {
     [ObservableProperty]
-    private ObservableCollection<NoteModel> _notes = [];
+    private ObservableCollection<NoteModel> _notes = []; 
+    public string DebugSelectedNoteId => SelectedNote?.Id.ToString() ?? "None";
 
     private NoteModel _selectedNote;
     public NoteModel SelectedNote
@@ -21,26 +22,31 @@ public partial class DashboardViewModel : ViewModel
         get => _selectedNote;
         set
         {
-                if (_selectedNote != null)
-                {
-                    _selectedNote.PropertyChanged -= OnModelPropertyChanged;
-                }
+            if (_selectedNote != null)
+            {
+                _selectedNote.PropertyChanged -= OnModelPropertyChanged;
+                _selectedNote.Dealers.CollectionChanged -= OnChildCollectionChanged; 
+                _selectedNote.Contacts.CollectionChanged -= OnChildCollectionChanged;
+                _selectedNote.Forms.CollectionChanged -= OnChildCollectionChanged;
 
-                SetProperty(ref _selectedNote, value);
-
-                if (_selectedNote != null)
-                {
-                    _selectedNote.PropertyChanged += OnModelPropertyChanged; 
-                
-                EnsureBlankItem(_selectedNote.Dealers, () => new Dealer(this));
-                EnsureBlankItem(_selectedNote.Contacts, () => new Contact());
-                EnsureBlankItem(_selectedNote.Forms, () => new Form(this));
+                UnsubscribeNoteChildren(_selectedNote);
             }
 
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedDealer)));
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedContact)));
-                OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedForm)));
-            
+            SetProperty(ref _selectedNote, value);
+
+            if (_selectedNote != null)
+            {
+                _selectedNote.PropertyChanged += OnModelPropertyChanged;
+                _selectedNote.Dealers.CollectionChanged += OnChildCollectionChanged; 
+                _selectedNote.Contacts.CollectionChanged += OnChildCollectionChanged;
+                _selectedNote.Forms.CollectionChanged += OnChildCollectionChanged;
+
+                SubscribeNoteChildren(_selectedNote);
+            }
+
+            OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedDealer)));
+            OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedContact)));
+            OnModelPropertyChanged(this, new PropertyChangedEventArgs(nameof(NoteModel.SelectedForm)));
         }
     }
 
@@ -60,11 +66,20 @@ public partial class DashboardViewModel : ViewModel
 
     public DashboardViewModel()
     {
-        Notes.Add(new NoteModel(this));
+        Notes.Add(new NoteModel());
 
         _selectedNote = Notes[0];
         Notes[0].Select();
 
+        if (_selectedNote != null)
+        {
+            _selectedNote.PropertyChanged += OnModelPropertyChanged;
+            _selectedNote.Dealers.CollectionChanged += OnChildCollectionChanged;
+            _selectedNote.Contacts.CollectionChanged += OnChildCollectionChanged;
+            _selectedNote.Forms.CollectionChanged += OnChildCollectionChanged;
+            SubscribeNoteChildren(_selectedNote);
+
+        }
         #region DEBUG
 #if DEBUG
         IsDebugMode = true;
@@ -154,10 +169,10 @@ public partial class DashboardViewModel : ViewModel
             bool isDeletingSelected = SelectedNote == noteToDelete;
             Notes.Remove(noteToDelete);
 
-            SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(this);
+            SelectedNote = Notes.FirstOrDefault() ?? new NoteModel();
             if (isDeletingSelected && Notes.Count > 0)
             {
-                SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(this);
+                SelectedNote = Notes.FirstOrDefault() ?? new NoteModel();
                 SelectedNote.Select();
             }
         }
@@ -168,7 +183,7 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault() ?? new Dealer(this));
+                SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault() ?? new Dealer());
                 SelectedNote.SelectedDealer?.Select();
             }
         }
@@ -201,7 +216,7 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault() ?? new Form(this));
+                SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault() ?? new Form());
                 SelectedNote.SelectedForm?.Select();
             }
         }
@@ -229,6 +244,8 @@ public partial class DashboardViewModel : ViewModel
         if(sender is null || e is null || e.PropertyName is null) return;
         string propertyName = e.PropertyName;
 
+        System.Diagnostics.Debug.WriteLine($"OnModelPropertyChanged from {sender.GetType().Name}.{propertyName}");
+
         if (SelectedNote is null) return;
 
         if (propertyName == nameof(NoteModel.CaseNumber) ||
@@ -246,20 +263,21 @@ public partial class DashboardViewModel : ViewModel
             propertyName == nameof(Form.Notes))
         {
             UiRefreshCounter++;
-            UpdateNotebook();
+            UpdateNotebook(); 
+            //OnPropertyChanged(nameof(SelectedNote.IsBlank));
         }
 
         if (propertyName == nameof(IBlankMaybe.IsBlank))
         {
             if (sender is NoteModel)
             {
-                EnsureBlankItem(Notes, () => new NoteModel(this));
+                EnsureBlankItem(Notes, () => new NoteModel());
             }
             else if (sender is Dealer)
             {
                 if (SelectedNote?.Dealers != null)
                 {
-                    EnsureBlankItem(SelectedNote.Dealers, () => new Dealer(this));
+                    EnsureBlankItem(SelectedNote.Dealers, () => new Dealer());
                 }
             }
             else if (sender is Company)
@@ -280,7 +298,7 @@ public partial class DashboardViewModel : ViewModel
             {
                 if (SelectedNote?.Forms != null)
                 {
-                    EnsureBlankItem(SelectedNote.Forms, () => new Form(this));
+                    EnsureBlankItem(SelectedNote.Forms, () => new Form());
                 }
             }
             else if (sender is TestDeal)
@@ -297,23 +315,19 @@ public partial class DashboardViewModel : ViewModel
 
         }
 
-        if (propertyName == nameof(NoteModel.SelectedDealer))
+        if (sender is NoteModel note) // if a property on the NoteModel itself changed
         {
-            var note = sender as NoteModel;
-        }
-
-        if (propertyName == nameof(NoteModel.SelectedDealer))
-        {
-            if (SelectedNote?.SelectedDealer != null)
+            if (propertyName == nameof(NoteModel.SelectedDealer))
             {
-                EnsureBlankItem(SelectedNote.SelectedDealer.Companies, () => new Company());
+                EnsureBlankItem(note.Dealers, () => new Dealer());
             }
-        }
-        else if (propertyName == nameof(NoteModel.SelectedForm))
-        {
-            if (SelectedNote?.SelectedForm != null)
+            else if (propertyName == nameof(NoteModel.SelectedForm))
             {
-                EnsureBlankItem(SelectedNote.SelectedForm.TestDeals, () => new TestDeal());
+                EnsureBlankItem(note.Forms, () => new Form());
+            }
+            else if (propertyName == nameof(NoteModel.SelectedContact))
+            {
+                EnsureBlankItem(note.Contacts, () => new Contact());
             }
         }
     }
@@ -359,5 +373,134 @@ public partial class DashboardViewModel : ViewModel
                 collection.Move(blankIndex, collection.Count - 1);
             }
         }
+    }
+    private void SubscribeNoteChildren(NoteModel note)
+    {
+        foreach (var dealer in note.Dealers)
+        {
+            dealer.PropertyChanged += OnModelPropertyChanged;
+            dealer.Companies.CollectionChanged += OnChildCollectionChanged;
+            SubscribeDealerChildren(dealer);
+        }
+        foreach (var contact in note.Contacts)
+        {
+            contact.PropertyChanged += OnModelPropertyChanged;
+        }
+        foreach (var form in note.Forms)
+        {
+            form.PropertyChanged += OnModelPropertyChanged;
+            form.TestDeals.CollectionChanged += OnChildCollectionChanged;
+            SubscribeFormChildren(form);
+        }
+
+        // Also subscribe to the *currently selected* children, as they are key
+        if (note.SelectedDealer != null)
+            note.SelectedDealer.PropertyChanged += OnModelPropertyChanged;
+        if (note.SelectedContact != null)
+            note.SelectedContact.PropertyChanged += OnModelPropertyChanged;
+        if (note.SelectedForm != null)
+            note.SelectedForm.PropertyChanged += OnModelPropertyChanged;
+        if (note.SelectedForm?.SelectedTestDeal != null)
+            note.SelectedForm.SelectedTestDeal.PropertyChanged += OnModelPropertyChanged;
+    }
+    private void UnsubscribeNoteChildren(NoteModel note)
+    {
+        foreach (var dealer in note.Dealers)
+        {
+            dealer.PropertyChanged -= OnModelPropertyChanged;
+            dealer.Companies.CollectionChanged -= OnChildCollectionChanged;
+            UnsubscribeDealerChildren(dealer);
+        }
+        foreach (var contact in note.Contacts)
+        {
+            contact.PropertyChanged -= OnModelPropertyChanged;
+        }
+        foreach (var form in note.Forms)
+        {
+            form.PropertyChanged -= OnModelPropertyChanged;
+            form.TestDeals.CollectionChanged -= OnChildCollectionChanged;
+            UnsubscribeFormChildren(form);
+        }
+
+        // Also unsubscribe from the *currently selected* children
+        if (note.SelectedDealer != null)
+            note.SelectedDealer.PropertyChanged -= OnModelPropertyChanged;
+        if (note.SelectedContact != null)
+            note.SelectedContact.PropertyChanged -= OnModelPropertyChanged;
+        if (note.SelectedForm != null)
+            note.SelectedForm.PropertyChanged -= OnModelPropertyChanged;
+        if (note.SelectedForm?.SelectedTestDeal != null)
+            note.SelectedForm.SelectedTestDeal.PropertyChanged -= OnModelPropertyChanged;
+    }
+
+    private void SubscribeDealerChildren(Dealer dealer)
+    {
+        foreach (var company in dealer.Companies)
+        {
+            company.PropertyChanged += OnModelPropertyChanged;
+        }
+        if (dealer.SelectedCompany != null)
+            dealer.SelectedCompany.PropertyChanged += OnModelPropertyChanged;
+    }
+
+    private void UnsubscribeDealerChildren(Dealer dealer)
+    {
+        foreach (var company in dealer.Companies)
+        {
+            company.PropertyChanged -= OnModelPropertyChanged;
+        }
+        if (dealer.SelectedCompany != null)
+            dealer.SelectedCompany.PropertyChanged -= OnModelPropertyChanged;
+    }
+
+    private void SubscribeFormChildren(Form form)
+    {
+        foreach (var testDeal in form.TestDeals)
+        {
+            testDeal.PropertyChanged += OnModelPropertyChanged;
+        }
+        if (form.SelectedTestDeal != null)
+            form.SelectedTestDeal.PropertyChanged += OnModelPropertyChanged;
+    }
+
+    private void UnsubscribeFormChildren(Form form)
+    {
+        foreach (var testDeal in form.TestDeals)
+        {
+            testDeal.PropertyChanged -= OnModelPropertyChanged;
+        }
+        if (form.SelectedTestDeal != null)
+            form.SelectedTestDeal.PropertyChanged -= OnModelPropertyChanged;
+    }
+
+
+    // Handle CollectionChanged events to subscribe/unsubscribe to individual items
+    private void OnChildCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        // Unsubscribe old items
+        if (e.OldItems != null)
+        {
+            foreach (INotifyPropertyChanged item in e.OldItems)
+            {
+                item.PropertyChanged -= OnModelPropertyChanged;
+                // Recursive unsubscribe for nested collections/selected items
+                if (item is Dealer dealer) UnsubscribeDealerChildren(dealer);
+                if (item is Form form) UnsubscribeFormChildren(form);
+            }
+        }
+
+        // Subscribe new items
+        if (e.NewItems != null)
+        {
+            foreach (INotifyPropertyChanged item in e.NewItems)
+            {
+                item.PropertyChanged += OnModelPropertyChanged;
+                // Recursive subscribe for nested collections/selected items
+                if (item is Dealer dealer) SubscribeDealerChildren(dealer);
+                if (item is Form form) SubscribeFormChildren(form);
+            }
+        }
+        // Always trigger IsBlank for the NoteModel itself if a child collection changes
+        OnPropertyChanged(nameof(SelectedNote.IsBlank));
     }
 }

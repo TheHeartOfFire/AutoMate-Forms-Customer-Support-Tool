@@ -31,6 +31,7 @@ public class SupportTool : ISupportTool
         FormgenUtils = new FormgenUtils(_properties.FormgenUtils);
         Enforcer = new BestPracticeEnforcer(formNameBestPractice);
         Variables = RegisterVariables();
+
     }
     #region Template Variable Registration
     private List<ITextTemplateVariable> RegisterVariables()
@@ -196,6 +197,14 @@ public class SupportTool : ISupportTool
              aliases: [ "dealno", "deal" ],
              getValue: () => Notebook.CurrentNote.DealText ?? string.Empty
             ),
+            new TextTemplateVariable(
+             properName: "User:Input",
+             name: "input",
+             prefix: "user:",
+             description:"User Input - No value",
+             aliases: [],
+             getValue: () => "[User Input]"
+            )
         };
         return variables;
     }

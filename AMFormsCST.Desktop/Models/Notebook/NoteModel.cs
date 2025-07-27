@@ -12,45 +12,23 @@ using System.Threading.Tasks;
 namespace AMFormsCST.Desktop.Models;
 public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 {
-    public string DebugId => Id.ToString();
-
     [ObservableProperty]
-    private int _uiRefreshCounter;
-
-    private string? _caseNumber = string.Empty; 
-    public string? CaseNumber 
-    {
-        get => _caseNumber;
-        set
-        {
-            if (SetProperty(ref _caseNumber, value))
-            {
-                OnPropertyChanged(nameof(CaseNumber));
-                OnPropertyChanged(nameof(IsBlank));
-            }
-        }
-    }
-    private string? _notes; 
-    public string? Notes
-    {
-        get => _notes;
-        set
-        {
-            if (SetProperty(ref _notes, value))
-            {
-                OnPropertyChanged(nameof(Notes));
-                OnPropertyChanged(nameof(IsBlank)); 
-            }
-        }
-    }
+    private string? _caseNumber = string.Empty;
+    // specifically for triggering UI updates
+    [ObservableProperty]
+    private int _uiRefreshCounter; 
+    [ObservableProperty]
+    private string? _notes;
     public ObservableCollection<Dealer> Dealers { get; set; }
     
-    public NoteModel()
+    private readonly DashboardViewModel _viewModel;
+    public NoteModel(DashboardViewModel viewModel)
     {
+        _viewModel = viewModel;
 
         Dealers = [];
         Dealers.CollectionChanged += ChildCollection_CollectionChanged;
-        Dealers.Add(new Dealer()); 
+        Dealers.Add(new Dealer(viewModel)); 
 
         Contacts = [];
         Contacts.CollectionChanged += ChildCollection_CollectionChanged;
@@ -58,15 +36,15 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
         Forms = [];
         Forms.CollectionChanged += ChildCollection_CollectionChanged;
-        Forms.Add(new Form()); 
+        Forms.Add(new Form(viewModel)); 
 
         
         SubscribeToInitialChildren();
 
         
-        SelectDealer(Dealers.FirstOrDefault() ?? new Dealer());
+        SelectDealer(Dealers.FirstOrDefault() ?? new Dealer(_viewModel));
         SelectContact(Contacts.FirstOrDefault() ?? new Contact());
-        SelectForm(Forms.FirstOrDefault() ?? new Form());
+        SelectForm(Forms.FirstOrDefault() ?? new Form(_viewModel));
     }
 
     private Dealer? _selectedDealer; 
@@ -75,7 +53,19 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         get => _selectedDealer;
         set
         {
+            // 1. Unsubscribe from the old dealer's events
+            if (_selectedDealer != null)
+            {
+                _selectedDealer.PropertyChanged -= _viewModel.OnModelPropertyChanged;
+            }
+
             SetProperty(ref _selectedDealer, value);
+
+            // 2. Subscribe to the new dealer's events
+            if (_selectedDealer != null)
+            {
+                _selectedDealer.PropertyChanged += _viewModel.OnModelPropertyChanged;
+            }
         }
     }
     public ObservableCollection<Contact> Contacts { get; set; } = [ new() ];
@@ -85,7 +75,19 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         get => _selectedContact;
         set
         {
+            // Unsubscribe from the old contact
+            if (_selectedContact != null)
+            {
+                _selectedContact.PropertyChanged -= _viewModel.OnModelPropertyChanged;
+            }
+
             SetProperty(ref _selectedContact, value);
+
+            // Subscribe to the new contact
+            if (_selectedContact != null)
+            {
+                _selectedContact.PropertyChanged += _viewModel.OnModelPropertyChanged;
+            }
         }
     }
     public ObservableCollection<Form> Forms { get; set; } = [ ];
@@ -96,7 +98,19 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         get => _selectedForm ?? Forms[0];
         set
         {
+            // Unsubscribe from the old form
+            if (_selectedForm != null)
+            {
+                _selectedForm.PropertyChanged -= _viewModel.OnModelPropertyChanged;
+            }
+
             SetProperty(ref _selectedForm, value);
+
+            // Subscribe to the new form
+            if (_selectedForm != null)
+            {
+                _selectedForm.PropertyChanged += _viewModel.OnModelPropertyChanged;
+            }
         }
     }
     public Guid Id { get; } = Guid.NewGuid();
@@ -158,8 +172,16 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
         foreach (var form in Forms) form.Deselect();
 
-        SelectedForm = Forms.FirstOrDefault(c => c.Id == selectedForm.Id) ?? new Form();
+        SelectedForm = Forms.FirstOrDefault(c => c.Id == selectedForm.Id) ?? new Form(_viewModel);
         SelectedForm?.Select();
+    }
+    partial void OnCaseNumberChanged(string? value)
+    {
+        OnPropertyChanged(nameof(IsBlank));
+    }
+    partial void OnNotesChanged(string? value)
+    {
+        OnPropertyChanged(nameof(IsBlank)); 
     }
     private void ChildCollection_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {

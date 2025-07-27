@@ -13,7 +13,6 @@ public class TextTemplateVariable(string properName, string name, string prefix,
     public string Description { get; } = description;
     public string ProperName { get; } = properName;
     public IReadOnlyCollection<string> Aliases { get { return _aliases; } }
-
     private readonly Func<string> _getValue = getValue;
 
     private readonly List<string> _aliases = aliases;

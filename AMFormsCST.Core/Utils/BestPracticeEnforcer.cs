@@ -20,19 +20,11 @@ public class BestPracticeEnforcer(IFormNameBestPractice formNameBestPractice) : 
     {
         ArgumentNullException.ThrowIfNull(template);
         if (string.IsNullOrWhiteSpace(template.Text)) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
-        if(Templates.Contains(template)) throw new ArgumentException("Template already exists.", nameof(template));
+
+        if(Templates.Contains(template)) return;
 
         Templates.Add(template);
         IO.SaveTemplates(Templates);
     }
 
-    public void RemoveTemplate(TextTemplate template)
-    {
-        ArgumentNullException.ThrowIfNull(template);
-        if (string.IsNullOrWhiteSpace(template.Text)) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
-        if (!Templates.Contains(template)) throw new ArgumentException("Template does not exist.", nameof(template));
-
-        Templates.Remove(template);
-        IO.SaveTemplates(Templates);
-    }
 }

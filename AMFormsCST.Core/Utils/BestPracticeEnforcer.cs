@@ -35,4 +35,18 @@ public class BestPracticeEnforcer(IFormNameBestPractice formNameBestPractice) : 
         Templates.Remove(template);
         IO.SaveTemplates(Templates);
     }
+    public void UpdateTemplate(TextTemplate updatedTemplate)
+    {
+        // Find the existing template by its ID
+        var existingTemplate = Templates.FirstOrDefault(t => t.Id == updatedTemplate.Id);
+        if (existingTemplate != null)
+        {
+            // Update its properties directly
+            existingTemplate.Name = updatedTemplate.Name;
+            existingTemplate.Description = updatedTemplate.Description;
+            existingTemplate.Text = updatedTemplate.Text;
+
+            IO.SaveTemplates(Templates);
+        }
+    }
 }

@@ -32,7 +32,8 @@ public partial class MainWindowViewModel : ViewModel
             {
                 new NavigationViewItem("Formgen Utilities", SymbolRegular.DocumentTextToolbox24, typeof(FormgenUtilitiesPage)),
                 new NavigationViewItem("Form Name Generator", SymbolRegular.TextT12, typeof(FormNameGeneratorPage)),
-                //new NavigationViewItem("Templates", SymbolRegular.Color24, typeof(ColorsPage)),
+                new NavigationViewItem("Code Snippets", SymbolRegular.Code20, typeof(CodeSnippetsPage)),
+                new NavigationViewItem("Templates", SymbolRegular.MailTemplate24, typeof(TemplatesPage)),
             },
         }
     ];

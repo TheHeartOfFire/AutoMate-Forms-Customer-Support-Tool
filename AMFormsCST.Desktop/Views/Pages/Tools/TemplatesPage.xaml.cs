@@ -19,13 +19,13 @@ using Wpf.Ui.Controls;
 
 namespace AMFormsCST.Desktop.Views.Pages.Tools;
 /// <summary>
-/// Interaction logic for FormNameGeneratorPage.xaml
+/// Interaction logic for TemplatesPage.xaml
 /// </summary>
-[GalleryPage("This utility allows you to generate form names that adhere to current naming conventions.", SymbolRegular.TextT12)]
-public partial class FormNameGeneratorPage : Page
+[GalleryPage("This utility allows you to manage your text templates which references the other parts of this program to prefill data", SymbolRegular.MailTemplate24)]
+public partial class TemplatesPage : Page
 {
-    public FormNameGeneratorViewModel ViewModel { get; }
-    public FormNameGeneratorPage(FormNameGeneratorViewModel viewModel)
+    public TemplatesViewModel ViewModel { get; }
+    public TemplatesPage(TemplatesViewModel viewModel)
     {
         ViewModel = viewModel;
         DataContext = ViewModel;

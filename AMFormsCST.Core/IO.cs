@@ -1,8 +1,12 @@
-﻿using AMFormsCST.Core.Types.Notebook;
+﻿using AMFormsCST.Core.Interfaces.BestPractices;
+using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+using AMFormsCST.Core.Types.Notebook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -10,12 +14,41 @@ namespace AMFormsCST.Core;
 internal static class IO
 {
     private static readonly string _appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    private static readonly string _rootPath = _appData + "\\AMFormsCST";
-    private static readonly string _notesPath = _rootPath + "\\SavedNotes.json";
-    internal static readonly string BackupPath = _rootPath + "\\FormgenBackup";
+    private static readonly string _rootPath;
+    private static readonly string _notesPath;
+    internal static readonly string BackupPath;
+    private static readonly string _templatesPath;
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     internal static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
+    static IO()
+    {
+        _rootPath = Path.Combine(_appData, "AMFormsCST");
+        _notesPath = Path.Combine(_rootPath, "SavedNotes.json");
+        BackupPath = Path.Combine(_rootPath, "FormgenBackup");
+        _templatesPath = Path.Combine(_rootPath, "TextTemplates.json");
 
+        try
+        {
+            if (!Directory.Exists(_rootPath))
+            {
+                Directory.CreateDirectory(_rootPath);
+            }
+            if (!Directory.Exists(BackupPath)) 
+            {
+                Directory.CreateDirectory(BackupPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            Console.WriteLine($"Error creating application directories: {ex.Message}");
+        }
+    }
     internal static void BackupFormgenFile(string uuid, XmlDocument file, uint? retentionCount)
     {
         var di = Directory.CreateDirectory($"{BackupPath}\\{uuid}");
@@ -47,23 +80,86 @@ internal static class IO
 
     }
 
-    internal static void SaveNotes(List<Note> notes)
+    internal static void SaveNotes(List<INote> notes)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(notes);
+        var concreteNotes = notes.Cast<Note>().ToList(); 
 
-        if (!Directory.Exists(_rootPath))
-            Directory.CreateDirectory(_rootPath);
+        var json = JsonSerializer.Serialize(concreteNotes, _jsonOptions);
 
-        File.WriteAllText(_notesPath, json);
+        try
+        {
+            File.WriteAllText(_notesPath, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving Notes: {ex.Message}");
+        }
     }
-    internal static List<Note> LoadNotes()
+    internal static List<INote> LoadNotes()
     {
         if (!File.Exists(_notesPath))
+        {
+            SaveNotes([]); 
             return [];
+        }
 
-        var json = File.ReadAllText(_notesPath);
+        try
+        {
+            var json = File.ReadAllText(_notesPath);
 
-        return System.Text.Json.JsonSerializer.Deserialize<List<Note>>(json) ?? new List<Note>();
+            var deserializedConcreteNotes = JsonSerializer.Deserialize<List<Note>>(json, _jsonOptions);
+
+            return deserializedConcreteNotes?.Cast<INote>().ToList() ?? [];
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing Notes: {ex.Message}");
+            return [];
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Notes file: {ex.Message}");
+            return [];
+        }
     }
 
+    internal static List<TextTemplate> LoadTemplates()
+    {
+        if (!File.Exists(_templatesPath))
+        {
+            SaveTemplates([]); 
+            return []; 
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_templatesPath);
+            var templates = JsonSerializer.Deserialize<List<TextTemplate>>(json, _jsonOptions);
+
+            return templates ?? []; 
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing TextTemplates: {ex.Message}");
+            return []; 
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"Error loading TextTemplates file: {ex.Message}");
+            return [];
+        }
+    }
+    internal static void SaveTemplates(List<TextTemplate> templates)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(templates, _jsonOptions);
+
+            File.WriteAllText(_templatesPath, json);
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"Error saving TextTemplates: {ex.Message}");
+        }
+    }
 }

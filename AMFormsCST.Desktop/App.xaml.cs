@@ -53,7 +53,7 @@ public partial class App : Application
                 //_ = services.AddSingleton<SettingsPage>();
                 //_ = services.AddSingleton<SettingsViewModel>();
 
-                 //All other pages and view models
+                //All other pages and view models
                 _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Assembly);
                 _ = services.AddTransientFromNamespace(
                     "AMFormsCST.Desktop.ViewModels",

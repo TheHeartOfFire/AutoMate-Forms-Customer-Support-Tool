@@ -87,6 +87,13 @@ public partial class DashboardViewModel : ViewModel
         #endregion
 
         if (IsDebugMode) _debugVisibility = Visibility.Visible;
+
+        if(_selectedNote is null) 
+        {
+            _selectedNote = new NoteModel();
+            Notes.Add(_selectedNote);
+            _selectedNote.Select();
+        }
     }
 
     [RelayCommand]
@@ -220,6 +227,34 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedForm?.Select();
             }
         }
+    }
+    [RelayCommand]
+    private void OpenTemplateDialog()
+    {
+        //var dialog = new Dialogs.NewTemplateDialog();
+
+        //dialog.ShowDialog();
+    }
+    [RelayCommand]
+    private void OpenCodeSnippetDialog()
+    {
+        //var dialog = new Dialogs.NewTemplateDialog();
+
+        //dialog.ShowDialog();
+    }
+    [RelayCommand]
+    private void OpenFormNameGeneratorDialog()
+    {
+        //var dialog = new Dialogs.NewTemplateDialog();
+
+        //dialog.ShowDialog();
+    }
+    [RelayCommand]
+    private void LoadCase()
+    {
+        //var dialog = new Dialogs.NewTemplateDialog();
+
+        //dialog.ShowDialog();
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ public partial class MainWindow : IWindow
         snackbarService.SetSnackbarPresenter(SnackbarPresenter);
         navigationService.SetNavigationControl(NavigationView);
         contentDialogService.SetDialogHost(RootContentDialog);
+        _ = SupportTool.SupportToolInstance; // Ensure the support tool is initialized
     }
     private void OnNavigationSelectionChanged(object sender, RoutedEventArgs e)
     {

@@ -8,4 +8,7 @@ public interface IBestPracticeEnforcer
     List<TextTemplate> Templates { get; }
 
     string GetFormName();
+    void AddTemplate(TextTemplate template);
+    void RemoveTemplate(TextTemplate template);
+    void UpdateTemplate(TextTemplate updatedTemplate);
 }

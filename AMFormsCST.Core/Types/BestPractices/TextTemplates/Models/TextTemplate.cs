@@ -5,14 +5,32 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-public class TextTemplate(string name, string description, string text) : IEquatable<TextTemplate>
+public class TextTemplate : IEquatable<TextTemplate>
 {
-    public string Name { get; set; } = name;
-    public string Description { get; set; } = description;
-    public string Text { get; } = text;
+    [JsonInclude]
+    public Guid Id { get; private set; }// Default to empty GUID for new templates
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string Text { get; set; }
+    public TextTemplate(string name, string description, string text)
+    {
+        Id = Guid.NewGuid(); // Or pass in an existing ID for editing
+        Name = name;
+        Description = description;
+        Text = text;
+    }
+    [JsonConstructor]
+    public TextTemplate(Guid id, string name, string description, string text)
+    {
+        Id = id;
+        Name = name;
+        Description = description;
+        Text = text;
+    }
 
     public List<ITextTemplateVariable> GetVariables(ISupportTool supportTool)
     {
@@ -43,20 +61,6 @@ public class TextTemplate(string name, string description, string text) : IEquat
 
 
         return string.Format(processedText, [.. variableValues]);
-    }
-    
-
-    private static string CheckForAlias(string text, ITextTemplateVariable variable, string name)
-    {
-        foreach (var alias in variable.Aliases)
-        {
-            var aliasName = variable.Prefix + alias;
-
-            if (text.Contains(aliasName))
-                name = aliasName;
-        }
-
-        return name;
     }
 
     public bool Equals(TextTemplate? other)

@@ -72,6 +72,13 @@
                         <ui:SymbolIcon Symbol="Add24"/>
                     </ui:Button>
                     <ui:Button
+                          Command="{Binding EditTemplateCommand}"
+                          Margin="5"
+                          Padding="10,5"
+                          HorizontalAlignment="Left">
+                        <ui:SymbolIcon Symbol="Edit24"/>
+                    </ui:Button>
+                    <ui:Button
                           Command="{Binding RemoveTemplateCommand}"
                           Margin="5"
                           Padding="10,5"

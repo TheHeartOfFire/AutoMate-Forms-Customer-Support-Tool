@@ -150,5 +150,30 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
 
         return (processedText, variables);
     }
+    public void RefreshTemplateData()
+    {
+        // First, notify that the base Template object might have changed (e.g., Name, Description)
+        OnPropertyChanged(nameof(Template)); // This will re-evaluate bindings like Template.Name, Template.Description
+
+        // Then, re-process the template text to update variables
+        var preprocessedTemplate = PreProcessTemplate(Template.Text);
+
+        // Create new TemplateVariableViewModels for the updated template content
+        var newVariables = new ObservableCollection<TemplateVariableViewModel>(
+            preprocessedTemplate.variables
+                .Select(variable => new TemplateVariableViewModel(variable.variable) { Variable = variable.variable }));
+
+        // Update the existing Variables collection.
+        // Instead of directly assigning, use Clear() and AddRange() for better ObservableCollection notification
+        // if you have an AddRange extension, or loop through.
+        Variables.Clear();
+        foreach (var v in newVariables)
+        {
+            Variables.Add(v); // This will trigger OnVariablesCollectionChanged and subscribe the new variable
+        }
+
+        // After updating variables, explicitly notify Output to re-evaluate
+        OnPropertyChanged(nameof(Output));
+    }
 }
 

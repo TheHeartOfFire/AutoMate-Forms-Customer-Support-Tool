@@ -10,4 +10,5 @@ public interface IBestPracticeEnforcer
     string GetFormName();
     void AddTemplate(TextTemplate template);
     void RemoveTemplate(TextTemplate template);
+    void UpdateTemplate(TextTemplate updatedTemplate);
 }

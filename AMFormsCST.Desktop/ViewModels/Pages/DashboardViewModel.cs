@@ -2,6 +2,9 @@
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.Views.Dialogs;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -87,6 +90,13 @@ public partial class DashboardViewModel : ViewModel
         #endregion
 
         if (IsDebugMode) _debugVisibility = Visibility.Visible;
+
+        if(_selectedNote is null) 
+        {
+            _selectedNote = new NoteModel();
+            Notes.Add(_selectedNote);
+            _selectedNote.Select();
+        }
     }
 
     [RelayCommand]
@@ -220,6 +230,105 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedForm?.Select();
             }
         }
+    }
+    [RelayCommand]
+    private void OpenTemplateDialog()
+    {
+        var vm = new TemplatesViewModel();
+        var page = new TemplatesPage(vm);
+
+
+        var dialog = new PageHostDialog(page);
+
+
+        dialog.Show();
+        _lastTemplate = (page, vm);
+        dialog.Closed += TemplateDialogClosed;
+    }
+
+    private void TemplateDialogClosed(object? sender, EventArgs e)
+    {
+        if (sender is null) return;
+
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
+            SelectedNote.Notes += _lastTemplate.ViewModel.SelectedTemplate?.Output;
+        dialog.Closed -= TemplateDialogClosed;
+    }
+
+    private (TemplatesPage View, TemplatesViewModel ViewModel) _lastTemplate;
+
+    [RelayCommand]
+    private void OpenCodeSnippetDialog()
+    {
+        var vm = new CodeSnippetsViewModel();
+        var page = new CodeSnippetsPage(vm);
+
+
+        var dialog = new PageHostDialog(page);
+
+
+        dialog.Show();
+        _lastCodeSnippet = (page, vm);
+        dialog.Closed += CodeSnippetDialogClosed;
+    }
+
+    private (CodeSnippetsPage View, CodeSnippetsViewModel ViewModel) _lastCodeSnippet;
+
+    private void CodeSnippetDialogClosed(object? sender, EventArgs e)
+    {
+        if (sender is null) return;
+
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
+            SelectedNote.Notes += _lastCodeSnippet.ViewModel.SelectedCodeSnippet?.Output;
+        dialog.Closed -= CodeSnippetDialogClosed;
+    }
+
+
+    [RelayCommand]
+    private void OpenFormNameGeneratorDialog()
+    {
+        var vm = new FormNameGeneratorViewModel();
+        var page = new FormNameGeneratorPage(vm); 
+
+        
+        var dialog = new PageHostDialog(page);
+
+        
+        dialog.Show();
+        _lastFormNameGenerator = (page, vm);
+        dialog.Closed += FormNameDialogClosed;
+
+        
+    }
+    private (FormNameGeneratorPage View, FormNameGeneratorViewModel ViewModel) _lastFormNameGenerator;
+    private void FormNameDialogClosed(object? sender, EventArgs e)
+    {
+        if (sender is null) return;
+
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
+            if(SelectedNote.SelectedForm.IsBlank)
+            {
+                SelectedNote.SelectedForm.Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+            }
+            else
+            {
+                SelectedNote.Forms.Last().Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+            }
+        dialog.Closed -= FormNameDialogClosed;
+    }
+
+    [RelayCommand]
+    private void LoadCase()
+    {
+        //var dialog = new Dialogs.NewTemplateDialog();
+
+        //dialog.ShowDialog();
     }
 
     /// <summary>

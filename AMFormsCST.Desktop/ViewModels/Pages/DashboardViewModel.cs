@@ -2,6 +2,9 @@
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.Views.Dialogs;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -245,10 +248,38 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenFormNameGeneratorDialog()
     {
-        //var dialog = new Dialogs.NewTemplateDialog();
+        var vm = new Tools.FormNameGeneratorViewModel();
+        var formNameGeneratorPage = new FormNameGeneratorPage(vm); 
 
-        //dialog.ShowDialog();
+        
+        var dialog = new PageHostDialog(formNameGeneratorPage);
+
+        
+        dialog.Show();
+        _lastDialog = dialog;
+        _lastFormNameGenerator = (formNameGeneratorPage, vm);
+        dialog.Closed += FormNameDialogClosed;
+
+        
     }
+    private PageHostDialog? _lastDialog;
+    private (FormNameGeneratorPage View, FormNameGeneratorViewModel ViewModel) _lastFormNameGenerator;
+    private void FormNameDialogClosed(object? sender, EventArgs e)
+    {
+        if (_lastDialog is null) return;
+
+        if (_lastDialog.ConfirmSelected)
+            if(SelectedNote.SelectedForm.IsBlank)
+            {
+                SelectedNote.SelectedForm.Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+            }
+            else
+            {
+                SelectedNote.Forms.Last().Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+            }
+        _lastDialog.Closed -= FormNameDialogClosed;
+    }
+
     [RelayCommand]
     private void LoadCase()
     {

@@ -16,14 +16,14 @@
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
     </UserControl.Resources>
 
-    <Grid HorizontalAlignment="Stretch" Margin="0,0,25,0">
-        <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible" Height="50">
+    <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
+        <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible">
             <ItemsControl ItemsSource="{Binding ItemsSource, ElementName=RadioButtonControl}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <RadioButton IsChecked="{Binding IsSelected, Mode=OneWay}"    
                                      Command="{Binding RadioButtonCommand, ElementName=RadioButtonControl}"
-                                     Margin="0,0,5,0"    
+                                     Margin="0,0,5,10"    
                                      MinWidth="10"    
                                      GroupName="{Binding GroupName, RelativeSource={RelativeSource AncestorType=local:HorizontalRadioButtons}}"
                                      HorizontalContentAlignment="Stretch">

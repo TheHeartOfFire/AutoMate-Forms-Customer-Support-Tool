@@ -241,34 +241,56 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenCodeSnippetDialog()
     {
-        //var dialog = new Dialogs.NewTemplateDialog();
+        var vm = new CodeSnippetsViewModel();
+        var page = new CodeSnippetsPage(vm);
 
-        //dialog.ShowDialog();
+
+        var dialog = new PageHostDialog(page);
+
+
+        dialog.Show();
+        _lastCodeSnippet = (page, vm);
+        dialog.Closed += CodeSnippetDialogClosed;
     }
+
+    private (CodeSnippetsPage View, CodeSnippetsViewModel ViewModel) _lastCodeSnippet;
+
+    private void CodeSnippetDialogClosed(object? sender, EventArgs e)
+    {
+        if (sender is null) return;
+
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
+            SelectedNote.Notes += _lastCodeSnippet.ViewModel.SelectedCodeSnippet?.Output;
+        dialog.Closed -= CodeSnippetDialogClosed;
+    }
+
+
     [RelayCommand]
     private void OpenFormNameGeneratorDialog()
     {
-        var vm = new Tools.FormNameGeneratorViewModel();
-        var formNameGeneratorPage = new FormNameGeneratorPage(vm); 
+        var vm = new FormNameGeneratorViewModel();
+        var page = new FormNameGeneratorPage(vm); 
 
         
-        var dialog = new PageHostDialog(formNameGeneratorPage);
+        var dialog = new PageHostDialog(page);
 
         
         dialog.Show();
-        _lastDialog = dialog;
-        _lastFormNameGenerator = (formNameGeneratorPage, vm);
+        _lastFormNameGenerator = (page, vm);
         dialog.Closed += FormNameDialogClosed;
 
         
     }
-    private PageHostDialog? _lastDialog;
     private (FormNameGeneratorPage View, FormNameGeneratorViewModel ViewModel) _lastFormNameGenerator;
     private void FormNameDialogClosed(object? sender, EventArgs e)
     {
-        if (_lastDialog is null) return;
+        if (sender is null) return;
 
-        if (_lastDialog.ConfirmSelected)
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
             if(SelectedNote.SelectedForm.IsBlank)
             {
                 SelectedNote.SelectedForm.Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
@@ -277,7 +299,7 @@ public partial class DashboardViewModel : ViewModel
             {
                 SelectedNote.Forms.Last().Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
             }
-        _lastDialog.Closed -= FormNameDialogClosed;
+        dialog.Closed -= FormNameDialogClosed;
     }
 
     [RelayCommand]

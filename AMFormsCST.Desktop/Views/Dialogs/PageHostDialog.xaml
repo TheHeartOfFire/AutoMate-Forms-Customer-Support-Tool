@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Dialogs"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="{Binding DialogTitle}"  Height="Auto" Width="Auto" MinHeight="500" MinWidth="400"
+        Title="{Binding DialogTitle}"  Height="Auto" Width="Auto" MinHeight="300" MinWidth="400"
         SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow" Topmost="True" WindowBackdropType="Mica"
         d:DataContext="{d:DesignInstance viewModels:PageHostDialogViewModel}"

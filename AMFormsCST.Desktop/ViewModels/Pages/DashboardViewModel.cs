@@ -234,10 +234,31 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenTemplateDialog()
     {
-        //var dialog = new Dialogs.NewTemplateDialog();
+        var vm = new TemplatesViewModel();
+        var page = new TemplatesPage(vm);
 
-        //dialog.ShowDialog();
+
+        var dialog = new PageHostDialog(page);
+
+
+        dialog.Show();
+        _lastTemplate = (page, vm);
+        dialog.Closed += TemplateDialogClosed;
     }
+
+    private void TemplateDialogClosed(object? sender, EventArgs e)
+    {
+        if (sender is null) return;
+
+        var dialog = (PageHostDialog)sender;
+
+        if (dialog.ConfirmSelected)
+            SelectedNote.Notes += _lastTemplate.ViewModel.SelectedTemplate?.Output;
+        dialog.Closed -= TemplateDialogClosed;
+    }
+
+    private (TemplatesPage View, TemplatesViewModel ViewModel) _lastTemplate;
+
     [RelayCommand]
     private void OpenCodeSnippetDialog()
     {

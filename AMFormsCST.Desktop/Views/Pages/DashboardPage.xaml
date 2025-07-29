@@ -63,7 +63,7 @@
             </StackPanel>
 
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="0"  Margin="0,0,0,10">
-                <ui:Button Margin="0,0,5,0" Command="{Binding OpenTemplateDialogCommand}" IsEnabled="False">
+                <ui:Button Margin="0,0,5,0" Command="{Binding OpenTemplateDialogCommand}">
                     <ui:SymbolIcon Symbol="MailTemplate24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" />
                 </ui:Button>
                 <ui:Button Margin="0,0,5,0" Command="{Binding OpenCodeSnippetDialogCommand}">

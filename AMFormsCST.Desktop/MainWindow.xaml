@@ -18,8 +18,9 @@
         WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
         SizeChanged="MainWindow_OnSizeChanged"
-                 MinWidth="1050" MinHeight="775" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-    <Grid ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                 MinWidth="1050" MinHeight="775"
+                 >
+    <Grid>
         <ui:NavigationView
     x:Name="NavigationView"
     Padding="42,0,42,0"
@@ -36,7 +37,7 @@
     PaneOpened="NavigationView_OnPaneOpened"
     SelectionChanged="OnNavigationSelectionChanged"
     TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
-    Transition="FadeInWithSlide" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+    Transition="FadeInWithSlide">
             <ui:NavigationView.Header>
                 <StackPanel Margin="42,32,42,20">
                     <ui:BreadcrumbBar x:Name="BreadcrumbBar" />
@@ -53,12 +54,14 @@
             </ui:NavigationView.AutoSuggestBox>
             <ui:NavigationView.ContentOverlay>
                 <Grid>
+                    <!-- The ContentPresenter has been moved here -->
+                    <ContentPresenter x:Name="RootContentDialog" />
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
                 </Grid>
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+        <!-- The ContentPresenter has been removed from here -->
 
         <ui:TitleBar
     x:Name="TitleBar"
@@ -75,7 +78,7 @@
     FocusOnLeftClick="True"
     Icon="pack://application:,,,/Assets/AMLogo.png"
     MenuOnRightClick="True"
-    TooltipText="Auto/Mate Forms CST" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+    TooltipText="Auto/Mate Forms CST">
             <tray:NotifyIcon.Menu>
                 <ContextMenu ItemsSource="{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
             </tray:NotifyIcon.Menu>

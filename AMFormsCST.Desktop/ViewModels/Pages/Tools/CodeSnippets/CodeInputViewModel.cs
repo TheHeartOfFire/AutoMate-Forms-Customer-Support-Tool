@@ -30,7 +30,7 @@ public partial class CodeInputViewModel : ObservableObject
     partial void OnBindableValueChanged(string? value)
     {
         _codeInputModel.SetValue(value ?? string.Empty); 
-        _parent.InputChanged(this);
+        _parent.InputChanged();
     }
     
 }

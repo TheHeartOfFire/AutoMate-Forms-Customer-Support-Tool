@@ -34,6 +34,7 @@ public partial class CodeSnippetItemViewModel : ObservableObject, ISelectable
         Inputs = new ObservableCollection<CodeInputViewModel>(
             codeBase.Inputs.Select(input => new CodeInputViewModel(input, this))
         );
+        Output = CodeBase.GetCode();
     }
 
     public void Select()
@@ -46,7 +47,7 @@ public partial class CodeSnippetItemViewModel : ObservableObject, ISelectable
         IsSelected = false;
     }
 
-    public void InputChanged(CodeInputViewModel input)
+    public void InputChanged()
     {
         Output = CodeBase.GetCode();
     }

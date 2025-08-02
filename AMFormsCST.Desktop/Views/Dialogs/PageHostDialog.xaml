@@ -6,25 +6,24 @@
         xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Dialogs"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="{Binding DialogTitle}"  Height="Auto" Width="Auto" MinHeight="300" MinWidth="400"
-        SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
+        Title="{Binding DialogTitle}" Height="500" Width="800" WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow" Topmost="True" WindowBackdropType="Mica"
         d:DataContext="{d:DesignInstance viewModels:PageHostDialogViewModel}"
         ExtendsContentIntoTitleBar="True">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         
         <Grid Name="CustomTitleBarArea" Height="32" VerticalAlignment="Top" Background="Transparent" MouseLeftButtonDown="CustomTitleBarArea_MouseLeftButtonDown" />
 
-        <Frame x:Name="DialogPageFrame" Grid.Row="1" NavigationUIVisibility="Hidden" Margin="5"/>
+        <Frame x:Name="DialogPageFrame" Grid.Row="1" NavigationUIVisibility="Hidden" Margin="5" Grid.RowSpan="2"/>
 
         <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal" Margin="15" Grid.Row="2">
             <ui:Button Command="{Binding ConfirmCommand}" Margin="0,0,10,0" IsCancel="True" Padding="0"
-                       CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ui:FluentWindow}}}">
+                       CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ui:FluentWindow}}}" Visibility="{Binding CanConfirm, Mode=OneTime}">
                 <ui:SymbolIcon Symbol="CheckboxChecked24" FontSize="32"/>
             </ui:Button>
             <ui:Button Command="{Binding CloseCommand}" Margin="0,0,10,0" IsCancel="True" Padding="0"

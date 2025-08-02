@@ -22,13 +22,13 @@ namespace AMFormsCST.Desktop.Views.Dialogs
     /// </summary>
     public partial class PageHostDialog : FluentWindow
     {
-        public PageHostDialog(Page contentPage)
+        public PageHostDialog(Page contentPage, bool canConfirm = false)
         {
             InitializeComponent();
 
             DialogPageFrame.Navigate(contentPage);
 
-            this.DataContext = new PageHostDialogViewModel(contentPage.DataContext);
+            this.DataContext = new PageHostDialogViewModel(contentPage.DataContext, canConfirm);
         }
         public bool ConfirmSelected => ((PageHostDialogViewModel)DataContext).ConfirmSelected;
 

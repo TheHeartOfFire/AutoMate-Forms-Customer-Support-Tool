@@ -2,6 +2,7 @@
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
+using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.Views.Dialogs;
 using AMFormsCST.Desktop.Views.Pages.Tools;
@@ -232,7 +233,7 @@ public partial class DashboardViewModel : ViewModel
         }
     }
     [RelayCommand]
-    private void OpenTemplateDialog()
+    private static void OpenTemplateDialog()
     {
         var vm = new TemplatesViewModel();
         var page = new TemplatesPage(vm);
@@ -242,25 +243,10 @@ public partial class DashboardViewModel : ViewModel
 
 
         dialog.Show();
-        _lastTemplate = (page, vm);
-        dialog.Closed += TemplateDialogClosed;
     }
-
-    private void TemplateDialogClosed(object? sender, EventArgs e)
-    {
-        if (sender is null) return;
-
-        var dialog = (PageHostDialog)sender;
-
-        if (dialog.ConfirmSelected)
-            SelectedNote.Notes += _lastTemplate.ViewModel.SelectedTemplate?.Output;
-        dialog.Closed -= TemplateDialogClosed;
-    }
-
-    private (TemplatesPage View, TemplatesViewModel ViewModel) _lastTemplate;
 
     [RelayCommand]
-    private void OpenCodeSnippetDialog()
+    private static void OpenCodeSnippetDialog()
     {
         var vm = new CodeSnippetsViewModel();
         var page = new CodeSnippetsPage(vm);
@@ -270,22 +256,8 @@ public partial class DashboardViewModel : ViewModel
 
 
         dialog.Show();
-        _lastCodeSnippet = (page, vm);
-        dialog.Closed += CodeSnippetDialogClosed;
     }
 
-    private (CodeSnippetsPage View, CodeSnippetsViewModel ViewModel) _lastCodeSnippet;
-
-    private void CodeSnippetDialogClosed(object? sender, EventArgs e)
-    {
-        if (sender is null) return;
-
-        var dialog = (PageHostDialog)sender;
-
-        if (dialog.ConfirmSelected)
-            SelectedNote.Notes += _lastCodeSnippet.ViewModel.SelectedCodeSnippet?.Output;
-        dialog.Closed -= CodeSnippetDialogClosed;
-    }
 
 
     [RelayCommand]
@@ -295,30 +267,34 @@ public partial class DashboardViewModel : ViewModel
         var page = new FormNameGeneratorPage(vm); 
 
         
-        var dialog = new PageHostDialog(page);
+        var dialog = new PageHostDialog(page, true);
 
         
         dialog.Show();
-        _lastFormNameGenerator = (page, vm);
         dialog.Closed += FormNameDialogClosed;
 
         
     }
-    private (FormNameGeneratorPage View, FormNameGeneratorViewModel ViewModel) _lastFormNameGenerator;
+
     private void FormNameDialogClosed(object? sender, EventArgs e)
     {
         if (sender is null) return;
 
         var dialog = (PageHostDialog)sender;
+        if (dialog.DataContext is not PageHostDialogViewModel outerVm) return;
+
+        if (outerVm.HostedPageViewModel is not FormNameGeneratorViewModel vm) return;
+
+        var name = vm.Form.FileName ?? string.Empty;
 
         if (dialog.ConfirmSelected)
             if(SelectedNote.SelectedForm.IsBlank)
             {
-                SelectedNote.SelectedForm.Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+                SelectedNote.SelectedForm.Name = name;
             }
             else
             {
-                SelectedNote.Forms.Last().Name = _lastFormNameGenerator.ViewModel.Form.FileName ?? string.Empty;
+                SelectedNote.Forms.Last().Name = name;
             }
         dialog.Closed -= FormNameDialogClosed;
     }

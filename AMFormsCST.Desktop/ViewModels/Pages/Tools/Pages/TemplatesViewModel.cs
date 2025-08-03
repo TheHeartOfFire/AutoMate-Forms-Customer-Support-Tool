@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 using AMFormsCST.Desktop.Views.Dialogs;
@@ -17,10 +18,18 @@ namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class TemplatesViewModel : ViewModel
 {
     [ObservableProperty]
-    private ObservableCollection<TemplateItemViewModel> _templates = new(SupportTool.SupportToolInstance.Enforcer.Templates.Select(t => new TemplateItemViewModel(t) { Template = t }));
+    private ObservableCollection<TemplateItemViewModel> _templates;
 
     [ObservableProperty] 
-    private TemplateItemViewModel _selectedTemplate = new(new(string.Empty, string.Empty, string.Empty));
+    private TemplateItemViewModel _selectedTemplate;
+
+    private ISupportTool _supportTool;
+    public TemplatesViewModel(ISupportTool supportTool)
+    {
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool)); 
+        _templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
+        _selectedTemplate = new(new(string.Empty, string.Empty, string.Empty), _supportTool);
+    }
 
     [RelayCommand]
     private void AddTemplate()
@@ -31,12 +40,12 @@ public partial class TemplatesViewModel : ViewModel
 
         if (result is not true) return;
 
-        var template = new TemplateItemViewModel(new TextTemplate(dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent));
+        var template = new TemplateItemViewModel(new TextTemplate(dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent), _supportTool);
 
-        SupportTool.SupportToolInstance.Enforcer.AddTemplate(template.Template);
+        _supportTool.Enforcer.AddTemplate(template.Template);
 
 
-        Templates = new(SupportTool.SupportToolInstance.Enforcer.Templates.Select(t => new TemplateItemViewModel(t) { Template = t }));
+        Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
         SelectTemplate(template);
     }
@@ -56,7 +65,7 @@ public partial class TemplatesViewModel : ViewModel
         SelectedTemplate.Template.Text = dialog.TemplateContent;
 
         SelectedTemplate.RefreshTemplateData();
-        SupportTool.SupportToolInstance.Enforcer.UpdateTemplate(SelectedTemplate.Template);
+        _supportTool.Enforcer.UpdateTemplate(SelectedTemplate.Template);
         SelectTemplate(SelectedTemplate);
     }
     [RelayCommand]
@@ -64,11 +73,11 @@ public partial class TemplatesViewModel : ViewModel
     {
         if (item is null) return;
 
-        SupportTool.SupportToolInstance.Enforcer.RemoveTemplate(item.Template);
-        Templates = new(SupportTool.SupportToolInstance.Enforcer.Templates.Select(t => new TemplateItemViewModel(t) { Template = t }));
+        _supportTool.Enforcer.RemoveTemplate(item.Template);
+        Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
 
-        SelectTemplate(Templates.Any() ? Templates.First() : new(new(string.Empty, string.Empty, string.Empty)));
+        SelectTemplate(Templates.Any() ? Templates.First() : new(new(string.Empty, string.Empty, string.Empty), _supportTool));
        
     }
     [RelayCommand]

@@ -19,6 +19,10 @@ using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.DependencyModel;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.BestPractices.Practices;
+using AMFormsCST.Core.Types.BestPractices.Models;
+using AMFormsCST.Core.Interfaces.BestPractices;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -65,6 +69,12 @@ public partial class App : Application
                 _ = services.AddTransient<IDialogService, DialogService>();
                 _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
                 _ = services.AddTransient<FormgenUtilsProperties>();
+
+                // Register SupportTool and its dependencies as singletons
+                _ = services.AddSingleton<AutoMateFormModel>();
+                _ = services.AddSingleton<IFormNameBestPractice, AutoMateFormNameBestPractices>();
+                _ = services.AddSingleton<ISupportTool, Core.SupportTool>();
+
                 _ = services.AddStringLocalizer(b =>
                 {
                     b.FromResource<Translations>(new("pl-PL"));

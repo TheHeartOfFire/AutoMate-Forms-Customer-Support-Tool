@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AMFormsCST.Core.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -85,7 +86,7 @@ namespace AMFormsCST.Desktop.Models.FormNameGenerator
 
         public string GetFileName()
         {
-            SupportTool.SupportToolInstance.Enforcer.FormNameBestPractice.Model = new Core.Types.BestPractices.Models.AutoMateFormModel
+            _supportTool.Enforcer.FormNameBestPractice.Model = new Core.Types.BestPractices.Models.AutoMateFormModel
             {
                 Name = Title ?? string.Empty,
                 Code = Code ?? string.Empty,
@@ -98,10 +99,12 @@ namespace AMFormsCST.Desktop.Models.FormNameGenerator
                 IsCustom = Tags.Contains(Tag.Custom),
                 
             };
-            return SupportTool.SupportToolInstance.Enforcer.GetFormName();
+            return _supportTool.Enforcer.GetFormName();
         }
-        public Form() 
+        private readonly ISupportTool _supportTool;
+        public Form(ISupportTool supportTool)
         {
+            _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
             Tags.CollectionChanged += (s, e) => OnPropertyChanged(nameof(FileName));
             AddTag(Tag.Pdf);
         }

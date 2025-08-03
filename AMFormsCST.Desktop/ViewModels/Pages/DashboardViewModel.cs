@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.Notebook;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
@@ -67,9 +68,10 @@ public partial class DashboardViewModel : ViewModel
         private set => SetProperty(ref _uiRefreshCounter, value); 
     }
 
-
-    public DashboardViewModel()
+    private readonly ISupportTool _supportTool;
+    public DashboardViewModel(ISupportTool supportTool)
     {
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         Notes.Add(new NoteModel());
 
         _selectedNote = Notes[0];
@@ -233,9 +235,9 @@ public partial class DashboardViewModel : ViewModel
         }
     }
     [RelayCommand]
-    private static void OpenTemplateDialog()
+    private void OpenTemplateDialog()
     {
-        var vm = new TemplatesViewModel();
+        var vm = new TemplatesViewModel(_supportTool);
         var page = new TemplatesPage(vm);
 
 
@@ -246,9 +248,9 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private static void OpenCodeSnippetDialog()
+    private void OpenCodeSnippetDialog()
     {
-        var vm = new CodeSnippetsViewModel();
+        var vm = new CodeSnippetsViewModel(_supportTool);
         var page = new CodeSnippetsPage(vm);
 
 
@@ -263,7 +265,7 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenFormNameGeneratorDialog()
     {
-        var vm = new FormNameGeneratorViewModel();
+        var vm = new FormNameGeneratorViewModel(_supportTool);
         var page = new FormNameGeneratorPage(vm); 
 
         
@@ -419,12 +421,12 @@ public partial class DashboardViewModel : ViewModel
 
     private void UpdateNotebook()
     {
-        SupportTool.SupportToolInstance.Notebook.Notes.Clear();
+        _supportTool.Notebook.Notes.Clear();
         foreach (var note in Notes)
         {
-            SupportTool.SupportToolInstance.Notebook.AddNote((Note)note, false);
+            _supportTool.Notebook.AddNote((Note)note, false);
         }
-        SupportTool.SupportToolInstance.Notebook.SelectNote((Note)SelectedNote);
+        _supportTool.Notebook.SelectNote((Note)SelectedNote);
     }
 
     private void EnsureBlankItem<T>(ObservableCollection<T> collection, Func<T> factory)

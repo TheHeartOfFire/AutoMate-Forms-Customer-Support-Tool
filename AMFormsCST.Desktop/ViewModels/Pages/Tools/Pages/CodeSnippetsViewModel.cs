@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Interfaces.CodeBlocks;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.CodeBlocks;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.CodeSnippets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,11 +19,15 @@ public partial class CodeSnippetsViewModel : ViewModel
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SelectCodeSnippetCommand))] 
-    private CodeSnippetItemViewModel? _selectedCodeSnippet; 
-    public CodeSnippetsViewModel()
+    private CodeSnippetItemViewModel? _selectedCodeSnippet;
+
+    private ISupportTool _supportTool;
+    public CodeSnippetsViewModel(ISupportTool supportTool)
     {
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
+
         CodeSnippets = new ObservableCollection<CodeSnippetItemViewModel>(
-            SupportTool.SupportToolInstance.CodeBlocks.GetBlocks()
+            _supportTool.CodeBlocks.GetBlocks()
                 .OrderBy(x => x.Name)
                 .Select(x => new CodeSnippetItemViewModel(x))
         );

@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Models.FormNameGenerator;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.Models.FormNameGenerator;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -12,7 +13,7 @@ namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class FormNameGeneratorViewModel : ViewModel
 {
     [ObservableProperty]
-    private Form _form = new();
+    private Form _form;
     [ObservableProperty]
     private bool _isPdfSelected; // This will initially be false by default
     partial void OnIsPdfSelectedChanged(bool value)
@@ -116,10 +117,12 @@ public partial class FormNameGeneratorViewModel : ViewModel
         }
     }
 
+    private readonly ISupportTool _supportTool;
     // Constructor to set initial UI state and synchronize with model
-    public FormNameGeneratorViewModel()
+    public FormNameGeneratorViewModel(ISupportTool supportTool)
     {
-        
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
+        _form = new Form(_supportTool);
         _isPdfSelected = true; 
     }
     [RelayCommand]

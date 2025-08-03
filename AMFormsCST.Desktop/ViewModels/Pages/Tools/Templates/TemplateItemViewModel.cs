@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Interfaces.BestPractices;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -52,11 +53,14 @@ public partial class TemplateItemViewModel : ObservableObject
             }
         }
     }
-    public TemplateItemViewModel(TextTemplate template)
+
+    private readonly ISupportTool _supportTool;
+    public TemplateItemViewModel(TextTemplate template, ISupportTool supportTool)
     {
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _template = template;
         _variables = new ObservableCollection<TemplateVariableViewModel>(
-            template.GetVariables(SupportTool.SupportToolInstance)
+            template.GetVariables(_supportTool)
                     .Select(variable => new TemplateVariableViewModel(variable) { Variable = variable }));
 
         // Initial subscription for existing variables
@@ -112,7 +116,7 @@ public partial class TemplateItemViewModel : ObservableObject
         OnPropertyChanged(nameof(Output)); 
     }
 
-    private static (string processedText, List<(int position, ITextTemplateVariable variable, string alias)> variables)  PreProcessTemplate(string templateText)
+    private (string processedText, List<(int position, ITextTemplateVariable variable, string alias)> variables)  PreProcessTemplate(string templateText)
     {
         if (string.IsNullOrEmpty(templateText))
         {
@@ -123,9 +127,9 @@ public partial class TemplateItemViewModel : ObservableObject
         var processedText = templateText;
         var variables = new List<(int position, ITextTemplateVariable variable, string alias)>();
 
-        while (TextTemplate.ContainsVariable(processedText, SupportTool.SupportToolInstance))
+        while (TextTemplate.ContainsVariable(processedText, _supportTool))
         {
-            var variable = TextTemplate.GetFirstVariable(processedText, SupportTool.SupportToolInstance);
+            var variable = TextTemplate.GetFirstVariable(processedText, _supportTool);
             
             if(variable.variable == null) break;
             

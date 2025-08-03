@@ -1,27 +1,40 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class PromptDataProperties : IFormgenFileProperties
+
+public partial class PromptDataProperties : ObservableObject, IFormgenFileProperties
 {
-    public PromptDataProperties() { }
-    public PromptDataProperties(PromptData promptData)
+    private readonly PromptData _corePromptData;
+
+    public IFormgenFileSettings Settings { get; set; }
+
+    public string? Message
     {
-        Settings = new PromptDataSettings(promptData.Settings);
-        Message = promptData.Message ?? string.Empty;
-        Choices = promptData.Choices;
+        get => _corePromptData.Message;
+        set => SetProperty(_corePromptData.Message, value, _corePromptData, (p, v) => p.Message = v);
     }
 
-    public IFormgenFileSettings Settings { get; set; } = new PromptDataSettings();
-    public string Message { get; set; } = string.Empty;
-    public List<string> Choices { get; set; } = [];
+    public List<string> Choices
+    {
+        get => _corePromptData.Choices;
+        set => SetProperty(_corePromptData.Choices, value, _corePromptData, (p, v) => p.Choices = v);
+    }
 
-    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
+    public PromptDataProperties(PromptData promptData)
+    {
+        _corePromptData = promptData;
+        if (promptData.Settings is not null)
+        {
+            Settings = new PromptDataSettings(promptData.Settings);
+        }
+    }
+
+    public UIElement GetUIElements()
+    {
+        return BasicStats.GetSettingsAndPropertiesUIElements(this);
+    }
 }

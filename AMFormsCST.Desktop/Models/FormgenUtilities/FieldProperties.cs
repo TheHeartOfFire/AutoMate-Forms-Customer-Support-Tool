@@ -1,29 +1,43 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormField;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class FieldProperties : IFormgenFileProperties
+
+public partial class FieldProperties : ObservableObject, IFormgenFileProperties
 {
-    public FieldProperties(FormField field)
+    private readonly FormField _coreField;
+
+    public IFormgenFileSettings Settings { get; set; }
+
+    public string? Expression
     {
-        Settings = new FieldSettings(field.Settings);
-        Expression = field.Expression ?? string.Empty;
-        FormattingOption = field.FormattingOption;
-        SampleData = field.SampleData ?? string.Empty;
+        get => _coreField.Expression;
+        set => SetProperty(_coreField.Expression, value, _coreField, (f, v) => f.Expression = v);
     }
 
-    public string Expression { get; set; } = string.Empty;
-    public FormatOption FormattingOption { get; set; }
-    public string SampleData { get; set; } = string.Empty;
-    public IFormgenFileSettings Settings { get; set; } = new FieldSettings();
+    public string? SampleData
+    {
+        get => _coreField.SampleData;
+        set => SetProperty(_coreField.SampleData, value, _coreField, (f, v) => f.SampleData = v);
+    }
 
-    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
+    public FormatOption FormattingOption
+    {
+        get => _coreField.FormattingOption;
+        set => SetProperty(_coreField.FormattingOption, value, _coreField, (f, v) => f.FormattingOption = v);
+    }
+
+    public FieldProperties(FormField field)
+    {
+        _coreField = field;
+        Settings = new FieldSettings(field.Settings);
+    }
+
+    public UIElement GetUIElements()
+    {
+        return BasicStats.GetSettingsAndPropertiesUIElements(this);
+    }
 }

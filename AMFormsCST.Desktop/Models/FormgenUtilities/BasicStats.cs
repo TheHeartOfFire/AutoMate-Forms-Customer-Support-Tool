@@ -1,213 +1,160 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Desktop.Converters;
+using AMFormsCST.Desktop.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
-using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings;
+using System.Windows.Data;
+using Wpf.Ui.Controls;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class BasicStats : IFormgenFileProperties
+public static class BasicStats
 {
-    public int Total { get; set; }
-    public IFormgenFileSettings Settings { get; set; } = new PageSettings();
-
-    public UIElement GetUIElements() => new Border()
+    public static UIElement GetSettingsAndPropertiesUIElements(IFormgenFileProperties properties)
     {
-        Child = new StackPanel 
-        {
-            Children =
-            {
-                new Label
-                {
-                    Content = $"Total: {Total}",
-                    Margin = new Thickness(5)
-                }
-            }
-        },
-        BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(3)
-    };
-
-    public static StackPanel GetSettingsAndPropertiesUIElements(IFormgenFileProperties properties)
-    {
-        var propertiesPanel = new StackPanel
-        {
-            Margin = new Thickness(5)
-        };
-
-        propertiesPanel.Children.Add(new Label
-        {
-            Content = "Properties",
-            FontWeight = FontWeights.SemiBold,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0),
-            FontSize = 28
-        });
+        var stackPanel = new StackPanel();
 
         foreach (var property in properties.GetType().GetProperties())
         {
-            if (!property.Name.Equals("Settings", StringComparison.OrdinalIgnoreCase) &&
-                !property.Name.Equals("PromptData", StringComparison.OrdinalIgnoreCase))
-                propertiesPanel.Children.Add(ParseProperty(properties, property));
-        }
-        var settingsPanel = new StackPanel
-        {
-            Margin = new Thickness(5)
-        };
-
-        settingsPanel.Children.Add(new Label
-        {
-            Content = "Settings",
-            FontWeight = FontWeights.SemiBold,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0),
-            FontSize = 28
-        });
-
-        foreach (var property in properties.Settings.GetType().GetProperties())
-        {
-            settingsPanel.Children.Add(ParseProperty(properties.Settings, property));
-        }
-        var propBorder = new Border
-        {
-            Child = propertiesPanel,
-            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(3)
-        };
-        var SettingsBorder = new Border()
-        {
-            Child = settingsPanel,
-            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(3)
-        }; 
-
-        var output = new StackPanel
-        {
-            Children =
+            if (property.Name == "Settings" && property.GetValue(properties) is IFormgenFileSettings settings)
             {
-                propBorder,
-                SettingsBorder
+                var card = CreateCardForObject(settings, "Settings");
+                stackPanel.Children.Add(card);
+            }
+            // Add a new rule to handle the PromptData property.
+            else if (property.Name == "PromptData" && property.GetValue(properties) is PromptDataProperties promptDataProperties)
+            {
+                var card = CreateCardForObject(promptDataProperties, "Prompt Data");
+                stackPanel.Children.Add(card);
+            }
+        }
 
+        return stackPanel;
+    }
+
+    private static CardControl CreateCardForObject(object obj, string header)
+    {
+        var card = new CardControl { Header = header, Margin = new Thickness(0, 0, 0, 12) };
+        var grid = new Grid
+        {
+            Margin = new Thickness(5),
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto }, // Label
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) } // Editor
             }
         };
 
-        if (properties is CodeLineProperties codeLineProps)
+        int rowIndex = 0;
+        foreach (var prop in obj.GetType().GetProperties())
         {
-            output.Children.Add(new StackPanel
+            // Skip the 'Settings' property as it's handled by the parent method.
+            if (prop.Name == "Settings")
+                continue;
+
+            // Special handling for the 'Choices' property
+            if (prop.Name == "Choices" && prop.GetValue(obj) is List<string> choices && choices.Count == 0)
             {
-                Children =
-                {
-                    new Label
-                    {
-                        Content = "Prompt Data",
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    },
-                    codeLineProps.PromptData.GetUIElements()
-                }
-            });
-
-        } 
-
-        return output;
-    }
-
-    internal static StackPanel ParseProperty(object properties, PropertyInfo propInfo)
-    {
-        var panel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(5)
-        };
-
-        if (propInfo.GetValue(properties) is List<string> list)
-        {
-            panel.Orientation = Orientation.Vertical;
-            panel.Children.Add(new Label()
-            {
-                Content = propInfo.Name + ":",
-                VerticalAlignment = VerticalAlignment.Center
-            });
-            foreach (var item in list)
-            {
-                panel.Children.Add(new Label()
-                {
-                    Content = "\t-" + item
-                });
+                continue; // Don't show the editor if there are no choices.
             }
-            return panel;
-        }
 
-        panel.Children.Add(new Label()
-        {
-            Content = propInfo.Name,
-            VerticalAlignment = VerticalAlignment.Center
-        });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-        var boolButton = ParseBool(properties, propInfo);
-        if (boolButton is not null)
-        {
-            panel.Children.Add(boolButton);
-            return panel;
-        }
-
-        panel.Children.Add(ParseString(properties, propInfo));
-        return panel;
-    }
-
-    private static Wpf.Ui.Controls.TextBox ParseString(object properties, PropertyInfo propInfo)
-    {
-        bool isUUID = propInfo.Name.Equals("PublishedUUID", StringComparison.OrdinalIgnoreCase);
-        var box = new Wpf.Ui.Controls.TextBox
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(5, 0, 0, 0),
-            Background = Brushes.Transparent,
-            BorderBrush = Brushes.Transparent,
-            IsReadOnly = isUUID,
-            ToolTip = isUUID
-                ? "This is a UUID and cannot be changed here. It will only update if you regenerate the UUID above."
-                : $"Enter a value for {propInfo.Name}",
-        };
-
-        box.SetBinding(Wpf.Ui.Controls.TextBox.TextProperty, new System.Windows.Data.Binding(propInfo.Name)
-        {
-            Source = properties,
-            Mode = System.Windows.Data.BindingMode.TwoWay
-        });
-        return box;
-    }
-
-    private static ToggleButton? ParseBool(object properties, PropertyInfo property)
-    {
-        if (bool.TryParse(properties.GetType().GetProperty(property.Name)?.GetValue(properties)?.ToString(), out bool boolValue))
-        {
-            var button = new ToggleButton
+            var label = new Wpf.Ui.Controls.TextBlock
             {
+                Text = prop.Name,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(5, 0, 0, 0),
-                IsChecked = boolValue,
-                Height = 25,
-                Width = 25
-
+                Margin = new Thickness(0, 0, 10, 8) // Add bottom margin for spacing
             };
-            button.SetBinding(ToggleButton.IsCheckedProperty, new System.Windows.Data.Binding(property.Name)
-            {
-                Source = properties,
-                Mode = System.Windows.Data.BindingMode.TwoWay
-            });
-            return button;
+            Grid.SetRow(label, rowIndex);
+            Grid.SetColumn(label, 0);
+            grid.Children.Add(label);
+
+            var editor = CreateEditorForProperty(prop, obj);
+            editor.Margin = new Thickness(0, 0, 0, 8); // Add bottom margin for spacing
+            Grid.SetRow(editor, rowIndex);
+            Grid.SetColumn(editor, 1);
+            grid.Children.Add(editor);
+
+            rowIndex++;
         }
-        return null;
+
+        card.Content = grid;
+        return card;
+    }
+
+    private static FrameworkElement CreateEditorForProperty(PropertyInfo prop, object source)
+    {
+        // For read-only properties or the 'ID' property, display as text.
+        if (!prop.CanWrite || prop.Name == "ID")
+        {
+            return new Wpf.Ui.Controls.TextBlock
+            {
+                Text = prop.GetValue(source)?.ToString() ?? "null",
+                VerticalAlignment = VerticalAlignment.Center
+            };
+        }
+
+        var binding = new Binding(prop.Name)
+        {
+            Source = source,
+            Mode = BindingMode.TwoWay,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        };
+
+        if (prop.PropertyType == typeof(string))
+        {
+            var textBox = new Wpf.Ui.Controls.TextBox();
+            textBox.SetBinding(Wpf.Ui.Controls.TextBox.TextProperty, binding);
+            return textBox;
+        }
+
+        if (prop.PropertyType == typeof(int))
+        {
+            var numberBox = new NumberBox();
+            numberBox.SetBinding(NumberBox.ValueProperty, binding);
+            return numberBox;
+        }
+
+        if (prop.PropertyType == typeof(bool))
+        {
+            var toggleSwitch = new ToggleSwitch();
+            toggleSwitch.SetBinding(ToggleSwitch.IsCheckedProperty, binding);
+            return toggleSwitch;
+        }
+
+        if (prop.PropertyType.IsEnum)
+        {
+            var comboBox = new ComboBox
+            {
+                ItemsSource = Enum.GetValues(prop.PropertyType)
+            };
+            comboBox.SetBinding(ComboBox.SelectedItemProperty, binding);
+            return comboBox;
+        }
+
+        if (prop.PropertyType == typeof(List<string>))
+        {
+            var textBox = new Wpf.Ui.Controls.TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                MinHeight = 80 // Give it some default height for better usability
+            };
+
+            // Use the custom converter for the binding
+            binding.Converter = new StringListToStringConverter();
+            textBox.SetBinding(Wpf.Ui.Controls.TextBox.TextProperty, binding);
+            return textBox;
+        }
+
+        // Fallback for unhandled types (Point, Rectangle, etc.)
+        return new Wpf.Ui.Controls.TextBlock
+        {
+            Text = prop.GetValue(source)?.ToString() ?? "null",
+            VerticalAlignment = VerticalAlignment.Center
+        };
     }
 }

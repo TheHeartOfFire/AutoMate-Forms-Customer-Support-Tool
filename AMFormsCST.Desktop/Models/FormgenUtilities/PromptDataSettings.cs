@@ -1,62 +1,76 @@
-﻿using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Desktop.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class PromptDataSettings : IFormgenFileSettings
-{
-    public PromptDataSettings() { }
-    public PromptDataSettings(Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings? settings)
-    {
-        if (settings is null) return;
 
-        Type = settings.Type;
-        IsExpression = settings.IsExpression;
-        Required = settings.Required;
-        Length = settings.Length;
-        DecimalPlaces = settings.DecimalPlaces;
-        Delimiter = settings.Delimiter;
-        AllowNegative = settings.AllowNegative;
-        ForceUpperCase = settings.ForceUpperCase;
-        MakeBuyerVars = settings.MakeBuyerVars;
-        IncludeNoneAsOption = settings.IncludeNoneAsOption;
+public partial class PromptDataSettings : ObservableObject, IFormgenFileSettings
+{
+    private readonly Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings _coreSettings;
+
+    public PromptDataSettings(Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings settings)
+    {
+        _coreSettings = settings;
     }
 
-    public PromptType Type { get; set; }
-    public bool IsExpression { get; set; }
-    public bool Required { get; set; }
-    public int Length { get; set; }
-    public int DecimalPlaces { get; set; }
-    public string Delimiter { get; set; } = string.Empty; 
-    public bool AllowNegative { get; set; }
-    public bool ForceUpperCase { get; set; }
-    public bool MakeBuyerVars { get; set; }
-    public bool IncludeNoneAsOption { get; set; }
-
-    public string GetPromptType() => Type switch
+    public PromptType Type
     {
-        PromptType.CheckBox => "Checkbox",
-        PromptType.Date => "Date",
-        PromptType.Decimal => "Decimal",
-        PromptType.Dropdown => "Dropdown",
-        PromptType.Integer => "Integer",
-        PromptType.Label => "Label",
-        PromptType.LabelNumber => "Label Number",
-        PromptType.Money => "Money",
-        PromptType.RadioButtons => "Radio Buttons",
-        PromptType.Separator => "Separator",
-        PromptType.StateCode => "State Code",
-        PromptType.Text => "Text",
-        PromptType.VIN => "VIN",
-        PromptType.YesNo => "Yes/No",
-        PromptType.ZIP5 => "5 digit Zip",
-        PromptType.ZIP10 => "10 digit Zip",
-        PromptType.OneTwoThree => "Buyer, Co-Buyer, or Both (1,2,3)",
-        PromptType.OneTwoThreeFour => "Buyer, Co-Buyer, Both, or Other (1,2,3,4)",
-        _ => "Unknown"
-    };
+        get => _coreSettings.Type;
+        set => SetProperty(_coreSettings.Type, value, _coreSettings, (s, v) => s.Type = v);
+    }
+
+    public bool IsExpression
+    {
+        get => _coreSettings.IsExpression;
+        set => SetProperty(_coreSettings.IsExpression, value, _coreSettings, (s, v) => s.IsExpression = v);
+    }
+
+    public bool Required
+    {
+        get => _coreSettings.Required;
+        set => SetProperty(_coreSettings.Required, value, _coreSettings, (s, v) => s.Required = v);
+    }
+
+    public int Length
+    {
+        get => _coreSettings.Length;
+        set => SetProperty(_coreSettings.Length, value, _coreSettings, (s, v) => s.Length = v);
+    }
+
+    public int DecimalPlaces
+    {
+        get => _coreSettings.DecimalPlaces;
+        set => SetProperty(_coreSettings.DecimalPlaces, value, _coreSettings, (s, v) => s.DecimalPlaces = v);
+    }
+
+    public string Delimiter
+    {
+        get => _coreSettings.Delimiter;
+        set => SetProperty(_coreSettings.Delimiter, value, _coreSettings, (s, v) => s.Delimiter = v);
+    }
+
+    public bool AllowNegative
+    {
+        get => _coreSettings.AllowNegative;
+        set => SetProperty(_coreSettings.AllowNegative, value, _coreSettings, (s, v) => s.AllowNegative = v);
+    }
+
+    public bool ForceUpperCase
+    {
+        get => _coreSettings.ForceUpperCase;
+        set => SetProperty(_coreSettings.ForceUpperCase, value, _coreSettings, (s, v) => s.ForceUpperCase = v);
+    }
+
+    public bool MakeBuyerVars
+    {
+        get => _coreSettings.MakeBuyerVars;
+        set => SetProperty(_coreSettings.MakeBuyerVars, value, _coreSettings, (s, v) => s.MakeBuyerVars = v);
+    }
+
+    public bool IncludeNoneAsOption
+    {
+        get => _coreSettings.IncludeNoneAsOption;
+        set => SetProperty(_coreSettings.IncludeNoneAsOption, value, _coreSettings, (s, v) => s.IncludeNoneAsOption = v);
+    }
 }

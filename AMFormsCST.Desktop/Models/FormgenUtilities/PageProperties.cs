@@ -5,15 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class PageProperties : BasicStats
+public class PageProperties : IFormgenFileProperties
 {
-
     public PageProperties(FormPage page)
     {
         Settings = new PageSettings(page.Settings);
     }
 
-    public new IFormgenFileSettings Settings { get; set; } = new PageSettings();
+    public IFormgenFileSettings Settings { get; set; }
+
+    public UIElement GetUIElements()
+    {
+        return BasicStats.GetSettingsAndPropertiesUIElements(this);
+    }
 }

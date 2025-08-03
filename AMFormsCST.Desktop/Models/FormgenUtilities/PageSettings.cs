@@ -1,31 +1,51 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class PageSettings : IFormgenFileSettings
+
+public partial class PageSettings : ObservableObject, IFormgenFileSettings
 {
-    public PageSettings(FormPageSettings? settings = null)
+    private readonly FormPageSettings _coreSettings;
+
+    public PageSettings(FormPageSettings settings)
     {
-        if (settings != null)
-        {
-            PageNumber = settings.PageNumber;
-            DefaultFontSize = settings.DefaultFontSize;
-            LeftPrinterMargin = settings.LeftPrinterMargin;
-            RightPrinterMargin = settings.RightPrinterMargin;
-            TopPrinterMargin = settings.TopPrinterMargin;
-            BottomPrinterMargin = settings.BottomPrinterMargin;
-        }
+        _coreSettings = settings;
     }
 
-    public int PageNumber { get; set; }
-    public int DefaultFontSize { get; set; }
-    public int LeftPrinterMargin { get; set; }
-    public int RightPrinterMargin { get; set; }
-    public int TopPrinterMargin { get; set; }
-    public int BottomPrinterMargin { get; set; }
+    public int PageNumber
+    {
+        get => _coreSettings.PageNumber;
+        set => SetProperty(_coreSettings.PageNumber, value, _coreSettings, (s, v) => s.PageNumber = v);
+    }
+
+    public int DefaultFontSize
+    {
+        get => _coreSettings.DefaultFontSize;
+        set => SetProperty(_coreSettings.DefaultFontSize, value, _coreSettings, (s, v) => s.DefaultFontSize = v);
+    }
+
+    public int LeftPrinterMargin
+    {
+        get => _coreSettings.LeftPrinterMargin;
+        set => SetProperty(_coreSettings.LeftPrinterMargin, value, _coreSettings, (s, v) => s.LeftPrinterMargin = v);
+    }
+
+    public int RightPrinterMargin
+    {
+        get => _coreSettings.RightPrinterMargin;
+        set => SetProperty(_coreSettings.RightPrinterMargin, value, _coreSettings, (s, v) => s.RightPrinterMargin = v);
+    }
+
+    public int TopPrinterMargin
+    {
+        get => _coreSettings.TopPrinterMargin;
+        set => SetProperty(_coreSettings.TopPrinterMargin, value, _coreSettings, (s, v) => s.TopPrinterMargin = v);
+    }
+
+    public int BottomPrinterMargin
+    {
+        get => _coreSettings.BottomPrinterMargin;
+        set => SetProperty(_coreSettings.BottomPrinterMargin, value, _coreSettings, (s, v) => s.BottomPrinterMargin = v);
+    }
 }

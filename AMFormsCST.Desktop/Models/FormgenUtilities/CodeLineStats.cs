@@ -1,69 +1,25 @@
-﻿using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Desktop.Interfaces;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class CodeLineStats : BasicStats, IFormgenFileProperties
+
+public class CodeLineStats : IFormgenFileProperties
 {
-    public int Init { get; set; }
-    public int Prompts { get; set; }
-    public int PostPrompts { get; set; }
+    public IFormgenFileSettings Settings { get; set; }
+    public PromptDataProperties? PromptData { get; set; }
 
-    public new UIElement GetUIElements()
+    public CodeLineStats(CodeLine codeLine)
     {
-        var statsPanel = new StackPanel
+        Settings = new CodeLineSettings(codeLine.Settings);
+        if (codeLine.PromptData is not null)
         {
-            Margin = new Thickness(5)
-        };
+            PromptData = new PromptDataProperties(codeLine.PromptData);
+        }
+    }
 
-        statsPanel.Children.Add(new Label
-        {
-            Content = "Stats",
-            FontWeight = FontWeights.SemiBold,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0),
-            FontSize = 28
-        });
-
-        statsPanel.Children.Add(new Label
-        {
-            Content = $"Total Code Lines: {Total}",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0)
-        });
-        statsPanel.Children.Add(new Label
-        {
-            Content = $"Init: {Init}",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0)
-        });
-        statsPanel.Children.Add(new Label
-        {
-            Content = $"Prompts: {Prompts}",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0)
-        });
-        statsPanel.Children.Add(new Label
-        {
-            Content = $"Post Prompts: {PostPrompts}",
-            FontWeight = FontWeights.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(5, 10, 0, 0)
-        });
-
-        return new Border()
-        {
-            Child = statsPanel,
-            BorderBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(3)
-        };
+    public UIElement GetUIElements()
+    {
+        return BasicStats.GetSettingsAndPropertiesUIElements(this);
     }
 }

@@ -107,7 +107,9 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             var originalTitle = _formgenUtils.ParsedFormgenFile.Title ?? Path.GetFileNameWithoutExtension(FilePath!);
             bool titleHasChanged = !string.Equals(originalTitle, FormTitle, StringComparison.Ordinal);
 
-            // Update the in-memory object before saving
+            // Update the in-memory object before saving.
+            // The properties from the dynamic UI are already updated on the core models
+            // because the desktop wrappers now use pass-through properties.
             _formgenUtils.ParsedFormgenFile.Title = FormTitle;
             _formgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
 
@@ -164,7 +166,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
                 throw new InvalidOperationException("Failed to parse the .formgen file.");
             }
 
-            FormTitle = fileData.Title ?? Path.GetFileNameWithoutExtension(FilePath);
+            FormTitle = fileData.Title ?? Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
             Uuid = fileData.Settings.UUID;
 
             // Check for associated image file
@@ -203,6 +205,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             DotFormgen formgenFile => new FormProperties(formgenFile),
             FormPage page => new PageProperties(page),
             FormField field => new FieldProperties(field),
+            CodeLine codeLine => new CodeLineProperties(codeLine),
             _ => null
         };
 

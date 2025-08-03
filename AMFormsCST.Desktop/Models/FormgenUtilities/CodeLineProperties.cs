@@ -1,28 +1,39 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
+
+/// <summary>
+/// A wrapper class that prepares a CodeLine object's data to be displayed as UI properties.
+/// </summary>
 public class CodeLineProperties : IFormgenFileProperties
 {
-    public CodeLineProperties() { }
+    /// <summary>
+    /// The settings associated with the CodeLine (e.g., Order, Type, Variable).
+    /// </summary>
+    public IFormgenFileSettings Settings { get; set; }
+
+    /// <summary>
+    /// The nested prompt data associated with the CodeLine, wrapped for UI display.
+    /// </summary>
+    public PromptDataProperties? PromptData { get; set; }
+
     public CodeLineProperties(CodeLine codeLine)
     {
         Settings = new CodeLineSettings(codeLine.Settings);
-        Expression = codeLine.Expression ?? string.Empty;
         if (codeLine.PromptData is not null)
-            PromptData = new(codeLine.PromptData);
+        {
+            PromptData = new PromptDataProperties(codeLine.PromptData);
+        }
     }
 
-    public IFormgenFileSettings Settings { get; set; } = new CodeLineSettings();
-    public string Expression { get; set; } = string.Empty;
-    public PromptDataProperties PromptData { get; set; } = new();
-
-    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
+    /// <summary>
+    /// Generates the UI elements for this CodeLine's properties.
+    /// </summary>
+    public UIElement GetUIElements()
+    {
+        // This static method from BasicStats will build the UI for us.
+        return BasicStats.GetSettingsAndPropertiesUIElements(this);
+    }
 }

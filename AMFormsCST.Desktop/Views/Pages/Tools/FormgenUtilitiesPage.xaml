@@ -38,13 +38,13 @@
                 <ui:Button
                     Appearance="Primary"
                     Command="{Binding OpenFormgenFileCommand}"
-                    Content="Open .formgen file"
+                    Content="Open"
                     Icon="{ui:SymbolIcon Document24}" />
                 <ui:Button
                     Margin="0,8,0,0"
                     Appearance="Success"
                     Command="{Binding SaveFormgenFileCommand}"
-                    Content="Save Changes"
+                    Content="Save"
                     Icon="{ui:SymbolIcon Save24}"
                     IsEnabled="{Binding IsFileLoaded}" />
             </StackPanel>
@@ -64,12 +64,12 @@
 
                     <TreeView
                         ItemsSource="{Binding TreeViewNodes}"
+                        Style="{StaticResource {x:Type TreeView}}"
                         Visibility="{Binding IsFileLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsExpanded" Value="True" />
+                            <Style BasedOn="{StaticResource {x:Type TreeViewItem}}" TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                                 <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                <Setter Property="Padding" Value="2" />
                             </Style>
                         </TreeView.ItemContainerStyle>
                         <TreeView.ItemTemplate>
@@ -88,67 +88,68 @@
             </Border>
         </Grid>
 
-        <!--  Right Panel: Properties  -->
-        <Grid Grid.Column="1" IsEnabled="{Binding IsFileLoaded}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Orientation="Vertical">
-                    <ui:CardControl Header="Form Details">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Form Title" />
-                            <ui:TextBox Margin="0,4,0,0" Text="{Binding FormTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <!--  Right Panel: Properties (wrapped in its own ScrollViewer)  -->
+        <ScrollViewer
+            Grid.Column="1"
+            IsEnabled="{Binding IsFileLoaded}"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical">
+                <ui:CardControl Header="Form Details">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Form Title" />
+                        <ui:TextBox Margin="0,4,0,0" Text="{Binding FormTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Margin="0,12,0,0" Text="Form UUID" />
-                            <Grid Margin="0,4,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding Uuid}" />
-                                <ui:Button
-                                    Grid.Column="1"
-                                    Margin="8,0,0,0"
-                                    Appearance="Secondary"
-                                    Command="{Binding RegenerateUuidCommand}"
-                                    Content="Regenerate"
-                                    Icon="{ui:SymbolIcon ArrowSync24}" />
-                            </Grid>
-                        </StackPanel>
-                    </ui:CardControl>
+                        <TextBlock Margin="0,12,0,0" Text="Form UUID" />
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding Uuid}" />
+                            <ui:Button
+                                Grid.Column="1"
+                                Margin="8,0,0,0"
+                                Appearance="Secondary"
+                                Command="{Binding RegenerateUuidCommand}"
+                                Content="Regenerate"
+                                Icon="{ui:SymbolIcon ArrowSync24}" />
+                        </Grid>
+                    </StackPanel>
+                </ui:CardControl>
 
-                    <ui:CardControl Margin="0,12,0,0" Header="Image Options">
-                        <StackPanel Orientation="Vertical">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ui:SymbolIcon
-                                    Grid.Column="0"
-                                    FontSize="16"
-                                    Symbol="{Binding IsImageFound, Converter={StaticResource NullableBoolToSymbolConverter}}" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="8,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Text="{Binding IsImageFound, Converter={StaticResource NullableBoolToTextConverter}}" />
-                            </Grid>
+                <ui:CardControl Margin="0,12,0,0" Header="Image Options">
+                    <StackPanel Orientation="Vertical">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon
+                                Grid.Column="0"
+                                FontSize="16"
+                                Symbol="{Binding IsImageFound, Converter={StaticResource NullableBoolToSymbolConverter}}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding IsImageFound, Converter={StaticResource NullableBoolToTextConverter}}" />
+                        </Grid>
 
-                            <ui:ToggleSwitch
-                                Margin="0,8,0,0"
-                                Content="Rename associated image on save"
-                                IsChecked="{Binding ShouldRenameImage, Mode=TwoWay}"
-                                IsEnabled="{Binding IsImageFound, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                OffContent="No"
-                                OnContent="Yes" />
-                        </StackPanel>
-                    </ui:CardControl>
+                        <ui:ToggleSwitch
+                            Margin="0,8,0,0"
+                            Content="Rename image"
+                            IsChecked="{Binding ShouldRenameImage, Mode=TwoWay}"
+                            IsEnabled="{Binding IsImageFound, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            OffContent="No"
+                            OnContent="Yes" />
+                    </StackPanel>
+                </ui:CardControl>
 
-                    <ContentControl
-                        Margin="0,12,0,0"
-                        Content="{Binding SelectedNodeProperties}" />
+                <ContentControl
+                    Margin="0,12,0,0"
+                    Content="{Binding SelectedNodeProperties}" />
 
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

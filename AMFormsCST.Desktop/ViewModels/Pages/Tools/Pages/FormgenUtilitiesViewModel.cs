@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Interfaces.Utils;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Controls;
 using AMFormsCST.Desktop.Interfaces;
@@ -17,7 +18,6 @@ namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 
 public partial class FormgenUtilitiesViewModel : ViewModel
 {
-    private readonly IFormgenUtils _formgenUtils;
 
     [ObservableProperty]
     private ObservableCollection<TreeItemNodeViewModel> _treeViewNodes = [];
@@ -75,9 +75,10 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
     public bool IsFileLoaded => !string.IsNullOrEmpty(FilePath);
 
-    public FormgenUtilitiesViewModel(IFormgenUtils formgenUtils)
+    private readonly ISupportTool _supportTool;
+    public FormgenUtilitiesViewModel(ISupportTool supportTool)
     {
-        _formgenUtils = formgenUtils;
+        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
     }
 
     [RelayCommand]
@@ -99,27 +100,27 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [RelayCommand]
     private void SaveFormgenFile()
     {
-        if (!IsFileLoaded || _formgenUtils.ParsedFormgenFile is null) return;
+        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile is null) return;
 
         IsBusy = true;
         try
         {
-            var originalTitle = _formgenUtils.ParsedFormgenFile.Title ?? Path.GetFileNameWithoutExtension(FilePath!);
+            var originalTitle = _supportTool.FormgenUtils.ParsedFormgenFile.Title ?? Path.GetFileNameWithoutExtension(FilePath!);
             bool titleHasChanged = !string.Equals(originalTitle, FormTitle, StringComparison.Ordinal);
 
             // Update the in-memory object before saving.
             // The properties from the dynamic UI are already updated on the core models
             // because the desktop wrappers now use pass-through properties.
-            _formgenUtils.ParsedFormgenFile.Title = FormTitle;
-            _formgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
+            _supportTool.FormgenUtils.ParsedFormgenFile.Title = FormTitle;
+            _supportTool.FormgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
 
             // Save changes to the current file path.
-            _formgenUtils.SaveFile(FilePath!);
+            _supportTool.FormgenUtils.SaveFile(FilePath!);
 
             // If the title has changed, rename the file and update the view model's file path.
             if (titleHasChanged)
             {
-                _formgenUtils.RenameFile(FormTitle, ShouldRenameImage);
+                _supportTool.FormgenUtils.RenameFile(FormTitle, ShouldRenameImage);
                 var directory = Path.GetDirectoryName(FilePath!);
                 FilePath = Path.Combine(directory!, FormTitle + ".formgen");
             }
@@ -158,8 +159,8 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
         try
         {
-            _formgenUtils.OpenFile(FilePath!);
-            var fileData = _formgenUtils.ParsedFormgenFile;
+            _supportTool.FormgenUtils.OpenFile(FilePath!);
+            var fileData = _supportTool.FormgenUtils.ParsedFormgenFile;
 
             if (fileData == null)
             {

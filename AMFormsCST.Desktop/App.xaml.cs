@@ -67,7 +67,6 @@ public partial class App : Application
                 );
 
                 _ = services.AddTransient<IDialogService, DialogService>();
-                _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
                 _ = services.AddTransient<FormgenUtilsProperties>();
 
                 // Register SupportTool and its dependencies as singletons

@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using Wpf.Ui;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages;
 
@@ -252,6 +253,20 @@ public partial class DashboardViewModel : ViewModel
     {
         var vm = new CodeSnippetsViewModel(_supportTool);
         var page = new CodeSnippetsPage(vm);
+
+
+        var dialog = new PageHostDialog(page);
+
+
+        dialog.Show();
+    }
+
+    [RelayCommand]
+    private void OpenFormgenUtilsDialog()
+    {
+        var vm = new FormgenUtilitiesViewModel(_supportTool);
+        var navigationService = App.GetRequiredService<INavigationService>();
+        var page = new FormgenUtilitiesPage(vm, navigationService);
 
 
         var dialog = new PageHostDialog(page);

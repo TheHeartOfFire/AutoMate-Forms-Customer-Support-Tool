@@ -17,6 +17,8 @@ using Wpf.Ui.DependencyInjection;
 using AMFormsCST.Desktop.Views.Pages.Tools;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.DependencyModel;
+using AMFormsCST.Core.Utils;
+using AMFormsCST.Core.Interfaces.Utils;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -60,6 +62,9 @@ public partial class App : Application
                     GalleryAssembly.Assembly
                 );
 
+                _ = services.AddTransient<IDialogService, DialogService>();
+                _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
+                _ = services.AddTransient<FormgenUtilsProperties>();
                 _ = services.AddStringLocalizer(b =>
                 {
                     b.FromResource<Translations>(new("pl-PL"));

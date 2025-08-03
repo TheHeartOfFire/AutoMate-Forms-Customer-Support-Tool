@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Desktop.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,14 @@ using System.Windows.Controls;
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class PromptDataProperties : IFormgenFileProperties
 {
+    public PromptDataProperties() { }
+    public PromptDataProperties(PromptData promptData)
+    {
+        Settings = new PromptDataSettings(promptData.Settings);
+        Message = promptData.Message ?? string.Empty;
+        Choices = promptData.Choices;
+    }
+
     public IFormgenFileSettings Settings { get; set; } = new PromptDataSettings();
     public string Message { get; set; } = string.Empty;
     public List<string> Choices { get; set; } = [];

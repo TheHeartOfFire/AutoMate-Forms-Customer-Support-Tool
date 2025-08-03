@@ -12,14 +12,11 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 
-public partial class TemplateItemViewModel : ObservableObject, ISelectable
+public partial class TemplateItemViewModel : ObservableObject
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Output))]
     private TextTemplate _template;
-
-    [ObservableProperty]
-    private bool _isSelected;
 
     private ObservableCollection<TemplateVariableViewModel> _variables;
     public ObservableCollection<TemplateVariableViewModel> Variables
@@ -86,15 +83,6 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
 
     public Guid Id => _id;
 
-    public void Select()
-    {
-        IsSelected = true;
-    }
-
-    public void Deselect()
-    {
-        IsSelected = false;
-    }
     private void OnVariablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(TemplateVariableViewModel.Value))

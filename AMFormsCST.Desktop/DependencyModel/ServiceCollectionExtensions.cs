@@ -30,7 +30,10 @@ internal static class ServiceCollectionExtensions
             {
                 if (services.All(x => x.ServiceType != type))
                 {
-                    if (type == typeof(ViewModel))
+                    if (
+                        type.Name == nameof(ViewModel)
+                        && type.Namespace == typeof(ViewModel).Namespace
+                    )
                     {
                         continue;
                     }

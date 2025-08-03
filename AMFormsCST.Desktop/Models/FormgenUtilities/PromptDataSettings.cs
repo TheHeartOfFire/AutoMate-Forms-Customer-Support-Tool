@@ -9,6 +9,23 @@ using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataS
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class PromptDataSettings : IFormgenFileSettings
 {
+    public PromptDataSettings() { }
+    public PromptDataSettings(Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings? settings)
+    {
+        if (settings is null) return;
+
+        Type = settings.Type;
+        IsExpression = settings.IsExpression;
+        Required = settings.Required;
+        Length = settings.Length;
+        DecimalPlaces = settings.DecimalPlaces;
+        Delimiter = settings.Delimiter;
+        AllowNegative = settings.AllowNegative;
+        ForceUpperCase = settings.ForceUpperCase;
+        MakeBuyerVars = settings.MakeBuyerVars;
+        IncludeNoneAsOption = settings.IncludeNoneAsOption;
+    }
+
     public PromptType Type { get; set; }
     public bool IsExpression { get; set; }
     public bool Required { get; set; }

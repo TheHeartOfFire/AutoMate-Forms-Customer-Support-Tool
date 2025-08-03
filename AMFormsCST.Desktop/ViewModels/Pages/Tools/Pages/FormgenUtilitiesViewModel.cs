@@ -1,95 +1,211 @@
 ﻿using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Utils;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Desktop.Controls;
+using AMFormsCST.Desktop.Interfaces;
+using AMFormsCST.Desktop.Models.FormgenUtilities;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Shapes;
-using static System.Net.WebRequestMethods;
+using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 
-public partial class FormgenUtilitiesViewModel : ViewModel 
+public partial class FormgenUtilitiesViewModel : ViewModel
 {
-    private static string _rootPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    private static string _formgenPath = System.IO.Path.Combine(_rootPath, "AMFormsCST", "Formgen");
-    private static string _backupPath = System.IO.Path.Combine(_rootPath, "AMFormsCST", "Formgen", "Backup");
-    private static string _formgenFolderPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "formgen");
+    private readonly IFormgenUtils _formgenUtils;
+
     [ObservableProperty]
-    private IFormgenUtils _formgenUtils = SupportTool.SupportToolInstance.FormgenUtils;
+    private ObservableCollection<TreeItemNodeViewModel> _treeViewNodes = [];
+
+    private TreeItemNodeViewModel? _selectedNode;
+    public TreeItemNodeViewModel? SelectedNode
+    {
+        get => _selectedNode;
+        set
+        {
+            // Deselect the old node if it exists and is different from the new one.
+            if (_selectedNode != null && _selectedNode != value)
+            {
+                _selectedNode.IsSelected = false;
+            }
+
+            if (SetProperty(ref _selectedNode, value))
+            {
+                // Ensure the new node is marked as selected if it's not null.
+                if (_selectedNode != null)
+                {
+                    _selectedNode.IsSelected = true;
+                    UpdateSelectedNodeProperties();
+                }
+                else
+                {
+                    // Clear properties if nothing is selected
+                    SelectedNodeProperties = null;
+                }
+            }
+        }
+    }
+
+    [ObservableProperty]
+    private UIElement? _selectedNodeProperties;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFileLoaded))]
+    private string? _filePath;
+
+    [ObservableProperty]
+    private string _formTitle = string.Empty;
 
     [ObservableProperty]
     private string _uuid = string.Empty;
 
     [ObservableProperty]
-    private bool _isDebugMode = false;
+    private bool? _isImageFound;
 
     [ObservableProperty]
-    private Visibility _debugVisibility = Visibility.Collapsed;
+    private bool _shouldRenameImage;
 
-    public static OpenFileDialog OpenWindow { get; set; } =
-        new OpenFileDialog
-        {
-            InitialDirectory = _formgenFolderPath,
-            Filter = "Formgen Files (*.formgen)|*.formgen"
-        };
-    public static OpenFolderDialog SaveWindow { get; set; } =
-        new OpenFolderDialog
-        {
-            InitialDirectory = _formgenFolderPath
-        };
+    [ObservableProperty]
+    private bool _isBusy;
 
-    /// <summary>
-    /// Set the state of Debug Mode
-    /// if <param name="debugModeEnable"></param> is null, it will toggle the current state
-    /// </summary>
-    /// <param name="debugModeEnable"></param>
-    public void ToggleDebugMode(bool? debugModeEnable)
+    public bool IsFileLoaded => !string.IsNullOrEmpty(FilePath);
+
+    public FormgenUtilitiesViewModel(IFormgenUtils formgenUtils)
     {
-        if (!debugModeEnable.HasValue)
-            debugModeEnable = !IsDebugMode;
-
-        IsDebugMode = debugModeEnable.Value;
-        DebugVisibility = IsDebugMode ? Visibility.Visible : Visibility.Collapsed;
+        _formgenUtils = formgenUtils;
     }
 
-    public void RegenerateUUID()
+    [RelayCommand]
+    private void OpenFormgenFile()
     {
-        if (FormgenUtils is null || FormgenUtils.ParsedFormgenFile is null) return;
-
-        FormgenUtils.RegenerateUUID();
-        Uuid = FormgenUtils.ParsedFormgenFile.Settings.UUID;
-    }
-    public void SaveFormgenFile(string path, string? newFileName = null, bool renameImage = false)
-    {
-        if (FormgenUtils is null || FormgenUtils.ParsedFormgenFile is null) return;
-
-        if (newFileName is not null)
+        var openFileDialog = new OpenFileDialog
         {
-            FormgenUtils.RenameFile(
-                newFileName,
-                renameImage);
+            Filter = "Formgen Files (*.formgen)|*.formgen|All files (*.*)|*.*",
+            Title = "Open .formgen File"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            FilePath = openFileDialog.FileName;
+            LoadFileContent();
         }
-
     }
-    public static MessageBoxResult Confirm(string message, string caption) => 
-        MessageBox.Show(
-                 message,
-                 caption,
-                 MessageBoxButton.YesNo,
-                 MessageBoxImage.Warning);
 
-    public void SaveBackup()
+    [RelayCommand]
+    private void SaveFormgenFile()
     {
-        FormgenUtils.CreateBackup();
+        if (!IsFileLoaded || _formgenUtils.ParsedFormgenFile is null) return;
+
+        IsBusy = true;
+        try
+        {
+            var originalTitle = _formgenUtils.ParsedFormgenFile.Title ?? Path.GetFileNameWithoutExtension(FilePath!);
+            bool titleHasChanged = !string.Equals(originalTitle, FormTitle, StringComparison.Ordinal);
+
+            // Update the in-memory object before saving
+            _formgenUtils.ParsedFormgenFile.Title = FormTitle;
+            _formgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
+
+            // Save changes to the current file path.
+            _formgenUtils.SaveFile(FilePath!);
+
+            // If the title has changed, rename the file and update the view model's file path.
+            if (titleHasChanged)
+            {
+                _formgenUtils.RenameFile(FormTitle, ShouldRenameImage);
+                var directory = Path.GetDirectoryName(FilePath!);
+                FilePath = Path.Combine(directory!, FormTitle + ".formgen");
+            }
+
+            MessageBox.Show("File saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+            // Reload content to reflect the saved state. This is important if the file was renamed.
+            if (IsFileLoaded)
+            {
+                LoadFileContent();
+            }
+        }
     }
-    
+
+    [RelayCommand]
+    private void RegenerateUuid()
+    {
+        if (!IsFileLoaded) return;
+        Uuid = Guid.NewGuid().ToString();
+    }
+
+    private void LoadFileContent()
+    {
+        if (!IsFileLoaded) return;
+
+        IsBusy = true;
+        TreeViewNodes.Clear();
+        SelectedNode = null;
+
+        try
+        {
+            _formgenUtils.OpenFile(FilePath!);
+            var fileData = _formgenUtils.ParsedFormgenFile;
+
+            if (fileData == null)
+            {
+                throw new InvalidOperationException("Failed to parse the .formgen file.");
+            }
+
+            FormTitle = fileData.Title ?? Path.GetFileNameWithoutExtension(FilePath);
+            Uuid = fileData.Settings.UUID;
+
+            // Check for associated image file
+            var fileDir = Path.GetDirectoryName(FilePath);
+            var fileNameNoExt = Path.GetFileNameWithoutExtension(FilePath);
+            var pdfPath = Path.Combine(fileDir!, fileNameNoExt + ".pdf");
+            var jpgPath = Path.Combine(fileDir!, fileNameNoExt + ".jpg");
+
+            IsImageFound = fileData.FormType == Format.Pdf ? File.Exists(pdfPath) : File.Exists(jpgPath);
+            ShouldRenameImage = IsImageFound ?? false;
+
+            var rootNode = new TreeItemNodeViewModel(fileData, this);
+            TreeViewNodes.Add(rootNode);
+
+            // Select the root node by default
+            if (TreeViewNodes.Count > 0)
+            {
+                SelectedNode = TreeViewNodes[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            FilePath = null; // Reset filepath on failure
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void UpdateSelectedNodeProperties()
+    {
+        IFormgenFileProperties? properties = SelectedNode?.Data switch
+        {
+            DotFormgen formgenFile => new FormProperties(formgenFile),
+            FormPage page => new PageProperties(page),
+            FormField field => new FieldProperties(field),
+            _ => null
+        };
+
+        SelectedNodeProperties = properties?.GetUIElements();
+    }
 }

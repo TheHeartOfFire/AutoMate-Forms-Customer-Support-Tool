@@ -76,9 +76,7 @@ public partial class TemplatesViewModel : ViewModel
     {
         if (item == SelectedTemplate) return;
         
-        SelectedTemplate.IsSelected = false;
         SelectedTemplate = item;
-        SelectedTemplate.IsSelected = true;
     }
     [RelayCommand]
     private void CopyTemplate(TemplateItemViewModel item)

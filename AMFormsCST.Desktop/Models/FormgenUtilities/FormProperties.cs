@@ -1,28 +1,31 @@
-﻿using AMFormsCST.Core.Utils;
+﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class FormProperties : IFormgenFileProperties
 {
-    public IFormgenFileSettings Settings { get; set; } = new FormSettings();
-    public string Title { get; set; } = string.Empty;
+    public IFormgenFileSettings Settings { get; set; }
+    public string Title { get; set; }
     public bool TradePrompt { get; set; }
     public Format FormType { get; set; }
     public bool SalesPersonPrompt { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string BillingName { get; set; } = string.Empty;
+    public string Username { get; set; }
+    public string BillingName { get; set; }
     public FormCategory Category { get; set; }
+
+    public FormProperties(DotFormgen formgenFile)
+    {
+        Settings = new FormSettings(formgenFile.Settings);
+        Title = formgenFile.Title ?? string.Empty;
+        TradePrompt = formgenFile.TradePrompt;
+        FormType = formgenFile.FormType;
+        SalesPersonPrompt = formgenFile.SalesPersonPrompt;
+        Username = formgenFile.Username ?? string.Empty;
+        BillingName = formgenFile.BillingName ?? string.Empty;
+        Category = formgenFile.Category;
+    }
 
     public string GetFormType() =>
         FormType switch

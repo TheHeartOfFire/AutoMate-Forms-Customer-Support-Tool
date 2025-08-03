@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Desktop.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,6 +11,28 @@ using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSe
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class FieldSettings : IFormgenFileSettings
 {
+    public FieldSettings(FormFieldSettings? settings = null)
+    {
+        if (settings != null)
+        {
+            DecimalPlaces = settings.DecimalPlaces;
+            DisplayPartial = settings.DisplayPartial;
+            EndIndex = settings.EndIndex;
+            FontSize = settings.FontSize;
+            FontAlignment = settings.FontAlignment;
+            ID = settings.ID;
+            ImpactPosition = settings.ImpactPosition;
+            Kerning = settings.Kearning;
+            LaserRect = settings.LaserRect;
+            Length = settings.Length;
+            ManualSize = settings.ManualSize;
+            Bold = settings.Bold;
+            ShrinkToFit = settings.ShrinkToFit;
+            StartIndex = settings.StartIndex;
+            Type = settings.Type;
+        }
+    }
+
     public int DecimalPlaces { get; set; }
     public bool DisplayPartial { get; set; }
     public int EndIndex { get; set; }

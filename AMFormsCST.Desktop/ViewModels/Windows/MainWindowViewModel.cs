@@ -41,7 +41,7 @@ public partial class MainWindowViewModel : ViewModel
     [ObservableProperty]
     private ObservableCollection<object> _footerMenuItems =
     [
-        //new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
+        new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
     ];
 
     [ObservableProperty]

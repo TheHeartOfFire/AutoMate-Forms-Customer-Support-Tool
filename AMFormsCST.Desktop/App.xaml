@@ -9,9 +9,9 @@
              Startup="OnStartup">  
     
     <Application.Resources>  
-        <ResourceDictionary>  
-            <ResourceDictionary.MergedDictionaries>  
-                <ui:ThemesDictionary Theme="Dark" />  
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />  
                 <ResourceDictionary Source="Controls/GalleryNavigationPresenter.xaml" />  
             </ResourceDictionary.MergedDictionaries>  

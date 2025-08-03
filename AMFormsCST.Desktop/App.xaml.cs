@@ -56,8 +56,8 @@ public partial class App : Application
                 _ = services.AddSingleton<DashboardViewModel>();
                 _ = services.AddSingleton<ToolsPage>();
                 _ = services.AddSingleton<ToolsViewModel>();
-                //_ = services.AddSingleton<SettingsPage>();
-                //_ = services.AddSingleton<SettingsViewModel>();
+                _ = services.AddSingleton<SettingsPage>();
+                _ = services.AddSingleton<SettingsViewModel>();
 
                 //All other pages and view models
                 _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Assembly);
@@ -67,6 +67,7 @@ public partial class App : Application
                 );
 
                 _ = services.AddTransient<IDialogService, DialogService>();
+                _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
                 _ = services.AddTransient<FormgenUtilsProperties>();
 
                 // Register SupportTool and its dependencies as singletons

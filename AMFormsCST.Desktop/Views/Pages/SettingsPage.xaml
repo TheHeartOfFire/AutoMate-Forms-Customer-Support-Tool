@@ -1,0 +1,68 @@
+<Page
+    x:Class="AMFormsCST.Desktop.Views.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:AMFormsCST.Desktop.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:viewmodels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages"
+    Title="SettingsPage"
+    d:DataContext="{d:DesignInstance viewmodels:SettingsViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+    </Page.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <TextBlock
+                FontSize="20"
+                FontWeight="Medium"
+                Text="Personalization" />
+            <TextBlock
+                Margin="0,12,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Customize the look and feel of the application." />
+
+            <TextBlock
+                Margin="0,24,0,0"
+                FontWeight="Medium"
+                Text="Application Theme" />
+            <RadioButton
+                Command="{Binding ChangeThemeCommand}"
+                CommandParameter="theme_light"
+                Content="Light"
+                GroupName="theme"
+                IsChecked="{Binding CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light}" />
+            <RadioButton
+                Command="{Binding ChangeThemeCommand}"
+                CommandParameter="theme_dark"
+                Content="Dark"
+                GroupName="theme"
+                IsChecked="{Binding  CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark}" />
+
+            <Separator Margin="0,24" />
+
+            <TextBlock
+                FontSize="20"
+                FontWeight="Medium"
+                Text="About" />
+            <TextBlock
+                Margin="0,12,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="{Binding AppVersion}" />
+
+            <ui:Button
+                Command="{Binding CheckForUpdatesCommand}"
+                Margin="0,12,0,0"
+                Appearance="Primary"
+                Content="Check for updates"
+                Icon="{ui:SymbolIcon ArrowDownload24}" />
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

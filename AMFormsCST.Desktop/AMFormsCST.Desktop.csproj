@@ -7,6 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Solera_Logo_Symbol_Only.ico</ApplicationIcon>
+    <FileVersion>2.0.0</FileVersion>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
     <PackageReference Include="System.ObjectModel" Version="4.3.0" />
+    <PackageReference Include="Velopack" Version="0.0.1350-g3ba32af" />
     <PackageReference Include="WPF-UI" Version="4.0.2" />
     <PackageReference Include="WPF-UI.DependencyInjection" Version="4.0.2" />
     <PackageReference Include="WPF-UI.Tray" Version="4.0.2" />

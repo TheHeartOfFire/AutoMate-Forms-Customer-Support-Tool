@@ -35,7 +35,7 @@ public class TextTemplate : IEquatable<TextTemplate>
     public List<ITextTemplateVariable> GetVariables(ISupportTool supportTool)
     {
         var variables = new List<ITextTemplateVariable>();
-        foreach (var variable in supportTool.Variables)
+        foreach (var variable in supportTool.Settings.UserSettings.Organization.Variables)
         {
             if (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
                 Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase))
@@ -84,7 +84,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public static bool ContainsVariable(string text, ISupportTool supportTool)
     {
-        var variables = supportTool.Variables;
+        var variables = supportTool.Settings.UserSettings.Organization.Variables;
         foreach (var variable in variables)
         {
             if (text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
@@ -105,7 +105,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public static (int position, ITextTemplateVariable? variable, string alias) GetFirstVariable(string text, ISupportTool supportTool)
     {
-        var variables = supportTool.Variables;
+        var variables = supportTool.Settings.UserSettings.Organization.Variables;
 
         (int position, ITextTemplateVariable? variable, string alias) lowestIndex = (-1, null, string.Empty);
 

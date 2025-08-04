@@ -1,4 +1,5 @@
 ﻿using AMFormsCST.Core.Interfaces.BestPractices;
+using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces.Utils;
 
 namespace AMFormsCST.Core.Interfaces;
@@ -8,5 +9,5 @@ public interface ISupportTool
     IBestPracticeEnforcer Enforcer { get; set; }
     IFormgenUtils FormgenUtils { get; set; }
     INotebook Notebook { get; set; }
-    IReadOnlyCollection<ITextTemplateVariable> Variables { get; }
+    ISettings Settings { get; set; }
 }

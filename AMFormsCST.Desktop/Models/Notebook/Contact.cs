@@ -10,19 +10,24 @@ namespace AMFormsCST.Desktop.Models;
 public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 {
     [ObservableProperty]
-    private string? _name = string.Empty;
+    private string _name = string.Empty;
     [ObservableProperty]
-    private string? _email = string.Empty;
+    private string _email = string.Empty;
     [ObservableProperty]
-    private string? _phone = string.Empty;
+    private string _phone = string.Empty;
     [ObservableProperty]
-    private string? _phoneExtension = string.Empty;
+    private string _phoneExtension = string.Empty;
     [ObservableProperty]
-    private string? _phoneExtensionDelimiter = " ";
+    private string _phoneExtensionDelimiter = " ";
     public Guid Id { get; } = Guid.NewGuid();
 
     [ObservableProperty]
     private bool _isSelected = false;
+
+    public Contact(string extensionDelimiter)
+    {
+        PhoneExtensionDelimiter = extensionDelimiter;
+    }
     public void Select()
     {
         IsSelected = true;

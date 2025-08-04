@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Interfaces;
+﻿using AMFormsCST.Core;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
@@ -73,7 +74,7 @@ public partial class DashboardViewModel : ViewModel
     public DashboardViewModel(ISupportTool supportTool)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
-        Notes.Add(new NoteModel());
+        Notes.Add(new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator));
 
         _selectedNote = Notes[0];
         Notes[0].Select();
@@ -97,7 +98,7 @@ public partial class DashboardViewModel : ViewModel
 
         if(_selectedNote is null) 
         {
-            _selectedNote = new NoteModel();
+            _selectedNote = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator);
             Notes.Add(_selectedNote);
             _selectedNote.Select();
         }
@@ -183,10 +184,10 @@ public partial class DashboardViewModel : ViewModel
             bool isDeletingSelected = SelectedNote == noteToDelete;
             Notes.Remove(noteToDelete);
 
-            SelectedNote = Notes.FirstOrDefault() ?? new NoteModel();
+            SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator);
             if (isDeletingSelected && Notes.Count > 0)
             {
-                SelectedNote = Notes.FirstOrDefault() ?? new NoteModel();
+                SelectedNote = Notes.FirstOrDefault() ?? new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator);
                 SelectedNote.Select();
             }
         }
@@ -219,7 +220,7 @@ public partial class DashboardViewModel : ViewModel
 
             if (isDeletingSelected)
             {
-                SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault() ?? new Contact());
+                SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault() ?? new Contact(_supportTool.Settings.UserSettings.ExtSeparator));
                 SelectedNote.SelectedContact?.Select();
             }
         }
@@ -274,8 +275,6 @@ public partial class DashboardViewModel : ViewModel
 
         dialog.Show();
     }
-
-
 
     [RelayCommand]
     private void OpenFormNameGeneratorDialog()
@@ -373,7 +372,7 @@ public partial class DashboardViewModel : ViewModel
         {
             if (sender is NoteModel)
             {
-                EnsureBlankItem(Notes, () => new NoteModel());
+                EnsureBlankItem(Notes, () => new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator));
             }
             else if (sender is Dealer)
             {
@@ -393,7 +392,7 @@ public partial class DashboardViewModel : ViewModel
             {
                 if (SelectedNote?.Contacts != null)
                 {
-                    EnsureBlankItem(SelectedNote.Contacts, () => new Contact());
+                    EnsureBlankItem(SelectedNote.Contacts, () => new Contact(_supportTool.Settings.UserSettings.ExtSeparator));
                 }
             }
             else if (sender is Form)
@@ -429,11 +428,10 @@ public partial class DashboardViewModel : ViewModel
             }
             else if (propertyName == nameof(NoteModel.SelectedContact))
             {
-                EnsureBlankItem(note.Contacts, () => new Contact());
+                EnsureBlankItem(note.Contacts, () => new Contact(_supportTool.Settings.UserSettings.ExtSeparator));
             }
         }
     }
-
     private void UpdateNotebook()
     {
         _supportTool.Notebook.Notes.Clear();
@@ -443,7 +441,6 @@ public partial class DashboardViewModel : ViewModel
         }
         _supportTool.Notebook.SelectNote((Note)SelectedNote);
     }
-
     private void EnsureBlankItem<T>(ObservableCollection<T> collection, Func<T> factory)
     where T : class, IBlankMaybe, INotifyPropertyChanged
     {
@@ -574,7 +571,6 @@ public partial class DashboardViewModel : ViewModel
         if (form.SelectedTestDeal != null)
             form.SelectedTestDeal.PropertyChanged -= OnModelPropertyChanged;
     }
-
 
     // Handle CollectionChanged events to subscribe/unsubscribe to individual items
     private void OnChildCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

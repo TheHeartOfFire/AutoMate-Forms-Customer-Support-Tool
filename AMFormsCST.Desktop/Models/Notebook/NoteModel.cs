@@ -45,7 +45,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     }
     public ObservableCollection<Dealer> Dealers { get; set; }
     
-    public NoteModel()
+    public NoteModel(string phoneExtensionDelimiter)
     {
 
         Dealers = [];
@@ -54,7 +54,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
         Contacts = [];
         Contacts.CollectionChanged += ChildCollection_CollectionChanged;
-        Contacts.Add(new Contact()); 
+        Contacts.Add(new Contact(phoneExtensionDelimiter)); 
 
         Forms = [];
         Forms.CollectionChanged += ChildCollection_CollectionChanged;
@@ -65,7 +65,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
         
         SelectDealer(Dealers.FirstOrDefault() ?? new Dealer());
-        SelectContact(Contacts.FirstOrDefault() ?? new Contact());
+        SelectContact(Contacts.FirstOrDefault() ?? new Contact(phoneExtensionDelimiter));
         SelectForm(Forms.FirstOrDefault() ?? new Form());
     }
 
@@ -78,7 +78,7 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
             SetProperty(ref _selectedDealer, value);
         }
     }
-    public ObservableCollection<Contact> Contacts { get; set; } = [ new() ];
+    public ObservableCollection<Contact> Contacts { get; set; }
     private Contact? _selectedContact; 
     public Contact? SelectedContact
     {

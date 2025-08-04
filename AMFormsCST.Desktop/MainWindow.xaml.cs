@@ -29,6 +29,8 @@ public partial class MainWindow : IWindow
     // TODO: Set up Backup system in FormgenUtils
     // TODO: Set up persistent notes. Regularly save current notes to file to be retrieved upon crash or between sessions.
     // TODO: Notes Importing(from clipboard, eventually from headless browser)
+    // TODO: Docs
+    // TODO: Readme
 
     public MainWindowViewModel ViewModel { get; }
 

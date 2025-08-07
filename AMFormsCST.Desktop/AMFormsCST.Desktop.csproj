@@ -7,9 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Solera_Logo_Symbol_Only.ico</ApplicationIcon>
-    <FileVersion>2.0.0</FileVersion>
     <AssemblyVersion>2.0.0</AssemblyVersion>
-    <Version>2.0.0</Version>
+    <FileVersion>$(assemblyversion)</FileVersion>
+    <Version>$(assemblyversion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -52,5 +52,18 @@
   <ItemGroup>
     <Folder Include="Helpers\" />
   </ItemGroup>
+	  <Target Name="VeloPack" AfterTargets="Publish">
+		<Exec Command="vpk pack -u SoleraCaseManagementTool -v $(assemblyversion) -p .\bin\Release\net9.0-windows7.0\win-x86 -e SoleraCaseManagementTool.exe" />
+	</Target>
+	<Target Name="GitHub Release" AfterTargets="Publish">
+		<Exec Command="gh release create $(assemblyversion) --generate-notes" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\assets.win.json" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\SoleraCaseManagementTool-win-Portable.zip" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\SoleraCaseManagementTool-win-Setup.exe" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\RELEASES" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\releases.win.json" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\SoleraCaseManagementTool-$(assemblyversion)-delta.nupkg" />
+		<Exec Command="gh release upload $(assemblyversion) .\Releases\SoleraCaseManagementTool-$(assemblyversion)-full.nupkg" />
+	</Target>
 
 </Project>

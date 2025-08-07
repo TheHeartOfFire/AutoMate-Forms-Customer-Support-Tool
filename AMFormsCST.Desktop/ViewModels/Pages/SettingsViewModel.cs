@@ -1,3 +1,4 @@
+using AMFormsCST.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -15,8 +16,8 @@ namespace AMFormsCST.Desktop.ViewModels.Pages;
 
 public partial class SettingsViewModel : ViewModel
 {
-    private readonly ISnackbarService _snackbarService;
     private bool _isInitialized = false;
+    private readonly IUpdateManagerService _updateManager;
 
     [ObservableProperty]
     private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
@@ -24,9 +25,9 @@ public partial class SettingsViewModel : ViewModel
     [ObservableProperty]
     private string _appVersion = String.Empty;
 
-    public SettingsViewModel(ISnackbarService snackbarService)
+    public SettingsViewModel(IUpdateManagerService updateManager)
     {
-        _snackbarService = snackbarService;
+        _updateManager = updateManager ?? throw new ArgumentNullException(nameof(updateManager));
         InitializeViewModel();
     }
 
@@ -65,28 +66,7 @@ public partial class SettingsViewModel : ViewModel
     [RelayCommand]
     private async Task CheckForUpdates()
     {
-        try
-        {
-            // Replace with your actual repository URL
-            var mgr = new UpdateManager(new GithubSource("https://github.com/TheHeartOfFire/AutoMate-Forms-Customer-Support-Tool", null, false));
-
-            var newVersion = await mgr.CheckForUpdatesAsync();
-            if (newVersion == null)
-            {
-                _snackbarService.Show("No Updates Found", "Your application is up to date.", ControlAppearance.Success, new SymbolIcon(SymbolRegular.Checkmark24), TimeSpan.FromSeconds(3));
-                return;
-            }
-
-            _snackbarService.Show("Update Available", $"Downloading version {newVersion.TargetFullRelease.Version}...", ControlAppearance.Info, new SymbolIcon(SymbolRegular.ArrowDownload24), TimeSpan.FromSeconds(5));
-
-            await mgr.DownloadUpdatesAsync(newVersion);
-
-            mgr.ApplyUpdatesAndRestart(newVersion);
-        }
-        catch (Exception ex)
-        {
-            _snackbarService.Show("Update Check Failed", ex.Message, ControlAppearance.Danger, new SymbolIcon(SymbolRegular.ErrorCircle24), TimeSpan.FromSeconds(5));
-        }
+        await _updateManager.CheckForUpdatesAsync();
     }
 
     private static string GetAppVersion()

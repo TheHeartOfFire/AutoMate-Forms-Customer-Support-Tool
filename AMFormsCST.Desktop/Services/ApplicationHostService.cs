@@ -14,15 +14,10 @@ namespace AMFormsCST.Desktop.Services;
 /// <summary>
 /// Managed host of the application.
 /// </summary>
-public class ApplicationHostService : IHostedService
+public class ApplicationHostService(IServiceProvider serviceProvider, IUpdateManagerService updateManagerService) : IHostedService
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public ApplicationHostService(IServiceProvider serviceProvider)
-    {
-        // If you want, you can do something with these services at the beginning of loading the application.
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly IUpdateManagerService _updateManagerService = updateManagerService;
 
     /// <summary>
     /// Triggered when the application host is ready to start the service.
@@ -45,18 +40,20 @@ public class ApplicationHostService : IHostedService
     /// <summary>
     /// Creates main window during activation.
     /// </summary>
-    private Task HandleActivationAsync()
+    private async Task HandleActivationAsync()
     {
+        await _updateManagerService.CheckForUpdatesOnStartupAsync();
+
         if (Application.Current.Windows.OfType<MainWindow>().Any())
         {
-            return Task.CompletedTask;
+            return;
         }
 
         IWindow mainWindow = _serviceProvider.GetRequiredService<IWindow>();
         mainWindow.Loaded += OnMainWindowLoaded;
         mainWindow?.Show();
 
-        return Task.CompletedTask;
+        return;
     }
 
     private void OnMainWindowLoaded(object sender, RoutedEventArgs e)

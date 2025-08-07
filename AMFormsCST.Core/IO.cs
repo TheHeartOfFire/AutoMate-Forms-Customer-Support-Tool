@@ -27,7 +27,7 @@ internal static class IO
     internal static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
     static IO()
     {
-        _rootPath = Path.Combine(_appData, "AMFormsCST");
+        _rootPath = Path.Combine(_appData, "Solera Case Management Tool");
         _notesPath = Path.Combine(_rootPath, "SavedNotes.json");
         BackupPath = Path.Combine(_rootPath, "FormgenBackup");
         _templatesPath = Path.Combine(_rootPath, "TextTemplates.json");

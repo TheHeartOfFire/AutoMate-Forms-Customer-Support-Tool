@@ -1,9 +1,18 @@
-﻿using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Views.Pages;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.BestPractices;
+using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Types.BestPractices.Models;
+using AMFormsCST.Core.Types.BestPractices.Practices;
+using AMFormsCST.Core.Utils;
+using AMFormsCST.Desktop.DependencyModel;
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Resources;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 using Lepo.i18n.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,17 +21,9 @@ using System.Configuration;
 using System.Data;
 using System.Windows;
 using System.Windows.Threading;
+using Velopack;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
-using AMFormsCST.Desktop.Views.Pages.Tools;
-using AMFormsCST.Desktop.ViewModels.Pages.Tools;
-using AMFormsCST.Desktop.DependencyModel;
-using AMFormsCST.Core.Utils;
-using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Core.Types.BestPractices.Practices;
-using AMFormsCST.Core.Types.BestPractices.Models;
-using AMFormsCST.Core.Interfaces.BestPractices;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -74,6 +75,7 @@ public partial class App : Application
                 _ = services.AddSingleton<AutoMateFormModel>();
                 _ = services.AddSingleton<IFormNameBestPractice, AutoMateFormNameBestPractices>();
                 _ = services.AddSingleton<ISupportTool, Core.SupportTool>();
+                _ = services.AddSingleton<IUpdateManagerService, UpdateManagerService>();
 
                 _ = services.AddStringLocalizer(b =>
                 {
@@ -99,6 +101,7 @@ public partial class App : Application
     /// </summary>
     private void OnStartup(object sender, StartupEventArgs e)
     {
+        VelopackApp.Build().Run();
         _host.Start();
     }
 

@@ -21,7 +21,6 @@ namespace AMFormsCST.Desktop;
 public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Implement Velopack for update management
     // TODO: Use the structure settings now available in Core project to finalize the settings page
     // TODO: Set up unit tests for Core and Desktop projects
     // TODO: BUGFIX: FormNameGenerator has a few bugs in name generation. (sold/trade tags for example)

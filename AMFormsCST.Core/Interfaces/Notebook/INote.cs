@@ -13,6 +13,7 @@ public interface INote : IEquatable<INote>, IEqualityComparer<INote>
     string? FormsText { get; set; }
     string? NotesText { get; set; }
     string? Phone { get; set; }
+    string? PhoneExt { get; set; }
     string? ServerId { get; set; }
     Guid Id { get; }
 

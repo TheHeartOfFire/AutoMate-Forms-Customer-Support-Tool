@@ -24,6 +24,7 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <ui:SymbolIcon Symbol="BuildingPeople20" Filled="True" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="64" Grid.Row="2" Grid.Column="2" Margin="0,0,15,0"/>
@@ -36,7 +37,7 @@
         <Separator Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="5" BorderThickness="2"/>
         <Separator Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" Margin="5" BorderThickness="2"/>
 
-<WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="2"  Margin="0,0,0,10" Grid.Column="3">
+<WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="3"  Margin="0,0,0,10" Grid.Column="3">
                 <ui:Button Margin="0,0,5,0" Command="{Binding OpenTemplateDialogCommand}">
                     <ui:SymbolIcon Symbol="MailTemplate24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24" />
                 </ui:Button>
@@ -71,22 +72,27 @@
 
             <StackPanel Orientation="Horizontal">
                 <Label Content="Case #: " VerticalAlignment="Center" HorizontalAlignment="Center" />
-                <ui:NumberBox Text="{Binding SelectedNote.CaseNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" PlaceholderText="Enter a case number..." MaxDecimalPlaces="0" Minimum="0" Maximum="1000000000" SpinButtonPlacementMode="Hidden" />
-
+                <ui:NumberBox Text="{Binding SelectedNote.CaseNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                              ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" PlaceholderText="Enter a case number..." 
+                              MaxDecimalPlaces="0" Minimum="0" Maximum="1000000000" SpinButtonPlacementMode="Hidden" />
+                <controls:CopyButton TextToCopy="{Binding SelectedNote.CaseNumber}" Margin="5,0,0,0"/>
             </StackPanel>
 
             
 
-            <Label Content="Notes:"  Margin=" 0, 0, 0, 0" Grid.Row="1"/>
+            <Label Content="Notes:"  Margin=" 0, 0, 0, 0" Grid.Row="1" VerticalAlignment="Bottom"/>
             <ui:TextBox Text="{Binding SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                             AcceptsReturn="True" ClearButtonEnabled="True" VerticalAlignment="Stretch" Grid.Row="2"
                             Margin="0,0,0,10"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.Notes}" 
+                                 Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" Grid.RowSpan="2"/>
         </Grid>
 
-        <Grid Margin="0,0,0,0" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+        <Grid Margin="0,0,0,0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -118,21 +124,30 @@
 
             <Label Content="Dealer/Group Name: " VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="2"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="0,0,0,0" Grid.Row="2" 
-                        Grid.Column="1" HorizontalAlignment="Left"/>
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" Margin="0,0,0,0" Grid.Row="2" 
+                        Grid.Column="1" HorizontalAlignment="Stretch"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedDealer.Name}" Grid.Row="2" 
+                        Grid.Column="2" HorizontalAlignment="right" Margin="5,0,0,0"/>
 
             <Label Content="Server ID: " VerticalAlignment="Center" HorizontalAlignment="Right"  Grid.Row="3"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.ServerCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" Margin="0,0,0,0"  Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left"/>
-
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" 
+                        Margin="0,0,0,0"  Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedDealer.ServerCode}" Grid.Row="3" 
+                        Grid.Column="2" HorizontalAlignment="right" Margin="5,0,0,0"/>
+            
             <Label Content="Company Name: " VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="4"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.SelectedCompany.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="180" Margin="0,0,0,0" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left"/>
-
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="150" 
+                        Margin="0,0,0,0" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedDealer.SelectedCompany.Name}" Grid.Row="4" 
+                        Grid.Column="2" HorizontalAlignment="right" Margin="5,0,0,0"/>
+            
             <Label Content="Company Number: " VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="5"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.SelectedCompany.CompanyCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                         ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" Margin="0,0,0,0" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left"/>
-
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedDealer.SelectedCompany.CompanyCode}" Grid.Row="5" 
+                        Grid.Column="2" HorizontalAlignment="right" Margin="5,0,0,0"/>
         </Grid>
 
 
@@ -140,6 +155,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -171,15 +187,25 @@
 
             <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0"  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
-
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0"  Grid.Row="2" 
+                        Grid.Column="1" HorizontalAlignment="Stretch"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedForm.Name}" Grid.Row="2" Grid.Column="2" 
+                                 HorizontalAlignment="Left" Margin="5,0,0,0"/>
+            
             <Label Content="Deal#: " VerticalAlignment="Center" HorizontalAlignment="Center"  Grid.Row="3" Grid.Column="0"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedForm.SelectedTestDeal.DealNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0"  Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left"/>
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0"  Grid.Row="3" 
+                        Grid.Column="1" HorizontalAlignment="Stretch"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedForm.SelectedTestDeal.DealNumber}" Grid.Row="3" Grid.Column="2" 
+                                 HorizontalAlignment="Left" Margin="5,0,0,0"/>
 
             <Label Content="Notes: " VerticalAlignment="Top" HorizontalAlignment="Center"  Grid.Row="4" Grid.Column="0"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0" AcceptsReturn="True" MinHeight="100" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left"/>
+                            ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" 
+                        Margin="0,0,0,0" AcceptsReturn="True" MinHeight="100" Grid.Row="4" 
+                        Grid.Column="1" HorizontalAlignment="Stretch"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedForm.Notes}" Grid.Row="4" Grid.Column="2" 
+                                 HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top"/>
 
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Grid.Row="5" Grid.Column="1">
                 <Label Content="Pdf" VerticalAlignment="Center"/>
@@ -198,6 +224,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -217,11 +244,17 @@
              DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="2" Margin="0,0,0,5"/>
 
             <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
-            <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0" Grid.Row="1" Grid.Column="1"/>
-
+            <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" 
+                        Margin="0,0,0,0" Grid.Row="1" Grid.Column="1"/>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedContact.Name}" Grid.Row="1" Grid.Column="2"
+                                  Margin="5,0,0,0"/>
+            
             <Label Content="Email: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" />
             <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" Margin="0,0,0,0" Grid.Row="2" Grid.Column="1" />
-
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedContact.Email}" Grid.Row="2" Grid.Column="2"
+                                  Margin="5,0,0,0"/>
+            
             <Label Content="Phone #: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" />
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,0" Grid.Row="3" Grid.Column="1">
@@ -229,6 +262,8 @@
                 <ui:TextBox Text="{Binding SelectedNote.SelectedContact.PhoneExtensionDelimiter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="32" Margin="15,0,15,0"/>
                 <ui:TextBox Text="{Binding SelectedNote.SelectedContact.PhoneExtension, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="64" />
             </StackPanel>
+            <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedContact.FullPhone}" Grid.Row="3" Grid.Column="2"
+                                  Margin="5,0,0,0"/>
         </Grid>
     </Grid>
 </Page>

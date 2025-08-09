@@ -61,8 +61,8 @@ public partial class DashboardViewModel : ViewModel
     private bool _isDebugMode = false;
 
     [ObservableProperty]
-    private Visibility _debugVisibility = Visibility.Collapsed; 
-    
+    private Visibility _debugVisibility = Visibility.Collapsed;
+
     private int _uiRefreshCounter;
     public int UiRefreshCounter
     {

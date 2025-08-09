@@ -37,13 +37,16 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
         IsSelected = false;
     }
 
-    public string GetPhone()
+    public string FullPhone
     {
-        if (string.IsNullOrEmpty(Phone))
-            return string.Empty;
-        if (string.IsNullOrEmpty(PhoneExtension))
-            return Phone;
-        return $"{Phone}{PhoneExtensionDelimiter}{PhoneExtension}";
+        get
+        {
+            if (string.IsNullOrEmpty(Phone))
+                return string.Empty;
+            if (string.IsNullOrEmpty(PhoneExtension))
+                return Phone;
+            return $"{Phone}{PhoneExtensionDelimiter}{PhoneExtension}";
+        }
     }
 
     public void ParsePhone(string phone)
@@ -60,9 +63,20 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
                                  string.IsNullOrEmpty(Email) &&
                                  string.IsNullOrEmpty(Phone) &&
                                  string.IsNullOrEmpty(PhoneExtension); } }
-    partial void OnNameChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); }
-    partial void OnEmailChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); }
-    partial void OnPhoneChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); } 
-    partial void OnPhoneExtensionChanged(string? value) { OnPropertyChanged(nameof(IsBlank)); } 
-
+    partial void OnNameChanged(string value) { OnPropertyChanged(nameof(IsBlank)); }
+    partial void OnEmailChanged(string value) { OnPropertyChanged(nameof(IsBlank)); }
+    partial void OnPhoneChanged(string value) 
+    { 
+        OnPropertyChanged(nameof(IsBlank));
+        OnPropertyChanged(nameof(FullPhone));
+    } 
+    partial void OnPhoneExtensionChanged(string value) 
+    { 
+        OnPropertyChanged(nameof(IsBlank));
+        OnPropertyChanged(nameof(FullPhone));
+    }
+    partial void OnPhoneExtensionDelimiterChanged(string value)
+    {
+        OnPropertyChanged(nameof(FullPhone));
+    }
 }

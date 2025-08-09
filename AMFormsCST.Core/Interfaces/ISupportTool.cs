@@ -10,4 +10,5 @@ public interface ISupportTool
     IFormgenUtils FormgenUtils { get; set; }
     INotebook Notebook { get; set; }
     ISettings Settings { get; set; }
+    void SaveAllSettings();
 }

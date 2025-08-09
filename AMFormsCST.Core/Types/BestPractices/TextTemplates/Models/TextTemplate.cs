@@ -35,6 +35,10 @@ public class TextTemplate : IEquatable<TextTemplate>
     public List<ITextTemplateVariable> GetVariables(ISupportTool supportTool)
     {
         var variables = new List<ITextTemplateVariable>();
+        if (supportTool?.Settings?.UserSettings?.Organization?.Variables is null)
+        {
+            return variables;
+        }
         foreach (var variable in supportTool.Settings.UserSettings.Organization.Variables)
         {
             if (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||

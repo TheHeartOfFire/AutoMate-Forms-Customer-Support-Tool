@@ -3,6 +3,7 @@
 // Copyright (C) Leszek Pomianowski and WPF UI Contributors.
 // All Rights Reserved.
 
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,10 +15,11 @@ namespace AMFormsCST.Desktop.Services;
 /// <summary>
 /// Managed host of the application.
 /// </summary>
-public class ApplicationHostService(IServiceProvider serviceProvider, IUpdateManagerService updateManagerService) : IHostedService
+public class ApplicationHostService(IServiceProvider serviceProvider, IUpdateManagerService updateManagerService, ISupportTool supportTool) : IHostedService
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly IUpdateManagerService _updateManagerService = updateManagerService;
+    private readonly ISupportTool _supportTool = supportTool;
 
     /// <summary>
     /// Triggered when the application host is ready to start the service.
@@ -34,6 +36,7 @@ public class ApplicationHostService(IServiceProvider serviceProvider, IUpdateMan
     /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _supportTool.SaveAllSettings();
         return Task.CompletedTask;
     }
 

@@ -14,7 +14,9 @@ public static class BasicStats
     public static UIElement GetSettingsAndPropertiesUIElements(IFormgenFileProperties properties)
     {
         var stackPanel = new StackPanel();
+        var mainProperties = new List<PropertyInfo>();
 
+        // First, separate the properties into main properties and complex types that need their own cards.
         foreach (var property in properties.GetType().GetProperties())
         {
             if (property.Name == "Settings" && property.GetValue(properties) is IFormgenFileSettings settings)
@@ -22,18 +24,29 @@ public static class BasicStats
                 var card = CreateCardForObject(settings, "Settings");
                 stackPanel.Children.Add(card);
             }
-            // Add a new rule to handle the PromptData property.
             else if (property.Name == "PromptData" && property.GetValue(properties) is PromptDataProperties promptDataProperties)
             {
                 var card = CreateCardForObject(promptDataProperties, "Prompt Data");
                 stackPanel.Children.Add(card);
             }
+            else if (property.Name != "Settings" && property.Name != "PromptData" && property.Name != "Item") // Exclude properties handled elsewhere
+            {
+                mainProperties.Add(property);
+            }
+        }
+
+        // If there are any main properties, create a card for them.
+        if (mainProperties.Count > 0)
+        {
+            var propertiesCard = CreateCardForObject(properties, "Properties", mainProperties);
+            // Insert the main properties card at the top.
+            stackPanel.Children.Insert(0, propertiesCard);
         }
 
         return stackPanel;
     }
 
-    private static CardControl CreateCardForObject(object obj, string header)
+    private static CardControl CreateCardForObject(object obj, string header, IEnumerable<PropertyInfo>? propsToRender = null)
     {
         var card = new CardControl { Header = header, Margin = new Thickness(0, 0, 0, 12) };
         var grid = new Grid
@@ -47,10 +60,13 @@ public static class BasicStats
         };
 
         int rowIndex = 0;
-        foreach (var prop in obj.GetType().GetProperties())
+        // Use the provided list of properties, or get all properties if none was provided.
+        var properties = propsToRender ?? obj.GetType().GetProperties();
+
+        foreach (var prop in properties)
         {
-            // Skip the 'Settings' property as it's handled by the parent method.
-            if (prop.Name == "Settings")
+            // Skip properties that are handled by the calling method or should not be displayed.
+            if (prop.Name == "Settings" || prop.Name == "PromptData")
                 continue;
 
             // Special handling for the 'Choices' property

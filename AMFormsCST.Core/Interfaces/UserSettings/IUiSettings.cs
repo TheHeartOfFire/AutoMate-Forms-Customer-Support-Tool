@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Interfaces.UserSettings;
-public interface IUiSettings
+public interface IUiSettings : ISetting
 {
+    List<ISetting> Settings { get; set; }
 }

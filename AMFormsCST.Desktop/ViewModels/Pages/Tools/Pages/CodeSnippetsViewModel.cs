@@ -1,7 +1,9 @@
 ﻿using AMFormsCST.Core;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.CodeBlocks;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.Practices;
+using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.CodeSnippets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -23,13 +25,13 @@ public partial class CodeSnippetsViewModel : ViewModel
     [NotifyCanExecuteChangedFor(nameof(SelectCodeSnippetCommand))] 
     private CodeSnippetItemViewModel? _selectedCodeSnippet;
 
-    private ISupportTool _supportTool;
+    private ICodeBlocks _codeBlocks;
     public CodeSnippetsViewModel(ISupportTool supportTool)
     {
-        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
+        _codeBlocks = supportTool.CodeBlocks ?? throw new ArgumentNullException(nameof(_codeBlocks));
 
         CodeSnippets = new ObservableCollection<CodeSnippetItemViewModel>(
-            _supportTool.CodeBlocks.GetBlocks()
+            _codeBlocks.GetBlocks()
                 .OrderBy(x => x.Name)
                 .Select(x => new CodeSnippetItemViewModel(x))
         );
@@ -49,10 +51,10 @@ public partial class CodeSnippetsViewModel : ViewModel
     /// </summary>
     public CodeSnippetsViewModel()
     {
-        _supportTool = new SupportTool(new AutoMateFormNameBestPractices(new Core.Types.BestPractices.Models.AutoMateFormModel()));
+        _codeBlocks = new CodeBlocks();
 
         CodeSnippets = new ObservableCollection<CodeSnippetItemViewModel>(
-            _supportTool.CodeBlocks.GetBlocks()
+            _codeBlocks.GetBlocks()
                 .OrderBy(x => x.Name)
                 .Select(x => new CodeSnippetItemViewModel(x))
         );

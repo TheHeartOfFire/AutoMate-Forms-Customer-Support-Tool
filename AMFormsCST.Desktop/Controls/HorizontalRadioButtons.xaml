@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"     
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"     
              xmlns:local="clr-namespace:AMFormsCST.Desktop.Controls"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converters="clr-namespace:AMFormsCST.Desktop.Converters"    
              mc:Ignorable="d"     
              d:DesignHeight="50" d:DesignWidth="300"    
@@ -52,7 +53,7 @@
                                             </MultiBinding>
                                         </TextBlock.Text>
                                     </TextBlock>
-                                    <Button Grid.Column="1"
+                                    <ui:Button Grid.Column="1"
                             Command="{Binding DeleteCommand, ElementName=RadioButtonControl}"
                             CommandParameter="{Binding}"
                             VerticalAlignment="Center"
@@ -61,10 +62,10 @@
                             Margin="5,0,0,0"
                             Padding="2"
                             Height="20" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
-                                        <Button.Visibility>
+                                        <ui:Button.Visibility>
                                             <Binding Path="IsBlank" Converter="{StaticResource BooleanToVisibilityConverter}"  ConverterParameter="Inverse" />
-                                        </Button.Visibility>
-                                        <Button.Style>
+                                        </ui:Button.Visibility>
+                                        <ui:Button.Style>
                                             <Style TargetType="Button">
                                                 <Setter Property="Opacity" Value="0" />
                                                 <Setter Property="Template">
@@ -96,9 +97,9 @@
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </Button.Style>
+                                        </ui:Button.Style>
                                         <TextBlock Text="x" Foreground="DarkGray" FontWeight="Bold"  VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" Margin="0,0,0,4"/>
-                                    </Button>
+                                    </ui:Button>
                                 </Grid>
                             </RadioButton.Content>
                         </RadioButton>
@@ -110,7 +111,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Resources>
-                    <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                    <Style TargetType="RadioButton" BasedOn="{StaticResource DefaultToggleButtonStyle}"/>
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>

@@ -95,12 +95,5 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
             return FindParent<T>(parentObject);
         }
 
-        private void Debug_ToggleImageFoundButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel.IsImageFound.HasValue)
-            {
-                ViewModel.IsImageFound = !ViewModel.IsImageFound;
-            }
-        }
     }
 }

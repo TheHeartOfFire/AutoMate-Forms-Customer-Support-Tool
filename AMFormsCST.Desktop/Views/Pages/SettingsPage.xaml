@@ -11,7 +11,7 @@
     Title="SettingsPage"
     d:DataContext="{d:DesignInstance viewmodels:SettingsViewModel,
                                      IsDesignTimeCreatable=False}"
-    d:DesignHeight="450"
+    d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Page.Resources>
@@ -19,49 +19,70 @@
     </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
-            <TextBlock
-                FontSize="20"
-                FontWeight="Medium"
-                Text="Personalization" />
-            <TextBlock
-                Margin="0,12,0,0"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Customize the look and feel of the application." />
 
-            <TextBlock
-                Margin="0,24,0,0"
-                FontWeight="Medium"
-                Text="Application Theme" />
-            <RadioButton
-                Command="{Binding ChangeThemeCommand}"
-                CommandParameter="theme_light"
-                Content="Light"
-                GroupName="theme"
-                IsChecked="{Binding CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light}" />
-            <RadioButton
-                Command="{Binding ChangeThemeCommand}"
-                CommandParameter="theme_dark"
-                Content="Dark"
-                GroupName="theme"
-                IsChecked="{Binding  CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark}" />
+            <!--  Personalization Section  -->
+            <ui:CardControl Margin="0,0,0,10" Header="Personalization">
+                <StackPanel>
+                    <TextBlock
+                        Margin="0,0,0,12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="Customize the look and feel of the application." />
 
-            <Separator Margin="0,24" />
+                    <TextBlock FontWeight="Medium" Text="Application Theme" />
+                    <RadioButton
+                        Margin="0,4,0,0"
+                        Content="Light"
+                        GroupName="theme"
+                        IsChecked="{Binding CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light}" />
+                    <RadioButton
+                        Margin="0,4,0,0"
+                        Content="Dark"
+                        GroupName="theme"
+                        IsChecked="{Binding CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark}" />
 
-            <TextBlock
-                FontSize="20"
-                FontWeight="Medium"
-                Text="About" />
-            <TextBlock
-                Margin="0,12,0,0"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="{Binding AppVersion}" />
+                    <ui:ToggleSwitch
+                        Margin="0,12,0,0"
+                        Content="Always on Top"
+                        IsChecked="{Binding AlwaysOnTop, Mode=TwoWay}" />
+                </StackPanel>
+            </ui:CardControl>
 
-            <ui:Button
-                Command="{Binding CheckForUpdatesCommand}"
-                Margin="0,12,0,0"
-                Appearance="Primary"
-                Content="Check for updates"
-                Icon="{ui:SymbolIcon ArrowDownload24}" />
+            <!--  Behavior Section  -->
+            <ui:CardControl Margin="0,0,0,10" Header="Behavior">
+                <StackPanel>
+                    <ui:ToggleSwitch
+                        Content="Automatically select new templates"
+                        IsChecked="{Binding SelectNewTemplate, Mode=TwoWay}"
+                        Margin="0,0,0,12" />
+
+                    <ui:ToggleSwitch
+                        Content="Capitalize form code in notes"
+                        IsChecked="{Binding CapitalizeFormCode, Mode=TwoWay}"
+                        Margin="0,0,0,12" />
+
+                    <TextBlock Text="Phone Extension Separator" />
+                    <ui:TextBox
+                        Margin="0,4,0,0"
+                        PlaceholderText="e.g., x"
+                        Text="{Binding ExtSeparator, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!--  About Section  -->
+            <ui:CardControl Header="About">
+                <StackPanel>
+                    <TextBlock
+                        Margin="0,0,0,12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="{Binding AppVersion}" />
+
+                    <ui:Button
+                        Command="{Binding CheckForUpdatesCommand}"
+                        Appearance="Primary"
+                        Content="Check for updates"
+                        Icon="{ui:SymbolIcon ArrowDownload24}" />
+                </StackPanel>
+            </ui:CardControl>
 
         </StackPanel>
     </ScrollViewer>

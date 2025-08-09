@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AMFormsCST.Core.Types.UserSettings;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Interfaces.UserSettings;
+
 public interface IUserSettings : ISetting
 {
     IOrgVariables Organization { get; set; }

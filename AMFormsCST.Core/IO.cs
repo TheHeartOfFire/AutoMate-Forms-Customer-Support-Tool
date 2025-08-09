@@ -1,55 +1,91 @@
-﻿using AMFormsCST.Core.Interfaces.BestPractices;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Interfaces.UserSettings;
+using AMFormsCST.Core.Types;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Types.Notebook;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization.Metadata;
 using System.Xml;
 
 namespace AMFormsCST.Core;
-internal static class IO
+public static class IO
 {
     private static readonly string _appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     private static readonly string _rootPath;
     private static readonly string _notesPath;
-    internal static readonly string BackupPath;
+    private static readonly string _settingsPath;
+    public static readonly string BackupPath;
     private static readonly string _templatesPath;
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private static JsonSerializerOptions _jsonOptions = new() { WriteIndented = true }; // Default options
 
-    internal static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
+    public static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
+
     static IO()
     {
         _rootPath = Path.Combine(_appData, "Solera Case Management Tool");
         _notesPath = Path.Combine(_rootPath, "SavedNotes.json");
+        _settingsPath = Path.Combine(_rootPath, "AppSettings.json");
         BackupPath = Path.Combine(_rootPath, "FormgenBackup");
         _templatesPath = Path.Combine(_rootPath, "TextTemplates.json");
 
         try
         {
-            if (!Directory.Exists(_rootPath))
-            {
-                Directory.CreateDirectory(_rootPath);
-            }
-            if (!Directory.Exists(BackupPath)) 
-            {
-                Directory.CreateDirectory(BackupPath);
-            }
+            if (!Directory.Exists(_rootPath)) Directory.CreateDirectory(_rootPath);
+            if (!Directory.Exists(BackupPath)) Directory.CreateDirectory(BackupPath);
         }
         catch (Exception ex)
         {
-            
             Console.WriteLine($"Error creating application directories: {ex.Message}");
         }
     }
-    internal static void BackupFormgenFile(string uuid, XmlDocument file, uint? retentionCount)
+
+    /// <summary>
+    /// Configures the JSON serializer with options provided by the UI project.
+    /// </summary>
+    public static void ConfigureJson(JsonSerializerOptions options)
+    {
+        _jsonOptions = options;
+    }
+
+    public static void SaveSettings(ISettings settings)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(settings, _jsonOptions);
+            File.WriteAllText(_settingsPath, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving settings: {ex.Message}");
+        }
+    }
+
+    public static ISettings? LoadSettings()
+    {
+        if (!File.Exists(_settingsPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_settingsPath);
+            return JsonSerializer.Deserialize<ISettings>(json, _jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading settings: {ex.Message}");
+            return null;
+        }
+    }
+
+    public static void BackupFormgenFile(string uuid, XmlDocument file, uint? retentionCount)
     {
         var di = Directory.CreateDirectory($"{BackupPath}\\{uuid}");
 
@@ -62,7 +98,7 @@ internal static class IO
 
         file.Save(BackupFormgenFilePath(uuid));
     }
-    internal static string AutoIncrement(string? input)
+    public static string AutoIncrement(string? input)
     {
         if (input == null) return input ?? string.Empty;
 
@@ -80,7 +116,7 @@ internal static class IO
 
     }
 
-    internal static void SaveNotes(List<INote> notes)
+    public static void SaveNotes(List<INote> notes)
     {
         var concreteNotes = notes.Cast<Note>().ToList(); 
 
@@ -95,7 +131,7 @@ internal static class IO
             Console.WriteLine($"Error saving Notes: {ex.Message}");
         }
     }
-    internal static List<INote> LoadNotes()
+    public static List<INote> LoadNotes()
     {
         if (!File.Exists(_notesPath))
         {
@@ -123,7 +159,7 @@ internal static class IO
         }
     }
 
-    internal static List<TextTemplate> LoadTemplates()
+    public static List<TextTemplate> LoadTemplates()
     {
         if (!File.Exists(_templatesPath))
         {
@@ -149,7 +185,7 @@ internal static class IO
             return [];
         }
     }
-    internal static void SaveTemplates(List<TextTemplate> templates)
+    public static void SaveTemplates(List<TextTemplate> templates)
     {
         try
         {

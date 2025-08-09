@@ -1,30 +1,62 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
-public class FormProperties : IFormgenFileProperties
+
+public partial class FormProperties : ObservableObject, IFormgenFileProperties
 {
+    private readonly DotFormgen _coreFormgenFile;
     public IFormgenFileSettings Settings { get; set; }
-    public string Title { get; set; }
-    public bool TradePrompt { get; set; }
-    public Format FormType { get; set; }
-    public bool SalesPersonPrompt { get; set; }
-    public string Username { get; set; }
-    public string BillingName { get; set; }
-    public FormCategory Category { get; set; }
+
+    public string Title
+    {
+        get => _coreFormgenFile.Title;
+        set => SetProperty(_coreFormgenFile.Title, value, _coreFormgenFile, (f, v) => f.Title = v);
+    }
+
+    public bool TradePrompt
+    {
+        get => _coreFormgenFile.TradePrompt;
+        set => SetProperty(_coreFormgenFile.TradePrompt, value, _coreFormgenFile, (f, v) => f.TradePrompt = v);
+    }
+
+    public Format FormType
+    {
+        get => _coreFormgenFile.FormType;
+        set => SetProperty(_coreFormgenFile.FormType, value, _coreFormgenFile, (f, v) => f.FormType = v);
+    }
+
+    public bool SalesPersonPrompt
+    {
+        get => _coreFormgenFile.SalesPersonPrompt;
+        set => SetProperty(_coreFormgenFile.SalesPersonPrompt, value, _coreFormgenFile, (f, v) => f.SalesPersonPrompt = v);
+    }
+
+    public string Username
+    {
+        get => _coreFormgenFile.Username;
+        set => SetProperty(_coreFormgenFile.Username, value, _coreFormgenFile, (f, v) => f.Username = v);
+    }
+
+    public string BillingName
+    {
+        get => _coreFormgenFile.BillingName;
+        set => SetProperty(_coreFormgenFile.BillingName, value, _coreFormgenFile, (f, v) => f.BillingName = v);
+    }
+
+    public FormCategory Category
+    {
+        get => _coreFormgenFile.Category;
+        set => SetProperty(_coreFormgenFile.Category, value, _coreFormgenFile, (f, v) => f.Category = v);
+    }
 
     public FormProperties(DotFormgen formgenFile)
     {
+        _coreFormgenFile = formgenFile;
         Settings = new FormSettings(formgenFile.Settings);
-        Title = formgenFile.Title ?? string.Empty;
-        TradePrompt = formgenFile.TradePrompt;
-        FormType = formgenFile.FormType;
-        SalesPersonPrompt = formgenFile.SalesPersonPrompt;
-        Username = formgenFile.Username ?? string.Empty;
-        BillingName = formgenFile.BillingName ?? string.Empty;
-        Category = formgenFile.Category;
     }
 
     public string GetFormType() =>

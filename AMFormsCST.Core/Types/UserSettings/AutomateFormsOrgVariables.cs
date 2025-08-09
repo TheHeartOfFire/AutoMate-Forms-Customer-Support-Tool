@@ -4,17 +4,17 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Types.UserSettings;
 public class AutomateFormsOrgVariables : IOrgVariables
 {
-    public IBestPracticeEnforcer Enforcer { get; } 
-    public INotebook Notebook { get; }
+    [JsonIgnore]
+    public IBestPracticeEnforcer? Enforcer { get; internal set; }
+    [JsonIgnore]
+    public INotebook? Notebook { get; internal set; }
 
-    public Dictionary<string, string> LooseVariables { get; set; } = 
+    public Dictionary<string, string> LooseVariables { get; set; } =
         new()
         {
             { "AMMailingAddress", string.Empty },
@@ -25,18 +25,34 @@ public class AutomateFormsOrgVariables : IOrgVariables
             { "AMZip", string.Empty },
         };
 
-    public List<ITextTemplateVariable> Variables { get; }
-        
+    [JsonIgnore]
+    public List<ITextTemplateVariable> Variables { get; private set; }
 
-    public AutomateFormsOrgVariables(IBestPracticeEnforcer enforcer, INotebook notebook)
+
+    // Constructor for Dependency Injection
+    public AutomateFormsOrgVariables(IBestPracticeEnforcer? enforcer, INotebook? notebook)
     {
-        Enforcer = enforcer ?? throw new ArgumentNullException(nameof(enforcer));
-        Notebook = notebook ?? throw new ArgumentNullException(nameof(notebook));
+        Enforcer = enforcer;
+        Notebook = notebook;
+        Variables = RegisterVariables();
+    }
+    public void InstantiateVariables(IBestPracticeEnforcer enforcer, INotebook notebook)
+    {
+        Enforcer = enforcer;
+        Notebook = notebook;
         Variables = RegisterVariables();
     }
 
     #region Variable Registration
-    private List<ITextTemplateVariable> RegisterVariables() => [
+    private List<ITextTemplateVariable> RegisterVariables()
+    {
+        if (Enforcer is null || Notebook is null)
+        {
+            return [];
+        }
+
+        return
+        [
             new TextTemplateVariable(
              properName: "Notes:ServerID",
              name: "serverid",
@@ -205,5 +221,6 @@ public class AutomateFormsOrgVariables : IOrgVariables
              getValue: () => "[User Input]"
             )
         ];
+    }
     #endregion
 }

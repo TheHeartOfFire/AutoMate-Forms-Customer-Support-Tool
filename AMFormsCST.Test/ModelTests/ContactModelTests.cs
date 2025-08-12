@@ -1,6 +1,7 @@
 using AMFormsCST.Desktop.Models;
 
 namespace AMFormsCST.Test.ModelTests;
+using Assert = Xunit.Assert;
 
 public class ContactModelTests
 {

@@ -32,8 +32,15 @@ public partial class TreeItemNodeViewModel : ObservableObject
         if(data is CodeLine line)
         {
             clHeader = line.Settings?.Variable;
-            if (clHeader.Equals("F0")) clHeader = line.PromptData?.Message;
-            if (string.IsNullOrWhiteSpace(clHeader)) clHeader = "<- Separator ->";
+            // Use string.Equals for a null-safe comparison.
+            if (string.Equals(clHeader, "F0"))
+            {
+                clHeader = line.PromptData?.Message;
+            }
+            if (string.IsNullOrWhiteSpace(clHeader))
+            {
+                clHeader = "<- Separator ->";
+            }
         }
 
         // Set the header based on the type of data

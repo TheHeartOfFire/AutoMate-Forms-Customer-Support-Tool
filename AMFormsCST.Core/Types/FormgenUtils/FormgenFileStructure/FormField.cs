@@ -17,6 +17,12 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             NumbersAsWords,
             NAIfBlank
         }
+
+        public FormField()
+        {
+            Settings = new FormFieldSettings();
+        }
+
         public FormField(XmlNode node)
         {
             var xmlAttributeCollection = node.ChildNodes[1]?.Attributes;

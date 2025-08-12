@@ -5,6 +5,7 @@ using AMFormsCST.Core.Types.BestPractices.Models;
 using AMFormsCST.Desktop.Models.FormNameGenerator;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Moq;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ViewModelTests;
 

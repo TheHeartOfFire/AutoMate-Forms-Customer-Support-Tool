@@ -3,6 +3,7 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Utils;
 using Moq;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.CoreLogicTests;
 

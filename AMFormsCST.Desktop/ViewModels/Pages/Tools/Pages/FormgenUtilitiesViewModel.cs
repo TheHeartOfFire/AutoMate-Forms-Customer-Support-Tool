@@ -24,7 +24,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     private ObservableCollection<TreeItemNodeViewModel> _treeViewNodes = [];
 
     private TreeItemNodeViewModel? _selectedNode;
-    public TreeItemNodeViewModel? SelectedNode
+    public virtual TreeItemNodeViewModel? SelectedNode
     {
         get => _selectedNode;
         set

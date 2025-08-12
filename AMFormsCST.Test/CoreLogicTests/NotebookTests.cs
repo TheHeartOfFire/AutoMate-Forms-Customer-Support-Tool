@@ -1,5 +1,6 @@
 using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.CoreLogicTests;
 

@@ -5,6 +5,7 @@ using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Moq;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ViewModelTests;
 

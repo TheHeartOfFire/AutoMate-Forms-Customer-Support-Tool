@@ -8,6 +8,8 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public PromptDataSettings? Settings { get; set; }
         public string? Message { get; set; }
         public List<string> Choices { get; set; } = [];
+
+        public PromptData() { Settings = new PromptDataSettings(); }
         public PromptData(XmlNode node)
         {
             if (node.Attributes != null) Settings = new PromptDataSettings(node.Attributes);
@@ -37,7 +39,6 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             }
 
             xml.WriteEndElement();
-
         }
     }
 }

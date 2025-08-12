@@ -1,4 +1,5 @@
 using AMFormsCST.Desktop.Models;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ModelTests;
 
@@ -80,5 +81,25 @@ public class DealerModelTests
         Assert.Same(company2, dealer.SelectedCompany);
         Assert.True(company2.IsSelected);
         Assert.False(company1.IsSelected);
+    }
+
+    [Fact]
+    public void SelectAndDeselect_UpdateIsSelectedProperty()
+    {
+        // Arrange
+        var dealer = new Dealer();
+        Assert.False(dealer.IsSelected); // Initial state
+
+        // Act: Select
+        dealer.Select();
+
+        // Assert
+        Assert.True(dealer.IsSelected);
+
+        // Act: Deselect
+        dealer.Deselect();
+
+        // Assert
+        Assert.False(dealer.IsSelected);
     }
 }

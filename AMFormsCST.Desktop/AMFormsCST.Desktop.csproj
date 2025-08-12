@@ -11,6 +11,10 @@
     <FileVersion>$(assemblyversion)</FileVersion>
     <Version>$(assemblyversion)</Version>
   </PropertyGroup>
+	
+	<ItemGroup>
+		<InternalsVisibleTo Include="AMFormsCST.Test" />
+	</ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\amlogo.png" />

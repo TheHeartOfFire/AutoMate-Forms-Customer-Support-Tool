@@ -40,9 +40,9 @@ public class FormgenUtilsTests
         _mockFileSystem.Verify(fs => fs.ReadAllText(fakeFilePath), Times.Once);
 
         // Verify that the ParsedFormgenFile property is not null and was populated correctly.
-        Assert.NotNull(formgenUtils.ParsedFormgenFile);
-        Assert.Equal("My Test Form", formgenUtils.ParsedFormgenFile.Title);
-        Assert.Equal("some-guid", formgenUtils.ParsedFormgenFile.Settings.UUID);
+        Xunit.Assert.NotNull(formgenUtils.ParsedFormgenFile);
+        Xunit.Assert.Equal("My Test Form", formgenUtils.ParsedFormgenFile.Title);
+        Xunit.Assert.Equal("some-guid", formgenUtils.ParsedFormgenFile.Settings.UUID);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class FormgenUtilsTests
 
         // Act & Assert
         // Verify that attempting to open a malformed XML file throws an XmlException.
-        Assert.Throws<XmlException>(() => formgenUtils.OpenFile(fakeFilePath));
+        Xunit.Assert.Throws<XmlException>(() => formgenUtils.OpenFile(fakeFilePath));
     }
 
     [Fact]
@@ -89,8 +89,8 @@ public class FormgenUtilsTests
 
         // Verify that the generated XML contains the correct data.
         var resultXml = savedContent.ToString();
-        Assert.Contains(@"<title>Saved Form</title>", resultXml);
-        Assert.Contains(@"publishedUUID=""new-guid""", resultXml);
+        Xunit.Assert.Contains(@"<title>Saved Form</title>", resultXml);
+        Xunit.Assert.Contains(@"publishedUUID=""new-guid""", resultXml);
     }
 
     [Fact]
@@ -99,12 +99,12 @@ public class FormgenUtilsTests
         // Arrange
         var formgenUtils = new FormgenUtils(_mockFileSystem.Object, _formgenUtilsProperties);
         formgenUtils.ParsedFormgenFile = new Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen();
-        Assert.NotNull(formgenUtils.ParsedFormgenFile); // Pre-condition check
+        Xunit.Assert.NotNull(formgenUtils.ParsedFormgenFile); // Pre-condition check
 
         // Act
         formgenUtils.CloseFile();
 
         // Assert
-        Assert.Null(formgenUtils.ParsedFormgenFile);
+        Xunit.Assert.Null(formgenUtils.ParsedFormgenFile);
     }
 }

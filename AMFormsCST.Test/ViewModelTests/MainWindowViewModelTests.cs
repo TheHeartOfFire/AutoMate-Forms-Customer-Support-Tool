@@ -4,6 +4,7 @@ using AMFormsCST.Desktop.Models.UserSettings;
 using AMFormsCST.Desktop.ViewModels;
 using Moq;
 using Wpf.Ui.Appearance;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ViewModelTests;
 

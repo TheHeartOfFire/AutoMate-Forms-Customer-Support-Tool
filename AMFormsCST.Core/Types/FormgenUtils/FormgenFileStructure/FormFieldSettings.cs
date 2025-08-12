@@ -36,6 +36,9 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             CENTER,
             RIGHT
         }
+
+        public FormFieldSettings() { }
+
         public FormFieldSettings(XmlAttributeCollection attributes)
         {
             if (int.TryParse(attributes[0].Value, out int parsedInt))

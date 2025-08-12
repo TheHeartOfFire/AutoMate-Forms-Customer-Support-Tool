@@ -7,6 +7,12 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
     {
         public FormPageSettings? Settings { get; set; }
         public List<FormField> Fields { get; set; } = new();
+
+        public FormPage()
+        {
+            Settings = new FormPageSettings();
+        }
+
         public FormPage(XmlNode node)
         {
             if (node.Attributes != null) Settings = new FormPageSettings(node.Attributes);

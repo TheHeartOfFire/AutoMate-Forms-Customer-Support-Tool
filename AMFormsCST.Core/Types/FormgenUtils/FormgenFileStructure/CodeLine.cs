@@ -23,6 +23,11 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             Expression = codeLine.Expression;
             PromptData = codeLine.PromptData;
         }
+        public CodeLine()
+        {
+            Settings = new CodeLineSettings();
+            PromptData = new PromptData();
+        }
 
         public void GenerateXml(XmlWriter xml)
         {

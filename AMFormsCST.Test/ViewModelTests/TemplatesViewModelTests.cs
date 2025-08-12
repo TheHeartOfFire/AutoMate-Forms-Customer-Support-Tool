@@ -7,6 +7,7 @@ using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ViewModelTests;
 

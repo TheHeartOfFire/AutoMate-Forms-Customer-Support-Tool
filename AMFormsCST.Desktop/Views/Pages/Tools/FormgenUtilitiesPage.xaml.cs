@@ -84,7 +84,7 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
         /// <param name="child">A direct or indirect child of the queried item.</param>
         /// <returns>The first parent item that matches the submitted type parameter. 
         /// If not found, a null reference is returned.</returns>
-        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        internal static T? FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
 

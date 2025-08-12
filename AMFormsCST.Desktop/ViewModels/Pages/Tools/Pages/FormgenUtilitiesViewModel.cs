@@ -1,14 +1,15 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
-using AMFormsCST.Desktop.Controls;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models.FormgenUtilities;
+using AMFormsCST.Desktop.Models.FormgenUtilities.Grouping;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -28,31 +29,17 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         get => _selectedNode;
         set
         {
-            // Deselect the old node if it exists and is different from the new one.
-            if (_selectedNode != null && _selectedNode != value)
-            {
-                _selectedNode.IsSelected = false;
-            }
-
+            // This setter is now primarily driven by the OnIsSelectedChanged callback
+            // in the TreeItemNodeViewModel. We just need to update the property.
             if (SetProperty(ref _selectedNode, value))
             {
-                // Ensure the new node is marked as selected if it's not null.
-                if (_selectedNode != null)
-                {
-                    _selectedNode.IsSelected = true;
-                    UpdateSelectedNodeProperties();
-                }
-                else
-                {
-                    // Clear properties if nothing is selected
-                    SelectedNodeProperties = null;
-                }
+                UpdateSelectedNodeProperties();
             }
         }
     }
 
     [ObservableProperty]
-    private UIElement? _selectedNodeProperties;
+    private IEnumerable<DisplayProperty>? _selectedNodeProperties;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFileLoaded))]
@@ -76,23 +63,25 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     public bool IsFileLoaded => !string.IsNullOrEmpty(FilePath);
 
     private readonly ISupportTool _supportTool;
-    public FormgenUtilitiesViewModel(ISupportTool supportTool)
+    private readonly IDialogService _dialogService;
+    private readonly IFileSystem _fileSystem;
+
+    public FormgenUtilitiesViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
     }
 
     [RelayCommand]
     private void OpenFormgenFile()
     {
-        var openFileDialog = new OpenFileDialog
-        {
-            Filter = "Formgen Files (*.formgen)|*.formgen|All files (*.*)|*.*",
-            Title = "Open .formgen File"
-        };
+        var filter = "Formgen Files (*.formgen)|*.formgen|All files (*.*)|*.*";
+        var selectedFile = _dialogService.ShowOpenFileDialog(filter);
 
-        if (openFileDialog.ShowDialog() == true)
+        if (!string.IsNullOrEmpty(selectedFile))
         {
-            FilePath = openFileDialog.FileName;
+            FilePath = selectedFile;
             LoadFileContent();
         }
     }
@@ -105,7 +94,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         IsBusy = true;
         try
         {
-            var originalTitle = _supportTool.FormgenUtils.ParsedFormgenFile.Title ?? Path.GetFileNameWithoutExtension(FilePath!);
+            var originalTitle = _supportTool.FormgenUtils.ParsedFormgenFile.Title ?? _fileSystem.GetFileNameWithoutExtension(FilePath!);
             bool titleHasChanged = !string.Equals(originalTitle, FormTitle, StringComparison.Ordinal);
 
             // Update the in-memory object before saving.
@@ -121,15 +110,15 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             if (titleHasChanged)
             {
                 _supportTool.FormgenUtils.RenameFile(FormTitle, ShouldRenameImage);
-                var directory = Path.GetDirectoryName(FilePath!);
-                FilePath = Path.Combine(directory!, FormTitle + ".formgen");
+                var directory = _fileSystem.GetDirectoryName(FilePath!);
+                FilePath = _fileSystem.CombinePath(directory!, FormTitle + ".formgen");
             }
 
-            MessageBox.Show("File saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            _dialogService.ShowMessageBox("File saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            _dialogService.ShowMessageBox($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -140,6 +129,19 @@ public partial class FormgenUtilitiesViewModel : ViewModel
                 LoadFileContent();
             }
         }
+    }
+
+    [RelayCommand]
+    private void ClearFile()
+    {
+        FilePath = null;
+        FormTitle = string.Empty;
+        Uuid = string.Empty;
+        IsImageFound = null;
+        ShouldRenameImage = false;
+        TreeViewNodes.Clear();
+        SelectedNode = null;
+        _supportTool.FormgenUtils.CloseFile();
     }
 
     [RelayCommand]
@@ -167,16 +169,16 @@ public partial class FormgenUtilitiesViewModel : ViewModel
                 throw new InvalidOperationException("Failed to parse the .formgen file.");
             }
 
-            FormTitle = fileData.Title ?? Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
+            FormTitle = fileData.Title ?? _fileSystem.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
             Uuid = fileData.Settings.UUID;
 
             // Check for associated image file
-            var fileDir = Path.GetDirectoryName(FilePath);
-            var fileNameNoExt = Path.GetFileNameWithoutExtension(FilePath);
-            var pdfPath = Path.Combine(fileDir!, fileNameNoExt + ".pdf");
-            var jpgPath = Path.Combine(fileDir!, fileNameNoExt + ".jpg");
+            var fileDir = _fileSystem.GetDirectoryName(FilePath);
+            var fileNameNoExt = _fileSystem.GetFileNameWithoutExtension(FilePath);
+            var pdfPath = _fileSystem.CombinePath(fileDir!, fileNameNoExt + ".pdf");
+            var jpgPath = _fileSystem.CombinePath(fileDir!, fileNameNoExt + ".jpg");
 
-            IsImageFound = fileData.FormType == Format.Pdf ? File.Exists(pdfPath) : File.Exists(jpgPath);
+            IsImageFound = fileData.FormType == Format.Pdf ? _fileSystem.FileExists(pdfPath) : _fileSystem.FileExists(jpgPath);
             ShouldRenameImage = IsImageFound ?? false;
 
             var rootNode = new TreeItemNodeViewModel(fileData, this);
@@ -185,12 +187,13 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             // Select the root node by default
             if (TreeViewNodes.Count > 0)
             {
-                SelectedNode = TreeViewNodes[0];
+                rootNode.IsSelected = true;
+                rootNode.IsExpanded = true; // Expand the root node by default
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to load file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            _dialogService.ShowMessageBox($"Failed to load file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             FilePath = null; // Reset filepath on failure
         }
         finally
@@ -204,12 +207,15 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         IFormgenFileProperties? properties = SelectedNode?.Data switch
         {
             DotFormgen formgenFile => new FormProperties(formgenFile),
+            PageGroup pageGroup => new PageGroupProperties(pageGroup),
+            CodeLineCollection codeLineCollection => new CodeLineCollectionProperties(codeLineCollection),
+            CodeLineGroup codeLineGroup => new CodeLineGroupProperties(codeLineGroup),
             FormPage page => new PageProperties(page),
             FormField field => new FieldProperties(field),
             CodeLine codeLine => new CodeLineProperties(codeLine),
             _ => null
         };
 
-        SelectedNodeProperties = properties?.GetUIElements();
+        SelectedNodeProperties = properties?.GetDisplayProperties();
     }
 }

@@ -1,11 +1,12 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
     public class DotFormgenSettings
     {
         public int Version { get; set; }
-        public string UUID { get; set; }
+        public string UUID { get; set; } = string.Empty;
         public bool LegacyImport { get; set; }
         public int TotalPages { get; set; }
         public int DefaultFontSize { get; set; }
@@ -13,6 +14,9 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public bool Duplex { get; set; }
         public int MaxAccessoryLines { get; set; }
         public bool PreprintedLaserForm { get; set; }
+
+        public DotFormgenSettings() { }
+
         public DotFormgenSettings(XmlAttributeCollection attributes)
         {
             if (int.TryParse(attributes[0].Value, out int parsedInt))

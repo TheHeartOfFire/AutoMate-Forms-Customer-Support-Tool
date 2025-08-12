@@ -69,11 +69,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public bool Equals(TextTemplate? other)
     {
-        return other is not null && other.Text.Equals(Text);
-    }
-    public bool Equals(string? other)
-    {
-        return other is not null && other.Equals(Text);
+        return other is not null && other.Id.Equals(Id);
     }
 
     public override bool Equals(object? obj)
@@ -83,7 +79,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Text, Name, Description);
+        return HashCode.Combine(Id);
     }
 
     public static bool ContainsVariable(string text, ISupportTool supportTool)

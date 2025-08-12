@@ -82,6 +82,7 @@ namespace AMFormsCST.Desktop.Models.FormNameGenerator
             Bank = string.Empty;
             Provider = string.Empty;
             Tags.Clear();
+            Tags.Add(Tag.Pdf);
         }
 
         public string GetFileName()

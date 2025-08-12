@@ -17,8 +17,16 @@ public class PageProperties : IFormgenFileProperties
 
     public IFormgenFileSettings Settings { get; set; }
 
-    public UIElement GetUIElements()
+    public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        return BasicStats.GetSettingsAndPropertiesUIElements(this);
+        if (Settings is PageSettings pageSettings)
+        {
+            yield return new DisplayProperty("Page Number:", pageSettings.PageNumber.ToString());
+            yield return new DisplayProperty("Default Font Size:", pageSettings.DefaultFontSize.ToString());
+            yield return new DisplayProperty("Left Margin:", pageSettings.LeftPrinterMargin.ToString());
+            yield return new DisplayProperty("Right Margin:", pageSettings.RightPrinterMargin.ToString());
+            yield return new DisplayProperty("Top Margin:", pageSettings.TopPrinterMargin.ToString());
+            yield return new DisplayProperty("Bottom Margin:", pageSettings.BottomPrinterMargin.ToString());
+        }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using AMFormsCST.Core;
 using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.Views.Dialogs;
@@ -71,9 +73,13 @@ public partial class DashboardViewModel : ViewModel
     }
 
     private readonly ISupportTool _supportTool;
-    public DashboardViewModel(ISupportTool supportTool)
+    private readonly IDialogService _dialogService;
+    private readonly IFileSystem _fileSystem;
+    public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _fileSystem = fileSystem;
         Notes.Add(new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator));
 
         _selectedNote = Notes[0];
@@ -96,12 +102,13 @@ public partial class DashboardViewModel : ViewModel
 
         if (IsDebugMode) _debugVisibility = Visibility.Visible;
 
-        if(_selectedNote is null) 
+        if (_selectedNote is null)
         {
             _selectedNote = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator);
             Notes.Add(_selectedNote);
             _selectedNote.Select();
         }
+
     }
 
     [RelayCommand]
@@ -265,9 +272,9 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenFormgenUtilsDialog()
     {
-        var vm = new FormgenUtilitiesViewModel(_supportTool);
+        var vm = new FormgenUtilitiesViewModel(_supportTool, _dialogService, _fileSystem);
         var navigationService = App.GetRequiredService<INavigationService>();
-        var page = new FormgenUtilitiesPage(vm, navigationService);
+        var page = new FormgenUtilitiesPage(vm, navigationService, _dialogService);
 
 
         var dialog = new PageHostDialog(page);

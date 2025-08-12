@@ -17,13 +17,13 @@ public class SupportTool : ISupportTool
     public ISettings Settings { get; set; }
     private readonly Properties _properties = new();
 
-    public SupportTool(IFormNameBestPractice formNameBestPractice, ISettings defaultSettings)
+    public SupportTool(IFileSystem fileSystem, IFormNameBestPractice formNameBestPractice, ISettings defaultSettings, ITemplateRepository templateRepository)
     {
         _properties = new Properties();
         CodeBlocks = new CodeBlocks();
         Notebook = new Notebook();
-        FormgenUtils = new FormgenUtils(_properties.FormgenUtils);
-        Enforcer = new BestPracticeEnforcer(formNameBestPractice);
+        FormgenUtils = new FormgenUtils(fileSystem, _properties.FormgenUtils);
+        Enforcer = new BestPracticeEnforcer(formNameBestPractice, templateRepository);
 
         // Load saved settings, or use the default ones if no file exists
         Settings = IO.LoadSettings() ?? defaultSettings;

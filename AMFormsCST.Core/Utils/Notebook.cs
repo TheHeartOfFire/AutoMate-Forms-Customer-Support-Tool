@@ -10,8 +10,8 @@ public class Notebook : INotebook
 
     public Notebook()
     {
-        
-        CurrentNote = Notes.Count > 0 ? Notes[0] : new Note();
+        if (Notes.Count == 0) Notes.Add(new Note());
+        CurrentNote = Notes[0];
     }
 
     public void AddNote(bool select = false) => AddNote(new Note(), select);

@@ -1,7 +1,7 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Windows;
+using System.Collections.Generic;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
@@ -11,7 +11,7 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
     private readonly DotFormgen _coreFormgenFile;
     public IFormgenFileSettings Settings { get; set; }
 
-    public string Title
+    public string? Title
     {
         get => _coreFormgenFile.Title;
         set => SetProperty(_coreFormgenFile.Title, value, _coreFormgenFile, (f, v) => f.Title = v);
@@ -35,13 +35,13 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
         set => SetProperty(_coreFormgenFile.SalesPersonPrompt, value, _coreFormgenFile, (f, v) => f.SalesPersonPrompt = v);
     }
 
-    public string Username
+    public string? Username
     {
         get => _coreFormgenFile.Username;
         set => SetProperty(_coreFormgenFile.Username, value, _coreFormgenFile, (f, v) => f.Username = v);
     }
 
-    public string BillingName
+    public string? BillingName
     {
         get => _coreFormgenFile.BillingName;
         set => SetProperty(_coreFormgenFile.BillingName, value, _coreFormgenFile, (f, v) => f.BillingName = v);
@@ -101,6 +101,21 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
             _ => "Unknown",
         };
 
-    public UIElement GetUIElements() => BasicStats.GetSettingsAndPropertiesUIElements(this);
-
+    // This method replaces GetUIElements()
+    public IEnumerable<DisplayProperty> GetDisplayProperties()
+    {
+        yield return new DisplayProperty("Title:", Title);
+        yield return new DisplayProperty("Form Type:", FormType.ToString());
+        yield return new DisplayProperty("Category:", Category.ToString());
+        yield return new DisplayProperty("Username:", Username);
+        yield return new DisplayProperty("Billing Name:", BillingName);
+        yield return new DisplayProperty("Trade Prompt:", TradePrompt.ToString());
+        yield return new DisplayProperty("Salesperson Prompt:", SalesPersonPrompt.ToString());
+        // Add other properties from FormSettings, etc.
+        if (Settings is FormSettings formSettings)
+        {
+            yield return new DisplayProperty("UUID:", formSettings.PublishedUUID);
+            yield return new DisplayProperty("Total Pages:", formSettings.TotalPages.ToString());
+        }
+    }
 }

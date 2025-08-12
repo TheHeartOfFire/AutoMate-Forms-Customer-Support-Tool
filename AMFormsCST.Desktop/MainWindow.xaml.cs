@@ -1,6 +1,8 @@
 ﻿using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.ViewModels;
+using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Tools;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,6 +49,17 @@ public partial class MainWindow : IWindow
 
         ViewModel = viewModel;
         DataContext = this;
+
+        ViewModel.NavigationItems =
+        [
+            new NavigationViewItem("Dashboard", SymbolRegular.Home24, typeof(DashboardPage)),
+            new NavigationViewItem("Tools", SymbolRegular.Wrench24, typeof(ToolsPage))
+        ];
+
+        ViewModel.NavigationFooter =
+        [
+            new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage))
+        ];
 
         InitializeComponent();
 

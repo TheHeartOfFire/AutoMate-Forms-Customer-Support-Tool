@@ -94,5 +94,9 @@ public partial class TemplatesViewModel : ViewModel
 
         Clipboard.SetText(SelectedTemplate.Output);
     }
+    [RelayCommand]
+    private void ResetTemplate(TemplateItemViewModel item)
+    {
+    }
 
 }

@@ -28,6 +28,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             Type = settings.Type;
             Variable = newName;
         }
+        public CodeLineSettings() { }
         public static CodeType GetCodeType(string type) => type switch
         {
             "INIT" => CodeType.INIT,

@@ -2,7 +2,7 @@ using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
 using CodeType = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings.CodeType;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
@@ -102,10 +102,9 @@ public class CodeLineSettingsTests
             Variable = "InitVar"
         };
         var sb = new StringBuilder();
-        // Use a dummy element to write attributes onto
         using var writer = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
         writer.WriteStartElement("dummy");
-        
+
         // Act
         settings.GenerateXml(writer);
         writer.WriteEndElement();

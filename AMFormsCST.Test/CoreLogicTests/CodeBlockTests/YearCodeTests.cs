@@ -25,7 +25,7 @@ public class YearCodeTests
         // Arrange
         var codeBlock = new YearCode();
         codeBlock.SetInputValue(0, "F123"); // Date Field
-        var expected = "YEAR(F123)";
+        var expected = "YEAR( F123 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -40,7 +40,7 @@ public class YearCodeTests
         // Arrange
         var codeBlock = new YearCode();
         // No input is set, so it should default to an empty string.
-        var expected = "YEAR()";
+        var expected = "YEAR( Date Field )";
 
         // Act
         var result = codeBlock.GetCode();

@@ -1,4 +1,5 @@
 using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
 using Moq;
 using System;
@@ -31,11 +32,11 @@ public class ErrorHandlerTests
     public void NoteNotFoundErrorCheck_WhenNoteExists_DoesNotThrow()
     {
         // Arrange
-        var noteToFind = new Mock<INote>();
-        var listToSearch = new List<INote> { noteToFind.Object };
+        var note = new Note();
+        var list = new List<INote> { note };
 
         // Act
-        var exception = Record.Exception(() => ErrorHandler.Notes.NoteNotFoundErrorCheck(noteToFind.Object, listToSearch));
+        var exception = Record.Exception(() => ErrorHandler.Notes.NoteNotFoundErrorCheck(note, list));
 
         // Assert
         Assert.Null(exception);

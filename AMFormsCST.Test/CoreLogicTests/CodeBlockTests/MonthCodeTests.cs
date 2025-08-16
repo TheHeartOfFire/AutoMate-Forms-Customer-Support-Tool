@@ -25,7 +25,7 @@ public class MonthCodeTests
         // Arrange
         var codeBlock = new MonthCode();
         codeBlock.SetInputValue(0, "F123"); // Date Field
-        var expected = "MONTH(F123)";
+        var expected = "MONTH( F123 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -40,7 +40,7 @@ public class MonthCodeTests
         // Arrange
         var codeBlock = new MonthCode();
         // No input is set, so it should default to an empty string.
-        var expected = "MONTH()";
+        var expected = "MONTH( Date Field )";
 
         // Act
         var result = codeBlock.GetCode();

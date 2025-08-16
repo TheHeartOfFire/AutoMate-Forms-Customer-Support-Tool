@@ -39,7 +39,10 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // We use the dispatcher to ensure this code runs after the UI has been fully composed.
+            // Ensure Application.Current and Dispatcher are available
+            if (Application.Current?.Dispatcher == null)
+                return;
+
             Application.Current.Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Loaded,
                 new Action(() =>
@@ -52,11 +55,9 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
                     navigationView.IsBackButtonVisible = Wpf.Ui.Controls.NavigationViewBackButtonVisible.Visible;
 
                     // Traverse the visual tree upwards to find the parent ScrollViewer.
-                    // This is more robust than relying on template part names.
                     var parentScrollViewer = FindParent<ScrollViewer>(this);
                     if (parentScrollViewer != null)
                     {
-                        // Disable its scrolling to allow the page's internal ScrollViewers to take over.
                         parentScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
                     }
                 })

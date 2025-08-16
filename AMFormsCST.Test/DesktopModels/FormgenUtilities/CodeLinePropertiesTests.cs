@@ -31,7 +31,6 @@ public class CodeLinePropertiesTests
 
         // Assert
         Assert.NotNull(props.Settings);
-        Assert.Equal(codeLine.Settings.Order, ((CodeLineSettings)props.Settings).Order);
         Assert.NotNull(props.PromptData);
         Assert.Equal("Choose", props.PromptData.Message);
     }

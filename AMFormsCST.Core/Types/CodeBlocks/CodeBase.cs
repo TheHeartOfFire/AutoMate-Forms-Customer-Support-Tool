@@ -18,6 +18,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
                 Inputs[Inputs.IndexOf(Inputs.Find(x => x.Index == input.Index)!)] = input;
             else
                 Inputs.Add(input);
+            Inputs.Sort();
 
             return this;
         }
@@ -25,6 +26,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
         public CodeBase AddInput(string description)
         {
             Inputs.Add(new CodeInput(string.Empty, description, Inputs.Count));
+            Inputs.Sort();
             return this;
         }
         public CodeBase AddInput(int index, string description)
@@ -34,6 +36,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
                 input.Index++;
 
             Inputs.Add(new CodeInput(string.Empty, description, index));
+            Inputs.Sort();
 
             return this;
         }

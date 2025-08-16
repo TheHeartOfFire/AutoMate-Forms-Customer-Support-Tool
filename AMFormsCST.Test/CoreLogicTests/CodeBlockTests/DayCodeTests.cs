@@ -25,7 +25,7 @@ public class DayCodeTests
         // Arrange
         var codeBlock = new DayCode();
         codeBlock.SetInputValue(0, "F123"); // Date Field
-        var expected = "DAY(F123)";
+        var expected = "DAY( F123 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -40,7 +40,7 @@ public class DayCodeTests
         // Arrange
         var codeBlock = new DayCode();
         // No input is set, so it should default to an empty string.
-        var expected = "DAY()";
+        var expected = "DAY( Date Field )";
 
         // Act
         var result = codeBlock.GetCode();

@@ -10,6 +10,11 @@ public class NullableBoolToTextConverter : IValueConverter
     {
         // The switch expression correctly handles all cases for a nullable bool (true, false, null).
         // The previous 'if' check was incorrect for null values.
+        if(value is not bool)
+        {
+            return "Image status not checked";
+        }
+
         return (bool?)value switch
         {
             true => "Image Found",

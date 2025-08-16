@@ -1,6 +1,6 @@
 ﻿namespace AMFormsCST.Core.Types.CodeBlocks
 {
-    public class CodeInput
+    public class CodeInput : IComparable<CodeInput>
     {
         public object Value { get; private set; }
         public string Description { get; set; }
@@ -21,5 +21,10 @@
 
         public void SetValue(string value) => Value = value;
         public void SetValue(CodeBase value) => Value = value;
+
+        public int CompareTo(CodeInput? other)
+        {
+            return other == null ? 1 : Index.CompareTo(other.Index);
+        }
     }
 }

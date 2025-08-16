@@ -31,7 +31,7 @@ public class SeplistCodeTests
         codeBlock.SetInputValue(0, "' '");
         codeBlock.SetInputValue(1, "F100");
         codeBlock.SetInputValue(2, "F101");
-        var expected = "SEPLIST(' ', F100, F101)";
+        var expected = "SEPLIST( ' ', F100, F101 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -93,7 +93,7 @@ public class SeplistCodeTests
         codeBlock.SetInputValue(2, "B");
         codeBlock.SetInputValue(3, "C");
         codeBlock.SetInputValue(4, "D");
-        var expected = "SEPLIST('-', A, B, C, D)";
+        var expected = "SEPLIST( '-', A, B, C, D )";
 
         // Act
         var result = codeBlock.GetCode();

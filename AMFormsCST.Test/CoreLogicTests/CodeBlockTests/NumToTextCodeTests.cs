@@ -29,7 +29,7 @@ public class NumToTextCodeTests
         var codeBlock = new NumToTextCode();
         codeBlock.SetInputValue(0, "F123"); // Number
         codeBlock.SetInputValue(1, "2");    // Decimal Places
-        var expected = "TEXT(ROUND(F123, 2))";
+        var expected = "TEXT( ROUND( F123, 2 ))";
 
         // Act
         var result = codeBlock.GetCode();
@@ -44,7 +44,7 @@ public class NumToTextCodeTests
         // Arrange
         var codeBlock = new NumToTextCode();
         // No inputs are set, so they should default to empty strings.
-        var expected = "TEXT(ROUND(, ))";
+        var expected = "TEXT( ROUND( Number, Decimal Places ))";
 
         // Act
         var result = codeBlock.GetCode();

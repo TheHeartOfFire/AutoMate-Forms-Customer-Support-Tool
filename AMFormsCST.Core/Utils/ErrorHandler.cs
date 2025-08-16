@@ -31,7 +31,7 @@ internal static class ErrorHandler
         {
             if (!listToSearch.Contains(noteToFind))
                 throw new NullReferenceException(
-                    string.Format(NoNoteInListMessage, typeof(INote), nameof(listToSearch)),
+                    string.Format(NoNoteInListMessage, typeof(INote).Name, nameof(listToSearch)),
                     new NullReferenceException(string.Format(NoteMissingMessage, nameof(noteToFind), noteToFind.Dump())));
         }
         internal static void NotesNotFoundErrorCheck(INote noteToFind1, INote noteToFind2, IList<INote> listToSearch)
@@ -42,7 +42,7 @@ internal static class ErrorHandler
                 bool both = !listToSearch.Contains(noteToFind1) && !listToSearch.Contains(noteToFind2);
 
                 throw new NullReferenceException(
-                   string.Format(NoNoteInListMessage, typeof(INote), nameof(listToSearch)),
+                   string.Format(NoNoteInListMessage, typeof(INote).Name, nameof(listToSearch)),
                     new NullReferenceException(
                         both ? string.Format(BothNotesMissingMessage, noteToFind1.Dump(), noteToFind2.Dump()) :
                         offender == noteToFind1 ? string.Format(NoteMissingMessage, nameof(noteToFind1), noteToFind1.Dump()) :
@@ -53,7 +53,7 @@ internal static class ErrorHandler
         internal static void NoNotesErrorCheck(IList<INote> notes)
         {
             if (notes.Count == 0)
-                throw new NullReferenceException(string.Format(EmptyListMessage, typeof(INote), nameof(notes)));
+                throw new NullReferenceException(string.Format(EmptyListMessage, typeof(INote).Name, nameof(notes)));
         }
     }
 }

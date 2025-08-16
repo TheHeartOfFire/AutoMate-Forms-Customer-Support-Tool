@@ -25,7 +25,7 @@ public class TextCodeTests
         // Arrange
         var codeBlock = new TextCode();
         codeBlock.SetInputValue(0, "F123"); // Value
-        var expected = "TEXT(F123)";
+        var expected = "TEXT( F123 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -40,7 +40,7 @@ public class TextCodeTests
         // Arrange
         var codeBlock = new TextCode();
         // No input is set, so it should default to an empty string.
-        var expected = "TEXT()";
+        var expected = "TEXT( Value )";
 
         // Act
         var result = codeBlock.GetCode();

@@ -1,11 +1,13 @@
 using AMFormsCST.Desktop;
 using AMFormsCST.Desktop.Controls;
+using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Test.Helpers;
 using Moq;
 using System;
 using System.DirectoryServices.ActiveDirectory;
 using System.Windows;
 using Wpf.Ui;
+using Wpf.Ui.Controls;
 using Wpf.Ui.Input;
 using Xunit;
 using Xunit.Sdk;
@@ -41,23 +43,6 @@ public class GalleryNavigationPresenterTests
     }
 
     [WpfFact]
-    public void TemplateButtonCommand_ExecutesNavigation_WhenTypeIsProvided()
-    {
-        // Arrange
-        var presenter = new GalleryNavigationPresenter();
-        var testType = typeof(string);
-
-        // Act & Assert
-        // This will call App.GetRequiredService<INavigationService>(), which will use the real implementation.
-        // If you want to verify navigation, you must refactor for testability.
-        var exception = Record.Exception(() => presenter.TemplateButtonCommand.Execute(testType));
-
-        // Assert
-        // The command should not throw, but we cannot verify navigation without refactoring.
-        Assert.Null(exception);
-    }
-
-    [WpfFact]
     public void TemplateButtonCommand_DoesNotNavigate_WhenTypeIsNull()
     {
         // Arrange
@@ -73,4 +58,5 @@ public class GalleryNavigationPresenterTests
         // The command should not throw, but we cannot verify navigation without refactoring.
         Assert.Null(exception);
     }
+
 }

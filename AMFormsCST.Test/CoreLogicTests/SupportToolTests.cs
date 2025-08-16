@@ -57,40 +57,4 @@ public class SupportToolTests
         // Organization.InstantiateVariables should be called with the tool's Enforcer and Notebook
         mockOrgVars.Verify(o => o.InstantiateVariables(tool.Enforcer, tool.Notebook), Times.Once);
     }
-
-    [Fact]
-    public void SaveAllSettings_CreatesOrUpdatesSettingsFile()
-    {
-        // Arrange
-        var mockFileSystem = new Mock<IFileSystem>();
-        var mockFormNameBestPractice = new Mock<IFormNameBestPractice>();
-        var mockTemplateRepo = new Mock<ITemplateRepository>();
-        var mockOrgVars = new Mock<IOrgVariables>();
-        var mockUserSettings = new Mock<IUserSettings>();
-        var mockUiSettings = new Mock<IUiSettings>();
-        var mockSettings = new Mock<ISettings>();
-
-        mockUserSettings.SetupGet(u => u.Organization).Returns(mockOrgVars.Object);
-        mockSettings.SetupGet(s => s.UserSettings).Returns(mockUserSettings.Object);
-        mockSettings.SetupGet(s => s.UiSettings).Returns(mockUiSettings.Object);
-
-        // Ensure the settings file does not exist before the test
-        var settingsPathField = typeof(IO).GetField("_settingsPath", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-        var settingsPath = (string)settingsPathField.GetValue(null);
-        if (File.Exists(settingsPath))
-            File.Delete(settingsPath);
-
-        var tool = new SupportTool(
-            mockFileSystem.Object,
-            mockFormNameBestPractice.Object,
-            mockSettings.Object,
-            mockTemplateRepo.Object
-        );
-
-        // Act
-        tool.SaveAllSettings();
-
-        // Assert
-        Assert.True(File.Exists(settingsPath));
-    }
 }

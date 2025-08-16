@@ -24,7 +24,12 @@ public class FuelDropdownDefaultCodeTests
     {
         // Arrange
         var codeBlock = new FuelDropdownDefaultCode();
-        var expected = "FUELTYPE = IF(CONTAINS(F776, 'GAS'), 'Gas', IF(CONTAINS(F776, 'DIESEL'), 'Diesel', IF(CONTAINS(F776, 'PROPANE'), 'Propane', IF(CONTAINS(F776, 'HYBRID'), 'Hybrid', IF(CONTAINS(F776, 'ELECTRIC'), 'Electric', IF(CONTAINS(F776, 'OTHER'), 'Other', ' '))))))";
+        var expected = "FUELTYPE = IF( CONTAINS( F776, 'GAS' ), 'Gas', " +
+            "IF( CONTAINS( F776, 'DIESEL' ), 'Diesel', " +
+            "IF( CONTAINS( F776, 'PROPANE' ), 'Propane', " +
+            "IF( CONTAINS( F776, 'HYBRID' ), 'Hybrid', " +
+            "IF( CONTAINS( F776, 'ELECTRIC' ), 'Electric', " +
+            "IF( CONTAINS( F776, 'OTHER' ), 'Other', ' ' ))))))";
 
         // Act
         var result = codeBlock.GetCode();

@@ -24,7 +24,7 @@ public class DateConversionCodeTests
         // Arrange
         var codeBlock = new DateConversionCode();
         codeBlock.SetInputValue(0, "F123"); // Date Field
-        var expected = "SEPLIST('/', MONTH(F123), DAY(F123), YEAR(F123) % 100)";
+        var expected = "SEPLIST( '/', MONTH( F123 ), DAY( F123 ), YEAR( F123 ) % 100 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -39,7 +39,7 @@ public class DateConversionCodeTests
         // Arrange
         var codeBlock = new DateConversionCode();
         // No input is set, so it should default to an empty string.
-        var expected = "SEPLIST('/', MONTH(), DAY(), YEAR() % 100)";
+        var expected = "SEPLIST( '/', MONTH( Date Field ), DAY( Date Field ), YEAR( Date Field ) % 100 )";
 
         // Act
         var result = codeBlock.GetCode();

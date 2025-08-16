@@ -47,7 +47,8 @@ public class ApplicationHostService(IServiceProvider serviceProvider, IUpdateMan
     {
         await _updateManagerService.CheckForUpdatesOnStartupAsync();
 
-        if (Application.Current.Windows.OfType<MainWindow>().Any())
+        if (Application.Current is null || 
+            Application.Current.Windows.OfType<MainWindow>().Any())
         {
             return;
         }

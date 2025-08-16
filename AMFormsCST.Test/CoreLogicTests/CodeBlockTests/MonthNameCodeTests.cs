@@ -25,8 +25,10 @@ public class MonthNameCodeTests
     {
         // Arrange
         var codeBlock = new MonthNameCode();
-        codeBlock.SetInputValue(0, "MONTH(F123)");
-        var expected = "CASE(MONTH(F123), 1, 'JANUARY', 2, 'FEBRUARY', 3, 'MARCH', 4, 'APRIL', 5, 'MAY', 6, 'JUNE', 7, 'JULY', 8, 'AUGUST', 9, 'SEPTEMBER', 10, 'OCTOBER', 11, 'NOVEMBER', 12, 'DECEMBER', 'Invalid Month')";
+        codeBlock.SetInputValue(0, "MONTH( F123 )");
+        var expected = "CASE( MONTH( F123 ), 1, 'JANUARY', 2, 'FEBRUARY', 3, 'MARCH', " +
+            "4, 'APRIL', 5, 'MAY', 6, 'JUNE', 7, 'JULY', 8, 'AUGUST', 9, 'SEPTEMBER', " +
+            "10, 'OCTOBER', 11, 'NOVEMBER', 12, 'DECEMBER', 'Invalid Month' )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -41,7 +43,9 @@ public class MonthNameCodeTests
         // Arrange
         var codeBlock = new MonthNameCode();
         // No input is set, so it should default to an empty string.
-        var expected = "CASE(, 1, 'JANUARY', 2, 'FEBRUARY', 3, 'MARCH', 4, 'APRIL', 5, 'MAY', 6, 'JUNE', 7, 'JULY', 8, 'AUGUST', 9, 'SEPTEMBER', 10, 'OCTOBER', 11, 'NOVEMBER', 12, 'DECEMBER', 'Invalid Month')";
+        var expected = "CASE( , 1, 'JANUARY', 2, 'FEBRUARY', 3, 'MARCH', " +
+            "4, 'APRIL', 5, 'MAY', 6, 'JUNE', 7, 'JULY', 8, 'AUGUST', 9, 'SEPTEMBER', " +
+            "10, 'OCTOBER', 11, 'NOVEMBER', 12, 'DECEMBER', 'Invalid Month' )";
 
         // Act
         var result = codeBlock.GetCode();

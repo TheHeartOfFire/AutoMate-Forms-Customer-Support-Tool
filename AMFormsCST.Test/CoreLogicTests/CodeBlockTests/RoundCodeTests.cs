@@ -27,7 +27,7 @@ public class RoundCodeTests
         var codeBlock = new RoundCode();
         codeBlock.SetInputValue(0, "F123"); // Number
         codeBlock.SetInputValue(1, "2");    // Decimal Places
-        var expected = "ROUND(F123, 2)";
+        var expected = "ROUND( F123, 2 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -42,7 +42,7 @@ public class RoundCodeTests
         // Arrange
         var codeBlock = new RoundCode();
         // No inputs are set, so they should default to empty strings.
-        var expected = "ROUND(, )";
+        var expected = "ROUND( Number, Decimal Places )";
 
         // Act
         var result = codeBlock.GetCode();

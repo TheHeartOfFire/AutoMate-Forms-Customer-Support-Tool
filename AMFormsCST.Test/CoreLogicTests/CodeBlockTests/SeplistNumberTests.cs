@@ -26,7 +26,7 @@ public class SeplistNumberTests
         var codeBlock = new SeplistNumber();
         codeBlock.SetInputValue(0, "F123"); // Numeric Field
         codeBlock.SetInputValue(1, "2");    // Decimal Places
-        var expected = "IF(F123 != 0, ROUND(F123, 2), '')";
+        var expected = "IF( F123 != 0, ROUND( F123, 2 ), '' )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -41,7 +41,7 @@ public class SeplistNumberTests
         // Arrange
         var codeBlock = new SeplistNumber();
         // No inputs are set, so they should default to empty strings.
-        var expected = "IF( != 0, ROUND(, ), '')";
+        var expected = "IF( Number != 0, ROUND( Number, Decimal Places ), '' )";
 
         // Act
         var result = codeBlock.GetCode();

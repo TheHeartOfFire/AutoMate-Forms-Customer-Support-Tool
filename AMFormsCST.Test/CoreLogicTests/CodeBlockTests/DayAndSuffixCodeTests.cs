@@ -24,7 +24,7 @@ public class DayAndSuffixCodeTests
         // Arrange
         var codeBlock = new DayAndSuffixCode();
         codeBlock.SetInputValue(0, "F123"); // Numeric Day field
-        var expected = "NUMTOTEXT(F123, 0) +  + CASE(F123, 11, 'th', 12, 'th', 13, 'th', CASE(F123 % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th'))";
+        var expected = "TEXT( ROUND( F123, 0 )) + CASE( F123, 11, 'th', 12, 'th', 13, 'th', CASE( F123 % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th' ))";
 
         // Act
         var result = codeBlock.GetCode();
@@ -39,7 +39,7 @@ public class DayAndSuffixCodeTests
         // Arrange
         var codeBlock = new DayAndSuffixCode();
         // No input is set, so it should default to an empty string.
-        var expected = "NUMTOTEXT(, 0) +  + CASE(, 11, 'th', 12, 'th', 13, 'th', CASE( % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th'))";
+        var expected = "TEXT( ROUND( Number, 0 )) + CASE( Comparison, 11, 'th', 12, 'th', 13, 'th', CASE( Comparison % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th' ))";
 
         // Act
         var result = codeBlock.GetCode();

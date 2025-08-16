@@ -12,10 +12,10 @@ public class PageProperties : IFormgenFileProperties
 {
     public PageProperties(FormPage page)
     {
-        Settings = new PageSettings(page.Settings);
+        Settings = page.Settings != null ? new PageSettings(page.Settings) : null;
     }
 
-    public IFormgenFileSettings Settings { get; set; }
+    public IFormgenFileSettings? Settings { get; set; }
 
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
@@ -28,5 +28,6 @@ public class PageProperties : IFormgenFileProperties
             yield return new DisplayProperty("Top Margin:", pageSettings.TopPrinterMargin.ToString());
             yield return new DisplayProperty("Bottom Margin:", pageSettings.BottomPrinterMargin.ToString());
         }
+        // If Settings is null, yields nothing (empty collection)
     }
 }

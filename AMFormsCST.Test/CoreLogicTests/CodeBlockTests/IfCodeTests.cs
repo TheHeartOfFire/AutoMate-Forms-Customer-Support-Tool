@@ -29,7 +29,7 @@ public class IfCodeTests
         codeBlock.SetInputValue(0, "F100 > 5");   // Condition
         codeBlock.SetInputValue(1, "'Yes'");      // ResultIfTrue
         codeBlock.SetInputValue(2, "'No'");       // ResultIfFalse
-        var expected = "IF(F100 > 5, 'Yes', 'No')";
+        var expected = "IF( F100 > 5, 'Yes', 'No' )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -44,7 +44,7 @@ public class IfCodeTests
         // Arrange
         var codeBlock = new IfCode();
         // No inputs are set, so they should default to empty strings.
-        var expected = "IF(, , )";
+        var expected = "IF( Condition, ResultIfTrue, ResultIfFalse )";
 
         // Act
         var result = codeBlock.GetCode();

@@ -30,7 +30,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks.Functions
         public CodeBase AddExtraInputs(int count)
         {
             for (var i = 0; i < count; i++)
-            {
+            { 
                 AddInput(InputCount() - 1, "Case");
                 AddInput(InputCount() - 1, "Result");
             }

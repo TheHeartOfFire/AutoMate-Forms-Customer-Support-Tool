@@ -27,7 +27,7 @@ public class PagePropertiesTests
 
     private FormPage CreateFormPage(FormPageSettings? settings = null)
     {
-        return new FormPage { Settings = settings ?? CreatePageSettings() };
+        return new FormPage { Settings = settings };
     }
 
     [Fact]

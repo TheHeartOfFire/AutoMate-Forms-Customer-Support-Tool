@@ -34,7 +34,7 @@ public class CaseCodeTests
         codeBlock.SetInputValue(3, "2");
         codeBlock.SetInputValue(4, "'B'");
         codeBlock.SetInputValue(5, "'C'");
-        var expected = "CASE(F100, 1, 'A', 2, 'B', 'C')";
+        var expected = "CASE( F100, 1, 'A', 2, 'B', 'C' )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -100,7 +100,7 @@ public class CaseCodeTests
         codeBlock.SetInputValue(5, "3"); // New Case
         codeBlock.SetInputValue(6, "'C'"); // New Result
         codeBlock.SetInputValue(7, "'D'"); // Default
-        var expected = "CASE(F100, 1, 'A', 2, 'B', 3, 'C', 'D')";
+        var expected = "CASE( F100, 1, 'A', 2, 'B', 3, 'C', 'D' )";
 
         // Act
         var result = codeBlock.GetCode();

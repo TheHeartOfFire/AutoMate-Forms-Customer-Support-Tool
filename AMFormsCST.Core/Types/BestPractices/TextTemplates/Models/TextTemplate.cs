@@ -41,8 +41,9 @@ public class TextTemplate : IEquatable<TextTemplate>
         }
         foreach (var variable in supportTool.Settings.UserSettings.Organization.Variables)
         {
-            if (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
-                Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (Text is not null && 
+                (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
+                Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 variables.Add(variable);
             }
@@ -69,11 +70,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public bool Equals(TextTemplate? other)
     {
-        return other is not null && other.Text.Equals(Text);
-    }
-    public bool Equals(string? other)
-    {
-        return other is not null && other.Equals(Text);
+        return other is not null && other.Id.Equals(Id);
     }
 
     public override bool Equals(object? obj)
@@ -83,7 +80,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Text, Name, Description);
+        return HashCode.Combine(Id);
     }
 
     public static bool ContainsVariable(string text, ISupportTool supportTool)

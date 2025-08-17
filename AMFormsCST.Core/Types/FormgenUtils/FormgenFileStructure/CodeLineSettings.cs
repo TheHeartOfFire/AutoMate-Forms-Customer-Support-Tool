@@ -5,7 +5,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
     public class CodeLineSettings
     {
         public int Order { get; set; }
-        public CodeType Type { get; set; }
+        public CodeType Type { get; set; } = CodeType.PROMPT;
         public string? Variable { get; set; }
         public enum CodeType
         {
@@ -28,6 +28,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             Type = settings.Type;
             Variable = newName;
         }
+        public CodeLineSettings() { }
         public static CodeType GetCodeType(string type) => type switch
         {
             "INIT" => CodeType.INIT,

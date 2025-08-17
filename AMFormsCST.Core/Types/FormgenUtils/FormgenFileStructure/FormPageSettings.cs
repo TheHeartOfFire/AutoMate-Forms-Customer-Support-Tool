@@ -10,6 +10,9 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public int RightPrinterMargin { get; set; }
         public int TopPrinterMargin { get; set; }
         public int BottomPrinterMargin { get; set; }
+
+        public FormPageSettings() { }
+
         public FormPageSettings(XmlAttributeCollection attributes)
         {
             if (int.TryParse(attributes[0].Value, out int parsedInt))

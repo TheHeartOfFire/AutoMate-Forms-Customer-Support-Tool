@@ -34,17 +34,6 @@ public partial class MainWindowViewModel : ObservableObject
     {
         _supportTool = supportTool;
 
-        NavigationItems = new ObservableCollection<object>
-        {
-            new NavigationViewItem("Dashboard", SymbolRegular.Home24, typeof(DashboardPage)),
-            new NavigationViewItem("Tools", SymbolRegular.Wrench24, typeof(ToolsPage))
-        };
-
-        NavigationFooter = new ObservableCollection<object>
-        {
-            new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage))
-        };
-
         // Initialize and subscribe to setting changes
         var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
         if (aotSetting != null)

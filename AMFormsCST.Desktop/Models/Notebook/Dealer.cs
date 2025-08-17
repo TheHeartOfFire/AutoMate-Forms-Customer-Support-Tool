@@ -60,7 +60,7 @@ namespace AMFormsCST.Desktop.Models
         public Dealer()
         {
 
-            Companies = new ObservableCollection<Company>();
+            Companies = [];
             Companies.CollectionChanged += ChildCollection_CollectionChanged;
             Companies.Add(new Company()); 
 

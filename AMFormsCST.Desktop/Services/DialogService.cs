@@ -1,4 +1,5 @@
 using AMFormsCST.Desktop.Views.Dialogs;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -25,13 +26,7 @@ public class DialogService : IDialogService
     {
         var dialog = new NewTemplateDialog(name, description, content);
         var result = dialog.ShowDialog();
-
-        if (result == true)
-        {
-            return (true, dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent);
-        }
-
-        return (result, string.Empty, string.Empty, string.Empty);
+        return (result, dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent);
     }
 
     /// <inheritdoc />
@@ -40,5 +35,21 @@ public class DialogService : IDialogService
         var dialog = new PageHostDialog(contentPage, canConfirm);
         dialog.ShowDialog();
         return dialog.ConfirmSelected;
+    }
+
+    public string? ShowOpenFileDialog(string filter)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Filter = filter,
+            Title = "Open File"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            return openFileDialog.FileName;
+        }
+
+        return null;
     }
 }

@@ -18,6 +18,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
                 Inputs[Inputs.IndexOf(Inputs.Find(x => x.Index == input.Index)!)] = input;
             else
                 Inputs.Add(input);
+            Inputs.Sort();
 
             return this;
         }
@@ -25,6 +26,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
         public CodeBase AddInput(string description)
         {
             Inputs.Add(new CodeInput(string.Empty, description, Inputs.Count));
+            Inputs.Sort();
             return this;
         }
         public CodeBase AddInput(int index, string description)
@@ -34,6 +36,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
                 input.Index++;
 
             Inputs.Add(new CodeInput(string.Empty, description, index));
+            Inputs.Sort();
 
             return this;
         }
@@ -91,7 +94,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
         public int InputCount() => Inputs.Count;
 
 
-        public virtual object GetInput(int idx) => Inputs[idx].Value;
+        public virtual object GetInput(int idx) => Inputs[idx].Value.Equals(string.Empty) ? Inputs[idx].Description : Inputs[idx].Value;
         public virtual object GetDescription(int idx) => Inputs[idx].Description;
 
         public virtual string GetCode()
@@ -106,7 +109,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
 
             foreach (var input in Inputs)
             {
-                output.Append(input.Value is CodeBase @base ? @base.GetCode() : (string)input.Value == string.Empty ? input.Description : input.Value);
+                output.Append(input.Value is CodeBase @base ? @base.GetCode() : ((string)input.Value).Equals(string.Empty) ? input.Description : input.Value);
 
                 if (step != Inputs.Count - 1)
                     output.Append(", ");

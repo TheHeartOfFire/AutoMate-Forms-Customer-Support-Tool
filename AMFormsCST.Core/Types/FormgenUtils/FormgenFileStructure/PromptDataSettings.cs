@@ -14,6 +14,9 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public bool ForceUpperCase { get; set; }
         public bool MakeBuyerVars { get; set; }
         public bool IncludeNoneAsOption { get; set; }
+        public PromptDataSettings()
+        {
+        }
 
         internal void GenerateXml(XmlWriter xml)
         {

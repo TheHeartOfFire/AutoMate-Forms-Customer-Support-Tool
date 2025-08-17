@@ -19,7 +19,7 @@ public class StringListToStringConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is string str)
+        if (value is string str && !str.Equals(String.Empty))
         {
             return str.Split([Environment.NewLine], StringSplitOptions.None).ToList();
         }

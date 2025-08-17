@@ -1,6 +1,8 @@
 ﻿using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.ViewModels;
+using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Tools;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +24,6 @@ public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
     // TODO: Set up unit tests for Core and Desktop projects
-    // TODO: BUGFIX: FormNameGenerator has a few bugs in name generation. (sold/trade tags for example)
     // TODO: Set up template import/export functionality
     // TODO: Set up Backup system in FormgenUtils
     // TODO: Set up persistent notes. Regularly save current notes to file to be retrieved upon crash or between sessions.
@@ -47,6 +48,17 @@ public partial class MainWindow : IWindow
 
         ViewModel = viewModel;
         DataContext = this;
+
+        ViewModel.NavigationItems =
+        [
+            new NavigationViewItem("Dashboard", SymbolRegular.Home24, typeof(DashboardPage)),
+            new NavigationViewItem("Tools", SymbolRegular.Wrench24, typeof(ToolsPage))
+        ];
+
+        ViewModel.NavigationFooter =
+        [
+            new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage))
+        ];
 
         InitializeComponent();
 

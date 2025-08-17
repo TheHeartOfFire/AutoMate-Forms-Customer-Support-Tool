@@ -93,12 +93,14 @@ public partial class App : Application
                 );
 
                 _ = services.AddTransient<IDialogService, DialogService>();
+                _ = services.AddSingleton<IFileSystem, FileSystem>();
                 _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
                 _ = services.AddTransient<FormgenUtilsProperties>();
 
                 // Register SupportTool and its dependencies as singletons
                 _ = services.AddSingleton<AutoMateFormModel>();
                 _ = services.AddSingleton<IFormNameBestPractice, AutoMateFormNameBestPractices>();
+                _ = services.AddSingleton<ITemplateRepository, TemplateRepository>();
                 _ = services.AddSingleton<IBestPracticeEnforcer, BestPracticeEnforcer>();
                 _ = services.AddSingleton<INotebook, Notebook>();
                 services.AddSingleton<IOrgVariables>(sp =>

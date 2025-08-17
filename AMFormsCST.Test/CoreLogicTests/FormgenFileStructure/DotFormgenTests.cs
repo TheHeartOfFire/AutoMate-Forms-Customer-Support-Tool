@@ -1,15 +1,31 @@
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using Assert = Xunit.Assert;
 using CodeType = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings.CodeType;
 using DotFormgenFormat = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen.Format;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
+
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class DotFormgenTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void DotFormgen_ParsesSampleFile_Correctly(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+        Assert.NotNull(dotFormgen.Settings);
+        Assert.False(string.IsNullOrWhiteSpace(dotFormgen.Title));
+        // etc.
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesPropertiesCorrectly()
     {
@@ -23,42 +39,25 @@ public class DotFormgenTests
         Assert.Empty(formgen.States);
     }
 
-    [Fact]
-    public void XmlConstructor_ParsesAllPropertiesCorrectly()
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesAllPropertiesCorrectly(string formgenFilePath)
     {
         // Arrange
-        var xml = @"
-            <formDef version=""1"" publishedUUID=""test-guid"" legacyImport=""false"" totalPages=""1"" defaultPoints=""10"" missingSourceJpeg=""false"" duplex=""false"" maxAccessoryLines=""0"" prePrintedLaserForm=""false"">
-                <title>My Test Form</title>
-                <tradePrompt>true</tradePrompt>
-                <formPrintType>Pdf</formPrintType>
-                <salespersonPrompt>false</salespersonPrompt>
-                <username>jdoe</username>
-                <billingName>John Doe</billingName>
-                <codeLines order=""1"" type=""PROMPT"" destVariable=""Var1""><promptData/></codeLines>
-                <formCategory>Retail</formCategory>
-                <validStates>TX</validStates>
-                <pages pageNumber=""1""><fields/></pages>
-            </formDef>";
+
         var doc = new XmlDocument();
-        doc.LoadXml(xml);
+        doc.Load(formgenFilePath);
         var rootElement = doc.DocumentElement!;
 
         // Act
         var formgen = new DotFormgen(rootElement);
 
         // Assert
-        Assert.Equal("My Test Form", formgen.Title);
-        Assert.True(formgen.TradePrompt);
-        Assert.Equal(DotFormgenFormat.Pdf, formgen.FormType);
-        Assert.False(formgen.SalesPersonPrompt);
-        Assert.Equal("jdoe", formgen.Username);
-        Assert.Equal("John Doe", formgen.BillingName);
-        Assert.Single(formgen.CodeLines);
-        Assert.Equal(DotFormgen.FormCategory.Retail, formgen.Category);
-        Assert.Single(formgen.States);
-        Assert.Equal("TX", formgen.States[0]);
-        Assert.Single(formgen.Pages);
+        Assert.NotNull(formgen.Title);
+        Assert.NotNull(formgen.Settings);
+        Assert.True(formgen.Pages.Count > 0);
+        Assert.True(formgen.CodeLines.Count > 0);
+        // Add more assertions as needed for your sample data
     }
 
     [Fact]

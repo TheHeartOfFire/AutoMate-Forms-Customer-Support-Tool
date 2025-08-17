@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VehicleType = AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel.SoldTrade;
+using Format = AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel.FormFormat;
 
 namespace AMFormsCST.Desktop.Models.FormNameGenerator
 {
@@ -98,7 +100,10 @@ namespace AMFormsCST.Desktop.Models.FormNameGenerator
                 Bank = Bank ?? string.Empty,
                 IsLAW = Tags.Contains(Tag.Law),
                 IsCustom = Tags.Contains(Tag.Custom),
-                
+                VehicleType = Tags.Contains(Tag.Sold) ? VehicleType.Sold :
+                              Tags.Contains(Tag.Trade) ? VehicleType.Trade : VehicleType.None,
+                IsVehicleMerchandising = Tags.Contains(Tag.VehicleMerchandising),
+                Format = Tags.Contains(Tag.Pdf) ? Format.Pdf : Format.LegacyImpact
             };
             return _supportTool.Enforcer.GetFormName();
         }

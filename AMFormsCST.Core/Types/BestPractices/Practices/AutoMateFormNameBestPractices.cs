@@ -20,14 +20,14 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
 
         var outerOpen = " [";
         var outerClose = ']';
-        var innerOpen = '(';
+        var innerOpen = " (";
         var innerClose = ')';
 
         if (model.Format is FormFormat.LegacyImpact)
         {
             outerOpen = " (";
             outerClose = ')';
-            innerOpen = ']';
+            innerOpen = " [";
             innerClose = ']';
         }
         // Pre-Encapsulation
@@ -48,9 +48,6 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
 
         sb.Append(model.Name);
 
-        if (!model.Name.Equals(string.Empty))
-            sb.Append(' ');
-
         // Encapsulation
         var hasEncapsulation = !(model.Code + model.RevisionDate).Equals(string.Empty);
         var hasBoth = !model.Code.Equals(string.Empty) && !model.RevisionDate.Equals(string.Empty);
@@ -62,9 +59,6 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
             sb.Append("LAW ");
 
         sb.Append(model.Code);
-
-        if (!model.Code.Equals(string.Empty))
-            sb.Append(' ');
 
         if (hasBoth)
             sb.Append(innerOpen);
@@ -90,7 +84,10 @@ public class AutoMateFormNameBestPractices(AutoMateFormModel model) : IFormNameB
             sb.Append(" (TRADE)");
 
         if (model.IsCustom)
-            sb.Append(" - Custom");
+            sb.Append(" -Custom");
+
+        if (model.IsVehicleMerchandising)
+            sb.Append(" -VM");
 
         return sb.ToString().Replace('/', '-');
     }

@@ -39,7 +39,7 @@ public class DayAndSuffixCodeTests
         // Arrange
         var codeBlock = new DayAndSuffixCode();
         // No input is set, so it should default to an empty string.
-        var expected = "TEXT( ROUND( Number, 0 )) + CASE( Comparison, 11, 'th', 12, 'th', 13, 'th', CASE( Comparison % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th' ))";
+        var expected = "TEXT( ROUND( Numeric Day, 0 )) + CASE( Numeric Day, 11, 'th', 12, 'th', 13, 'th', CASE( Numeric Day % 10, 1, 'st', 2, 'nd', 3, 'rd', 'th' ))";
 
         // Act
         var result = codeBlock.GetCode();

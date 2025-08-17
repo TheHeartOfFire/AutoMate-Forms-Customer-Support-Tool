@@ -3,14 +3,43 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
 using Alignment = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSettings.Alignment;
 using FieldType = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSettings.FieldType;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class FormFieldSettingsTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesSettingsFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var page in dotFormgen.Pages)
+        {
+            foreach (var field in page.Fields)
+            {
+                var settings = field.Settings;
+                Assert.NotNull(settings);
+
+                // Basic checks for parsed values
+                Assert.True(settings.ID >= 0);
+                Assert.True(Enum.IsDefined(typeof(FieldType), settings.Type));
+                Assert.True(settings.FontSize >= 0);
+                Assert.True(Enum.IsDefined(typeof(Alignment), settings.FontAlignment));
+                // Additional checks for rectangle and point types
+                Assert.True(settings.ImpactPosition.X >= 0 && settings.ImpactPosition.Y >= 0);
+                Assert.True(settings.LaserRect.Width >= 0 && settings.LaserRect.Height >= 0);
+            }
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesWithDefaults()
     {
@@ -19,7 +48,7 @@ public class FormFieldSettingsTests
 
         // Assert
         Assert.Equal(0, settings.ID);
-        Assert.Equal(FieldType.TEXT, settings.Type); // Default from GetFieldType
+        Assert.Equal(FieldType.TEXT, settings.Type);
         Assert.Equal(new Point(0, 0), settings.ImpactPosition);
         Assert.Equal(new Rectangle(0, 0, 0, 0), settings.LaserRect);
         Assert.False(settings.ManualSize);

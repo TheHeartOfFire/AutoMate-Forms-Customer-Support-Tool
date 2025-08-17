@@ -1,13 +1,37 @@
-using AMFormsCST.Desktop.Models.FormgenUtilities;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using PromptData = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptData;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
+using AMFormsCST.Desktop.Models.FormgenUtilities;
 using CorePromptSettings = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings;
-
+using PromptDataSettings = AMFormsCST.Desktop.Models.FormgenUtilities.PromptDataSettings;
 
 public class PromptDataPropertiesTests
 {
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void PromptDataProperties_ParsesLiveSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var codeLine in dotFormgen.CodeLines)
+        {
+            if (codeLine.PromptData != null)
+            {
+                var props = new PromptDataProperties(codeLine.PromptData);
+
+                Assert.NotNull(props.Settings);
+                Assert.NotNull(props.Choices);
+
+                var displayProps = props.GetDisplayProperties().ToList();
+                Assert.Contains(displayProps, dp => dp.Name == "Message:");
+            }
+        }
+    }
+
     private PromptData CreatePromptData(
         string? message = "Test Message",
         List<string>? choices = null,

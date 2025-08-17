@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formDef version="4" publishedUUID="754cf6d6-ba39-4831-8314-987b65aed1ea" legacyImport="true" totalPages="1" defaultPoints="10" missingSourceJpeg="false" duplex="false" maxAccessoryLines="0" prePrintedLaserForm="false">
+    <pages pageNumber="1" defaultPoints="0" leftPrinterMargin="18" rightPrinterMargin="18" topPrinterMargin="18" bottomPrinterMargin="18">
+        <fields>
+            <entry>
+                <key>1</key>
+                <value uniqueId="1" formFieldType="TEXT" legacyCol="14" legacyLine="145" x="78" y="156" w="300" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="50" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F766</expression>
+                    <sampleData>F766                                              </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>2</key>
+                <value uniqueId="2" formFieldType="TEXT" legacyCol="14" legacyLine="155" x="78" y="168" w="300" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="50" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F767</expression>
+                    <sampleData>F767                                              </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>3</key>
+                <value uniqueId="3" formFieldType="TEXT" legacyCol="14" legacyLine="175" x="78" y="192" w="210" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="35" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F50</expression>
+                    <sampleData>F50                                </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>4</key>
+                <value uniqueId="4" formFieldType="TEXT" legacyCol="20" legacyLine="195" x="114" y="216" w="210" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="35" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F2488</expression>
+                    <sampleData>F2488                              </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>5</key>
+                <value uniqueId="5" formFieldType="TEXT" legacyCol="17" legacyLine="215" x="96" y="240" w="72" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="12" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F55</expression>
+                    <sampleData>F55         </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>6</key>
+                <value uniqueId="6" formFieldType="TEXT" legacyCol="61" legacyLine="215" x="360" y="240" w="72" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="12" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F56</expression>
+                    <sampleData>F56         </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>7</key>
+                <value uniqueId="7" formFieldType="TEXT" legacyCol="16" legacyLine="235" x="90" y="264" w="60" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="10" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F70</expression>
+                    <sampleData>F70       </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>8</key>
+                <value uniqueId="8" formFieldType="TEXT" legacyCol="46" legacyLine="235" x="270" y="264" w="198" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="17" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="12" alignment="Left">
+                    <expression>F71</expression>
+                    <sampleData>F71              </sampleData>
+                    <formatOption>None</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>9</key>
+                <value uniqueId="9" formFieldType="TEXT" legacyCol="33" legacyLine="255" x="192" y="288" w="24" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="4" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F61</expression>
+                    <sampleData>F61 </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>10</key>
+                <value uniqueId="10" formFieldType="TEXT" legacyCol="49" legacyLine="255" x="288" y="288" w="72" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="12" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F62</expression>
+                    <sampleData>F62         </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>11</key>
+                <value uniqueId="11" formFieldType="TEXT" legacyCol="66" legacyLine="255" x="390" y="288" w="90" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="15" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F63</expression>
+                    <sampleData>F63            </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>12</key>
+                <value uniqueId="12" formFieldType="TEXT" legacyCol="8" legacyLine="440" x="42" y="510" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F102</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>13</key>
+                <value uniqueId="13" formFieldType="TEXT" legacyCol="9" legacyLine="440" x="48" y="510" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F102</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>14</key>
+                <value uniqueId="14" formFieldType="TEXT" legacyCol="8" legacyLine="460" x="42" y="534" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F103</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>15</key>
+                <value uniqueId="15" formFieldType="TEXT" legacyCol="9" legacyLine="460" x="48" y="534" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F103</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>16</key>
+                <value uniqueId="16" formFieldType="TEXT" legacyCol="8" legacyLine="485" x="42" y="564" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F104</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>17</key>
+                <value uniqueId="17" formFieldType="TEXT" legacyCol="9" legacyLine="485" x="48" y="564" w="6" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="1" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F104</expression>
+                    <sampleData>*</sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+            <entry>
+                <key>18</key>
+                <value uniqueId="18" formFieldType="TEXT" legacyCol="71" legacyLine="595" x="420" y="696" w="60" h="11" manualSize="false" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="10" pictureRight="0" displayPartialField="false" startChar="0" endChar="0" perCharDeltaPts="0" alignment="Left">
+                    <expression>F456</expression>
+                    <sampleData>F456      </sampleData>
+                    <formatOption>EmptyZeroPrintsNothing</formatOption>
+                </value>
+            </entry>
+        </fields>
+    </pages>
+    <title>LIMITED USED CAR WARRANTY</title>
+    <tradePrompt>false</tradePrompt>
+    <formPrintType>LegacyLaser</formPrintType>
+    <salespersonPrompt>false</salespersonPrompt>
+    <username>Dakota.Jordan</username>
+    <codeLines order="1" type="PROMPT" destVariable="F0">
+        <promptData type="InstructionLine" promptIsExpression="false" required="false" leftSize="0" rightSize="0" choicesDelimiter="0" allowNegatives="false" forceUpperCase="true" makeBuyerVars="true" includeNoneAsOption="false">
+            <promptMessage>ENTER 'X' FOR DURATION</promptMessage>
+        </promptData>
+    </codeLines>
+    <codeLines order="2" type="PROMPT" destVariable="F102">
+        <promptData type="Text" promptIsExpression="false" required="false" leftSize="1" rightSize="0" choicesDelimiter="0" allowNegatives="false" forceUpperCase="true" makeBuyerVars="true" includeNoneAsOption="false">
+            <promptMessage>  'A' 90 DAYS/3,750 MI:</promptMessage>
+        </promptData>
+    </codeLines>
+    <codeLines order="3" type="PROMPT" destVariable="F103">
+        <promptData type="Text" promptIsExpression="false" required="false" leftSize="1" rightSize="0" choicesDelimiter="0" allowNegatives="false" forceUpperCase="true" makeBuyerVars="true" includeNoneAsOption="false">
+            <promptMessage>  'B' 60 DAYS/2,500 MI:</promptMessage>
+        </promptData>
+    </codeLines>
+    <codeLines order="4" type="PROMPT" destVariable="F104">
+        <promptData type="Text" promptIsExpression="false" required="false" leftSize="1" rightSize="0" choicesDelimiter="0" allowNegatives="false" forceUpperCase="true" makeBuyerVars="true" includeNoneAsOption="false">
+            <promptMessage>  'C' 30 DAYS/1,250 MI:</promptMessage>
+        </promptData>
+    </codeLines>
+    <formCategory>Insurance</formCategory>
+    <validStates>MA</validStates>
+</formDef>

@@ -94,7 +94,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
         public int InputCount() => Inputs.Count;
 
 
-        public virtual object GetInput(int idx) => Inputs[idx].Value;
+        public virtual object GetInput(int idx) => Inputs[idx].Value.Equals(string.Empty) ? Inputs[idx].Description : Inputs[idx].Value;
         public virtual object GetDescription(int idx) => Inputs[idx].Description;
 
         public virtual string GetCode()
@@ -109,7 +109,7 @@ namespace AMFormsCST.Core.Types.CodeBlocks
 
             foreach (var input in Inputs)
             {
-                output.Append(input.Value is CodeBase @base ? @base.GetCode() : (string)input.Value == string.Empty ? input.Description : input.Value);
+                output.Append(input.Value is CodeBase @base ? @base.GetCode() : ((string)input.Value).Equals(string.Empty) ? input.Description : input.Value);
 
                 if (step != Inputs.Count - 1)
                     output.Append(", ");

@@ -18,6 +18,7 @@ public class AutoMateFormModel : IFormModel
     public string State { get; set; } = string.Empty;
     public bool IsCustom { get; set; } = false;
     public bool IsLAW { get; set; } = false;
+    public bool IsVehicleMerchandising { get; set; } = false;
     public SoldTrade VehicleType { get; set; } = SoldTrade.None;
     public FormFormat Format { get; set; } = FormFormat.LegacyImpact;
 

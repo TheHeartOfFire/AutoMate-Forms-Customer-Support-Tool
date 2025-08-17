@@ -3,11 +3,14 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Assert = Xunit.Assert;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure; // Ensure this using is present
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class DotFormgenSettingsTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
     [Fact]
     public void ParameterlessConstructor_InitializesWithDefaults()
     {
@@ -88,5 +91,19 @@ public class DotFormgenSettingsTests
         // Assert
         var expected = "<dummy version=\"3\" publishedUUID=\"generate-guid\" legacyImport=\"false\" totalPages=\"1\" defaultPoints=\"9\" missingSourceJpeg=\"false\" duplex=\"false\" maxAccessoryLines=\"0\" prePrintedLaserForm=\"false\" />";
         Assert.Equal(expected, resultXml);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesAttributesFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+        var settings = dotFormgen.Settings;
+
+        // Basic assertions to ensure parsing works
+        Assert.True(settings.Version > 0);
+        Assert.False(string.IsNullOrWhiteSpace(settings.UUID));
+        Assert.True(settings.TotalPages > 0);
+        // You can add more assertions based on what you expect in your sample data
     }
 }

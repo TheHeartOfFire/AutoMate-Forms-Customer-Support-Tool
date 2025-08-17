@@ -1,21 +1,45 @@
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
 using PromptType = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings.PromptType;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class PromptDataSettingsTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesSettingsFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var codeLine in dotFormgen.CodeLines)
+        {
+            if (codeLine.PromptData?.Settings != null)
+            {
+                var settings = codeLine.PromptData.Settings;
+                Assert.NotNull(settings);
+
+                // Basic checks for parsed values
+                Assert.True(Enum.IsDefined(typeof(PromptType), settings.Type));
+                Assert.True(settings.Length >= 0);
+                Assert.True(settings.DecimalPlaces >= 0);
+                // Delimiter may be null or empty, but should not throw
+            }
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesWithDefaults()
     {
-        // Arrange & Act
         var settings = new PromptDataSettings();
 
-        // Assert
-        Assert.Equal(PromptType.OneTwoThree, settings.Type); // Default is first enum value
+        Assert.Equal(PromptType.OneTwoThree, settings.Type);
         Assert.False(settings.IsExpression);
         Assert.False(settings.Required);
         Assert.Equal(0, settings.Length);
@@ -30,7 +54,6 @@ public class PromptDataSettingsTests
     [Fact]
     public void XmlConstructor_ParsesAttributesCorrectly()
     {
-        // Arrange
         var doc = new XmlDocument();
         var element = doc.CreateElement("promptData");
         element.SetAttribute("type", "Dropdown");
@@ -45,10 +68,8 @@ public class PromptDataSettingsTests
         element.SetAttribute("includeNoneAsOption", "true");
         var attributes = element.Attributes;
 
-        // Act
         var settings = new PromptDataSettings(attributes);
 
-        // Assert
         Assert.Equal(PromptType.Dropdown, settings.Type);
         Assert.True(settings.IsExpression);
         Assert.True(settings.Required);
@@ -66,13 +87,10 @@ public class PromptDataSettingsTests
     [InlineData("Money", PromptType.Money)]
     [InlineData("VIN", PromptType.VIN)]
     [InlineData("Zip5", PromptType.ZIP5)]
-    [InlineData("INVALID", PromptType.Text)] // Default case
+    [InlineData("INVALID", PromptType.Text)]
     public void GetPromptType_FromString_ReturnsCorrectEnum(string typeString, PromptType expectedType)
     {
-        // Act
         var result = PromptDataSettings.GetPromptType(typeString);
-
-        // Assert
         Assert.Equal(expectedType, result);
     }
 
@@ -81,13 +99,10 @@ public class PromptDataSettingsTests
     [InlineData(PromptType.Money, "Money")]
     [InlineData(PromptType.VIN, "VIN")]
     [InlineData(PromptType.ZIP5, "Zip5")]
-    [InlineData((PromptType)99, "Text")] // Default case
+    [InlineData((PromptType)99, "Text")]
     public void GetPromptType_FromEnum_ReturnsCorrectString(PromptType typeEnum, string expectedString)
     {
-        // Act
         var result = PromptDataSettings.GetPromptType(typeEnum);
-
-        // Assert
         Assert.Equal(expectedString, result);
     }
 
@@ -96,20 +111,16 @@ public class PromptDataSettingsTests
     [InlineData(PromptType.CheckBox, "CHK")]
     [InlineData(PromptType.Money, "$1.00")]
     [InlineData(PromptType.Text, "ABC")]
-    [InlineData((PromptType)99, "ABC")] // Default case
+    [InlineData((PromptType)99, "ABC")]
     public void PromptDescriptor_ReturnsCorrectString(PromptType typeEnum, string expected)
     {
-        // Act
         var result = PromptDataSettings.PromptDescriptor(typeEnum);
-
-        // Assert
         Assert.Equal(expected, result);
     }
 
     [Fact]
     public void GenerateXml_WritesCorrectAttributes()
     {
-        // Arrange
         var settings = new PromptDataSettings
         {
             Type = PromptType.RadioButtons,
@@ -124,18 +135,14 @@ public class PromptDataSettingsTests
             IncludeNoneAsOption = false
         };
         var sb = new StringBuilder();
-        // Use a dummy element to write attributes onto
         using var writer = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
         writer.WriteStartElement("dummy");
 
-        // Act
         settings.GenerateXml(writer);
         writer.WriteEndElement();
         writer.Flush();
         var resultXml = sb.ToString();
 
-        // Assert
-        var expected = "<dummy type=\"RadioButtons\" promptIsExpression=\"true\" required=\"true\" leftSize=\"8\" rightSize=\"3\" choicesDelimiter=\",\" allowNegatives=\"true\" forceUpperCase=\"false\" makeBuyerVars=\"true\" includeNoneAsOption=\"false\" />";
         Assert.Contains("type=\"RadioButtons\"", resultXml);
         Assert.Contains("promptIsExpression=\"true\"", resultXml);
         Assert.Contains("required=\"true\"", resultXml);

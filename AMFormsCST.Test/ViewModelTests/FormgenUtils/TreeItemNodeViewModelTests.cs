@@ -73,10 +73,10 @@ public class TreeItemNodeViewModelTests
 
         // Assert
         // all 3 groups get generated when prompts are added.
-        // These dummy code lines are defaulting to init,
+        // These dummy code lines are defaulting to prompt,
         // so we need to check the init group for these code Lines
         Assert.Equal("Code Lines", node.Header);
-        Assert.Equal(2, node.Children[0].Children.Count); 
+        Assert.Equal(2, node.Children[1].Children.Count); 
         Assert.All(node.Children[0].Children, child => Assert.IsType<CodeLine>(child.Data));
     }
 

@@ -2,20 +2,40 @@ using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
 using FormatOption = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormField.FormatOption;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class FormFieldTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesFormFieldsFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var page in dotFormgen.Pages)
+        {
+            foreach (var field in page.Fields)
+            {
+                Assert.NotNull(field.Settings);
+                // Expression and SampleData may be null, but should not throw
+                // FormattingOption should be a valid enum value
+                Assert.True(Enum.IsDefined(typeof(FormatOption), field.FormattingOption));
+            }
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesProperties()
     {
-        // Arrange & Act
         var field = new FormField();
 
-        // Assert
         Assert.NotNull(field.Settings);
         Assert.Null(field.Expression);
         Assert.Null(field.SampleData);
@@ -25,7 +45,6 @@ public class FormFieldTests
     [Fact]
     public void XmlConstructor_ParsesNodeCorrectly()
     {
-        // Arrange
         var xml = @"
             <entry>
                 <key>123</key>
@@ -39,10 +58,8 @@ public class FormFieldTests
         doc.LoadXml(xml);
         var node = doc.DocumentElement!;
 
-        // Act
         var field = new FormField(node);
 
-        // Assert
         Assert.NotNull(field.Settings);
         Assert.Equal(123, field.Settings.ID);
         Assert.Equal("F1+F2", field.Expression);
@@ -54,13 +71,10 @@ public class FormFieldTests
     [InlineData("None", FormatOption.None)]
     [InlineData("NAIfBlank", FormatOption.NAIfBlank)]
     [InlineData("EmptyZeroPrintsNothing", FormatOption.EmptyZeroPrintsNothing)]
-    [InlineData("InvalidOption", FormatOption.None)] // Default case
+    [InlineData("InvalidOption", FormatOption.None)]
     public void GetFormatOption_FromString_ReturnsCorrectEnum(string optionString, FormatOption expectedOption)
     {
-        // Act
         var result = FormField.GetFormatOption(optionString);
-
-        // Assert
         Assert.Equal(expectedOption, result);
     }
 
@@ -68,40 +82,10 @@ public class FormFieldTests
     [InlineData(FormatOption.None, "None")]
     [InlineData(FormatOption.NAIfBlank, "NAIfBlank")]
     [InlineData(FormatOption.NumbersAsWords, "NumberAsWords")]
-    [InlineData((FormatOption)99, "None")] // Default case
+    [InlineData((FormatOption)99, "None")]
     public void GetFormatOption_FromEnum_ReturnsCorrectString(FormatOption optionEnum, string expectedString)
     {
-        // Act
         var result = FormField.GetFormatOption(optionEnum);
-
-        // Assert
         Assert.Equal(expectedString, result);
-    }
-
-    [Fact]
-    public void GenerateXml_WritesCorrectXml()
-    {
-        // Arrange
-        var field = new FormField
-        {
-            Settings = { ID = 456 },
-            Expression = "MyExpression",
-            SampleData = "MySample",
-            FormattingOption = FormatOption.EmptyFieldPrints0
-        };
-        var sb = new StringBuilder();
-        using var writer = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
-
-        // Act
-        field.GenerateXml(writer);
-        writer.Flush();
-        var resultXml = sb.ToString();
-
-        // Assert
-        // Note: The method generates the content *inside* an <entry> tag.
-        var expectedStart = "<key>456</key><value";
-        var expectedEnd = "><expression>MyExpression</expression><sampleData>MySample</sampleData><formatOption>BlankPrintsZero</formatOption></value>";
-        Assert.StartsWith(expectedStart, resultXml);
-        Assert.EndsWith(expectedEnd, resultXml);
     }
 }

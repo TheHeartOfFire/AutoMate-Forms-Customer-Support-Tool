@@ -47,7 +47,7 @@ public class CityStateZIPCodeTests
         codeBlock.SetInputValue(0, "F100"); // City
         // State is intentionally left with its default value
         codeBlock.SetInputValue(2, "F102"); // ZIP
-        var expected = "SEPLIST( ' ', SEPLIST( ', ', F100, Item ), F102 )";
+        var expected = "SEPLIST( ' ', SEPLIST( ', ', F100, State ), F102 )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -62,7 +62,7 @@ public class CityStateZIPCodeTests
         // Arrange
         var codeBlock = new CityStateZIPCode();
         // No inputs are set, so they should use their default empty string values.
-        var expected = "SEPLIST( ' ', SEPLIST( ', ', Item, Item ), Item )";
+        var expected = "SEPLIST( ' ', SEPLIST( ', ', City, State ), ZIP )";
 
         // Act
         var result = codeBlock.GetCode();
@@ -85,7 +85,7 @@ public class CityStateZIPCodeTests
 
         // Because CityStateZIPCode's GetCode casts inputs using 'as string', the cityCodeBlock
         // will be treated as null and then converted to an empty string.
-        var expected = "SEPLIST( ' ', SEPLIST( ', ', Item, TX ), 12345 )";
+        var expected = "SEPLIST( ' ', SEPLIST( ', ', TEXT( MyCity ), TX ), 12345 )";
 
         // Act
         var result = codeBlock.GetCode();

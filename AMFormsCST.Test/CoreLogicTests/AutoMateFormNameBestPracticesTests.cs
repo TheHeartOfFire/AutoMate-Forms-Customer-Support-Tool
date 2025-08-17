@@ -6,41 +6,36 @@ namespace AMFormsCST.Test.CoreLogicTests;
 
 public class AutoMateFormNameBestPracticesTests
 {
+    private AutoMateFormModel model = new AutoMateFormModel
+    {
+        Format = AutoMateFormModel.FormFormat.Pdf,
+        IsLAW = true,
+        Name = "Retail Installment Contract",
+        Code = "553-TX-ARB-eps",
+        RevisionDate = "1-1-24"
+    };
+
     [Fact]
-    public void Generate_WithOnlyName_ReturnsNameWithTrailingSpace()
+    public void Generate_WithOnlyName_ReturnsName()
     {
         // Arrange
-        var model = new AutoMateFormModel { Name = "Retail Installment Contract" };
+        model.Code = string.Empty;
+        model.RevisionDate = string.Empty;
+        model.IsLAW = false;
         var practice = new AutoMateFormNameBestPractices(model);
 
         // Act
         var result = practice.Generate();
 
         // Assert
-        Assert.Equal("Retail Installment Contract ", result);
+        Assert.Equal("Retail Installment Contract", result);
     }
 
     [Fact]
     public void Generate_WithAllProperties_PdfFormat_ReturnsCorrectlyFormattedString()
     {
-        // Arrange
-        var model = new AutoMateFormModel
-        {
-            Format = AutoMateFormModel.FormFormat.Pdf,
-            State = "TX",
-            IsLAW = true,
-            Company = "R&R",
-            Bank = "Ally",
-            Name = "5052",
-            Code = "5052A",
-            RevisionDate = "1-1-24",
-            Manufacturer = "Ford",
-            Dealership = "Best",
-            VehicleType = AutoMateFormModel.SoldTrade.Sold,
-            IsCustom = true
-        };
         var practice = new AutoMateFormNameBestPractices(model);
-        var expected = "TX LAW R&RAlly 5052 [LAW 5052A (1-1-24)] (FordBest) (SOLD) - Custom";
+        var expected = "LAW Retail Installment Contract [LAW 553-TX-ARB-eps (1-1-24)]";
 
         // Act
         var result = practice.Generate();
@@ -52,24 +47,9 @@ public class AutoMateFormNameBestPracticesTests
     [Fact]
     public void Generate_WithAllProperties_LegacyImpactFormat_ReturnsCorrectlyFormattedString()
     {
-        // Arrange
-        var model = new AutoMateFormModel
-        {
-            Format = AutoMateFormModel.FormFormat.LegacyImpact,
-            State = "TX",
-            IsLAW = true,
-            Company = "R&R",
-            Bank = "Ally",
-            Name = "5052",
-            Code = "5052A",
-            RevisionDate = "1-1-24",
-            Manufacturer = "Ford",
-            Dealership = "Best",
-            VehicleType = AutoMateFormModel.SoldTrade.Trade,
-            IsCustom = true
-        };
         var practice = new AutoMateFormNameBestPractices(model);
-        var expected = "TX LAW R&RAlly 5052 (LAW 5052A [1-1-24]) (FordBest) (TRADE) - Custom";
+        model.Format = AutoMateFormModel.FormFormat.LegacyImpact;
+        var expected = "LAW Retail Installment Contract (LAW 553-TX-ARB-eps [1-1-24])";
 
         // Act
         var result = practice.Generate();
@@ -82,22 +62,25 @@ public class AutoMateFormNameBestPracticesTests
     public void Generate_WithOnlyCode_EncapsulatesCorrectly()
     {
         // Arrange
-        var model = new AutoMateFormModel { Name = "Test Form", Code = "T123" };
+        model.IsLAW = false;
+        model.RevisionDate = string.Empty;
         var practice = new AutoMateFormNameBestPractices(model);
 
         // Assert
-        Assert.Equal("Test Form [T123 ]", practice.Generate());
+        Assert.Equal("Retail Installment Contract [553-TX-ARB-eps]", practice.Generate());
     }
 
     [Fact]
     public void Generate_WithOnlyRevisionDate_EncapsulatesCorrectly()
     {
         // Arrange
-        var model = new AutoMateFormModel { Name = "Test Form", RevisionDate = "1-1-24" };
+        model.IsLAW = false;
+        model.Code = string.Empty;
+
         var practice = new AutoMateFormNameBestPractices(model);
 
         // Assert
-        Assert.Equal("Test Form [1-1-24]", practice.Generate());
+        Assert.Equal("Retail Installment Contract [1-1-24]", practice.Generate());
     }
 
     [Fact]
@@ -108,7 +91,7 @@ public class AutoMateFormNameBestPracticesTests
         var practice = new AutoMateFormNameBestPractices(model);
 
         // Assert
-        Assert.Equal("[01-01-24]", practice.Generate());
+        Assert.Equal(" (01-01-24)", practice.Generate());
     }
 
     [Fact]
@@ -123,5 +106,47 @@ public class AutoMateFormNameBestPracticesTests
 
         // Assert
         Assert.Equal(string.Empty, result);
+    }
+    [Fact]
+    public void Generate_WithCustomTag_ReturnsCorrectlyFormattedString()
+    {
+        // Arrange
+        model.IsCustom = true;
+        var practice = new AutoMateFormNameBestPractices(model);
+        var expected = "LAW Retail Installment Contract [LAW 553-TX-ARB-eps (1-1-24)] -Custom";
+
+        // Act
+        var result = practice.Generate();
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+    [Fact]
+    public void Generate_WithSoldTag_ReturnsCorrectlyFormattedString()
+    {
+        // Arrange
+        model.VehicleType = AutoMateFormModel.SoldTrade.Sold;
+        var practice = new AutoMateFormNameBestPractices(model);
+        var expected = "LAW Retail Installment Contract [LAW 553-TX-ARB-eps (1-1-24)] (SOLD)";
+
+        // Act
+        var result = practice.Generate();
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+    [Fact]
+    public void Generate_WithTradeTag_ReturnsCorrectlyFormattedString()
+    {
+        // Arrange
+        model.VehicleType = AutoMateFormModel.SoldTrade.Trade;
+        var practice = new AutoMateFormNameBestPractices(model);
+        var expected = "LAW Retail Installment Contract [LAW 553-TX-ARB-eps (1-1-24)] (TRADE)";
+
+        // Act
+        var result = practice.Generate();
+
+        // Assert
+        Assert.Equal(expected, result);
     }
 }

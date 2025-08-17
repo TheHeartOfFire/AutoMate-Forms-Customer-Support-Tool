@@ -41,7 +41,7 @@ public class SeplistNumberTests
         // Arrange
         var codeBlock = new SeplistNumber();
         // No inputs are set, so they should default to empty strings.
-        var expected = "IF( Number != 0, ROUND( Number, Decimal Places ), '' )";
+        var expected = "IF( Numeric Field != 0, ROUND( Numeric Field, Decimal Places ), '' )";
 
         // Act
         var result = codeBlock.GetCode();

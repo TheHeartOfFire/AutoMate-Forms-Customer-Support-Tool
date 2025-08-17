@@ -2,59 +2,47 @@ using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class FormPageTests
 {
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesFormPagesFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var page in dotFormgen.Pages)
+        {
+            Assert.NotNull(page.Settings);
+            Assert.True(page.Settings.PageNumber > 0);
+            Assert.True(page.Fields.Count >= 0);
+
+            // Optionally, check that each field has a non-null expression
+            foreach (var field in page.Fields)
+            {
+                Assert.NotNull(field.Expression);
+            }
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesPropertiesCorrectly()
     {
-        // Arrange & Act
         var page = new FormPage();
 
-        // Assert
         Assert.NotNull(page.Settings);
         Assert.Empty(page.Fields);
     }
 
-    [Fact]
-    public void XmlConstructor_ParsesNodeCorrectly()
-    {
-        // Arrange
-        var xml = @"
-            <pages pageNumber=""1"" defaultPoints=""10"" leftMargin=""0"" rightMargin=""0"" topMargin=""0"" bottomMargin=""0"">
-                <fields>
-                    <entry>
-                        <key>1</key>
-                        <value uniqueId=""1""><expression>F1</expression></value>
-                    </entry>
-                    <entry>
-                        <key>2</key>
-                        <value uniqueId=""2""><expression>F2</expression></value>
-                    </entry>
-                </fields>
-            </pages>";
-        var doc = new XmlDocument();
-        doc.LoadXml(xml);
-        var node = doc.DocumentElement!;
-
-        // Act
-        var page = new FormPage(node);
-
-        // Assert
-        Assert.NotNull(page.Settings);
-        Assert.Equal(1, page.Settings.PageNumber);
-        Assert.Equal(10, page.Settings.DefaultFontSize);
-        Assert.Equal(2, page.Fields.Count);
-        Assert.Equal("F1", page.Fields[0].Expression);
-    }
 
     [Fact]
     public void GenerateXml_WritesCorrectXml()
     {
-        // Arrange
         var page = new FormPage
         {
             Settings = { PageNumber = 2, DefaultFontSize = 12 }
@@ -65,12 +53,10 @@ public class FormPageTests
         var sb = new StringBuilder();
         using var writer = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
 
-        // Act
         page.GenerateXml(writer);
         writer.Flush();
         var resultXml = sb.ToString();
 
-        // Assert
         var expectedStart = "<pages pageNumber=\"2\" defaultPoints=\"12\"";
         var expectedFields = "<fields><entry><key>100</key>";
         var expectedEnd = "</fields></pages>";

@@ -2,12 +2,37 @@ using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class FormPageSettingsTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesSettingsFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var page in dotFormgen.Pages)
+        {
+            var settings = page.Settings;
+            Assert.NotNull(settings);
+
+            // Basic checks for parsed values
+            Assert.True(settings.PageNumber >= 0);
+            Assert.True(settings.DefaultFontSize >= 0);
+            Assert.True(settings.LeftPrinterMargin >= 0);
+            Assert.True(settings.RightPrinterMargin >= 0);
+            Assert.True(settings.TopPrinterMargin >= 0);
+            Assert.True(settings.BottomPrinterMargin >= 0);
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesWithDefaults()
     {

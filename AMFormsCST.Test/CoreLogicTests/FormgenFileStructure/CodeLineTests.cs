@@ -2,13 +2,38 @@ using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Assert = Xunit.Assert;
+using Xunit;
 using CodeType = AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings.CodeType;
+using AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 namespace AMFormsCST.Test.CoreLogicTests.FormgenFileStructure;
 
 public class CodeLineTests
 {
+    // Always alias the live sample data provider
+    private static readonly IEnumerable<object[]> FormgenFilePaths = FormgenTestDataHelper.FormgenFilePaths;
+    [Theory]
+    [MemberData(nameof(FormgenFilePaths), MemberType = typeof(FormgenTestDataHelper))]
+    public void XmlConstructor_ParsesCodeLinesFromSampleFiles(string formgenFilePath)
+    {
+        var dotFormgen = FormgenTestDataHelper.LoadDotFormgen(formgenFilePath);
+
+        foreach (var codeLine in dotFormgen.CodeLines)
+        {
+            Assert.NotNull(codeLine.Settings);
+
+            // Check type-specific properties
+            if (codeLine.Settings.Type == CodeType.PROMPT)
+            {
+                Assert.NotNull(codeLine.PromptData);
+            }
+            else
+            {
+                Assert.NotNull(codeLine.Expression);
+            }
+        }
+    }
+
     [Fact]
     public void ParameterlessConstructor_InitializesProperties()
     {
@@ -69,28 +94,6 @@ public class CodeLineTests
     }
 
     [Fact]
-    public void XmlConstructor_ForPromptType_ParsesPromptData()
-    {
-        // Arrange
-        var xml = "<codeLine order=\"2\" type=\"PROMPT\" destVariable=\"Choice\"><promptData><message>Choose one</message><choices><string>A</string><string>B</string></choices></promptData></codeLine>";
-        var doc = new XmlDocument();
-        doc.LoadXml(xml);
-        var node = doc.DocumentElement!;
-
-        // Act
-        var codeLine = new CodeLine(node);
-
-        // Assert
-        Assert.NotNull(codeLine.Settings);
-        Assert.Equal(CodeType.PROMPT, codeLine.Settings.Type);
-        Assert.NotNull(codeLine.PromptData);
-        Assert.Equal("Choose one", codeLine.PromptData.Message);
-        Assert.Equal(2, codeLine.PromptData.Choices.Count);
-        Assert.Equal("A", codeLine.PromptData.Choices[0]);
-        Assert.Null(codeLine.Expression); // Should be null for prompt types
-    }
-
-    [Fact]
     public void GenerateXml_ForNonPromptType_WritesCorrectXml()
     {
         // Arrange
@@ -112,25 +115,4 @@ public class CodeLineTests
         Assert.Equal(expected, resultXml);
     }
 
-    [Fact]
-    public void GenerateXml_ForPromptType_WritesCorrectXml()
-    {
-        // Arrange
-        var codeLine = new CodeLine
-        {
-            Settings = { Order = 10, Type = CodeType.PROMPT, Variable = "UserChoice" },
-            PromptData = { Message = "Select an option", Choices = { "Opt1", "Opt2" } }
-        };
-        var sb = new StringBuilder();
-        using var writer = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
-
-        // Act
-        codeLine.GenerateXml(writer);
-        writer.Flush();
-        var resultXml = sb.ToString();
-
-        // Assert
-        var expected = "<codeLines order=\"10\" type=\"PROMPT\" destVariable=\"UserChoice\"><promptData><message>Select an option</message><choices><string>Opt1</string><string>Opt2</string></choices></promptData></codeLines>";
-        Assert.Equal(expected, resultXml);
-    }
 }

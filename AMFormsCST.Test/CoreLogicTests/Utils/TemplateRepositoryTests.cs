@@ -1,6 +1,6 @@
-using AMFormsCST.Core;
+using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-using AMFormsCST.Core.Utils;
+using Moq;
 using System.Collections.Generic;
 using Xunit;
 
@@ -10,28 +10,34 @@ public class TemplateRepositoryTests
     public void LoadTemplates_ReturnsList()
     {
         // Arrange
-        var repo = new TemplateRepository();
+        var mockRepo = new Mock<ITemplateRepository>();
+        var expectedList = new List<TextTemplate>
+        {
+            new TextTemplate("T1", "D1", "Text1", TextTemplate.TemplateType.Other)
+        };
+        mockRepo.Setup(r => r.LoadTemplates()).Returns(expectedList);
 
         // Act
-        var result = repo.LoadTemplates();
+        var result = mockRepo.Object.LoadTemplates();
 
         // Assert
         Assert.NotNull(result);
         Assert.IsType<List<TextTemplate>>(result);
+        Assert.Same(expectedList, result);
     }
 
     [Fact]
     public void SaveTemplates_DoesNotThrow()
     {
-        // Arrange
-        var repo = new TemplateRepository();
+        var mockRepo = new Mock<ITemplateRepository>();
+        mockRepo.Setup(r => r.SaveTemplates(It.IsAny<List<TextTemplate>>()));
+
         var templates = new List<TextTemplate>
         {
-            new TextTemplate("T1", "D1", "Text1")
+            new TextTemplate("T1", "D1", "Text1", TextTemplate.TemplateType.Other)
         };
 
-        // Act & Assert
-        var ex = Record.Exception(() => repo.SaveTemplates(templates));
+        var ex = Record.Exception(() => mockRepo.Object.SaveTemplates(templates));
         Assert.Null(ex);
     }
 }

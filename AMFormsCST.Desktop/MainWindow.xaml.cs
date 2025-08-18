@@ -23,7 +23,6 @@ namespace AMFormsCST.Desktop;
 public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Set up unit tests for Core and Desktop projects
     // TODO: Set up template import/export functionality
     // TODO: Set up Backup system in FormgenUtils
     // TODO: Set up persistent notes. Regularly save current notes to file to be retrieved upon crash or between sessions.

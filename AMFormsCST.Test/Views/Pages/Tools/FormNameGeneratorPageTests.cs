@@ -6,6 +6,7 @@ using Xunit;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class FormNameGeneratorPageTests
 {
     [WpfFact]

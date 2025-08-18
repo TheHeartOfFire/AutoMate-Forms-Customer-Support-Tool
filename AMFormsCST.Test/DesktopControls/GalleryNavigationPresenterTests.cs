@@ -12,6 +12,7 @@ using Wpf.Ui.Input;
 using Xunit;
 using Xunit.Sdk;
 
+[Collection("STA Tests")]
 public class GalleryNavigationPresenterTests
 {
     [WpfFact]

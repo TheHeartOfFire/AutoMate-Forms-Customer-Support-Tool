@@ -6,6 +6,7 @@ using System.Windows;
 
 namespace AMFormsCST.Test.ConverterTests;
 
+[Collection("STA Tests")]
 public class ContentFallbackConverterTests
 {
     private readonly ContentFallbackConverter _converter = new();

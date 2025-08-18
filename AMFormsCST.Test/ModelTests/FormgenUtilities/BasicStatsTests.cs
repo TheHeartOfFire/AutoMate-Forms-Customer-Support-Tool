@@ -7,6 +7,7 @@ using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.ModelTests.FormgenUtilities;
 
+[Collection("STA Tests")]
 public class BasicStatsTests
 {
     // A mock class implementing IFormgenFileProperties for testing purposes.

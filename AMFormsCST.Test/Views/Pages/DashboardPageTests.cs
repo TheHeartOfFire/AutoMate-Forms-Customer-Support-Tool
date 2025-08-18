@@ -10,6 +10,7 @@ using AMFormsCST.Core.Types.CodeBlocks;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class DashboardPageTests
 {
     [WpfFact]

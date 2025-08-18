@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using Xunit;
 using TreeViewItem = Wpf.Ui.Controls.TreeViewItem;
 
+[Collection("STA Tests")]
 public class TreeViewItemExtensionsTests
 {
     [WpfFact]

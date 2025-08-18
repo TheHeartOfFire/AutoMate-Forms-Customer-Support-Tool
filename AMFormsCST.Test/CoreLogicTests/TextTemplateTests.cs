@@ -16,7 +16,6 @@ public class TextTemplateTests
 
     public TextTemplateTests()
     {
-        // 1. Mock the variables that the template will search for.
         var mockVar1 = new Mock<ITextTemplateVariable>();
         mockVar1.Setup(v => v.ProperName).Returns("{CaseNumber}");
         mockVar1.Setup(v => v.Prefix).Returns("$");
@@ -33,7 +32,6 @@ public class TextTemplateTests
 
         _variables = [mockVar1.Object, mockVar2.Object];
 
-        // 2. Mock the dependency chain to provide the variables.
         var mockOrgVariables = new Mock<IOrgVariables>();
         mockOrgVariables.Setup(ov => ov.Variables).Returns(_variables);
 
@@ -51,8 +49,8 @@ public class TextTemplateTests
     public void GetVariables_FindsVariablesInText_AndReturnsThem()
     {
         // Arrange
-        var template = new TextTemplate("Test", "Desc", "Case number is {CaseNumber} and user is $User.");
-
+        var template = new TextTemplate("Test", "Desc", "Case number is {CaseNumber} and user is $User.", TextTemplate.TemplateType.Other);
+    
         // Act
         var foundVariables = template.GetVariables(_mockSupportTool.Object);
 
@@ -66,7 +64,7 @@ public class TextTemplateTests
     public void GetVariables_WhenNoVariablesInText_ReturnsEmptyList()
     {
         // Arrange
-        var template = new TextTemplate("Test", "Desc", "This text has no variables.");
+        var template = new TextTemplate("Test", "Desc", "This text has no variables.", TextTemplate.TemplateType.Other);
 
         // Act
         var foundVariables = template.GetVariables(_mockSupportTool.Object);
@@ -146,5 +144,37 @@ public class TextTemplateTests
         Assert.Equal(-1, position);
         Assert.Null(variable);
         Assert.Equal(string.Empty, alias);
+    }
+
+    [Theory]
+    [InlineData(TextTemplate.TemplateType.PublishComments)]
+    [InlineData(TextTemplate.TemplateType.InternalComments)]
+    [InlineData(TextTemplate.TemplateType.ClosureComments)]
+    [InlineData(TextTemplate.TemplateType.Email)]
+    [InlineData(TextTemplate.TemplateType.Other)]
+    public void Constructor_SetsTemplateTypeCorrectly(TextTemplate.TemplateType type)
+    {
+        // Arrange & Act
+        var template = new TextTemplate("Name", "Desc", "Text", type);
+
+        // Assert
+        Assert.Equal(type, template.Type);
+    }
+
+    [Fact]
+    public void JsonConstructor_SetsAllPropertiesCorrectly()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        // Act
+        var template = new TextTemplate(id, "Name", "Desc", "Text", TextTemplate.TemplateType.Email);
+
+        // Assert
+        Assert.Equal(id, template.Id);
+        Assert.Equal("Name", template.Name);
+        Assert.Equal("Desc", template.Description);
+        Assert.Equal("Text", template.Text);
+        Assert.Equal(TextTemplate.TemplateType.Email, template.Type);
     }
 }

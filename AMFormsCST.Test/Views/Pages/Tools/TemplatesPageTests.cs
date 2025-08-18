@@ -8,6 +8,7 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class TemplatesPageTests
 {
     [WpfFact]
@@ -18,10 +19,11 @@ public class TemplatesPageTests
 
         // Setup Enforcer.Templates to return an empty list or test data
         var enforcerMock = new Mock<IBestPracticeEnforcer>();
+        var fileSystemMock = new Mock<IFileSystem>();
         enforcerMock.SetupGet(e => e.Templates).Returns(new List<TextTemplate>());
         supportToolMock.SetupGet(s => s.Enforcer).Returns(enforcerMock.Object);
 
-        var vm = new TemplatesViewModel(supportToolMock.Object);
+        var vm = new TemplatesViewModel(supportToolMock.Object, fileSystemMock.Object);
 
         // Act
         var page = new TemplatesPage(vm);

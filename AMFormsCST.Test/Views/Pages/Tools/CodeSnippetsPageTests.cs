@@ -6,6 +6,7 @@ using Xunit;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class CodeSnippetsPageTests
 {
     [WpfFact]

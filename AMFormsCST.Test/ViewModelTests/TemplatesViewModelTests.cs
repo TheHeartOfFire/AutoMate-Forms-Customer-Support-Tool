@@ -3,6 +3,7 @@ using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Moq;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ public class TemplatesViewModelTests
     private readonly Mock<ISettings> _mockSettings;
     private readonly Mock<IUserSettings> _mockUserSettings;
     private readonly Mock<IOrgVariables> _mockOrgVariables;
+    private readonly Mock<IFileSystem> _mockFileSystem;
     private readonly List<TextTemplate> _templateList;
 
     public TemplatesViewModelTests()
@@ -28,12 +30,13 @@ public class TemplatesViewModelTests
         _mockSettings = new Mock<ISettings>();
         _mockUserSettings = new Mock<IUserSettings>();
         _mockOrgVariables = new Mock<IOrgVariables>();
+        _mockFileSystem = new Mock<IFileSystem>();
 
         // 2. Create a list of templates to be returned by the mock enforcer
         _templateList =
         [
-            new TextTemplate("Template 1", "Desc 1", "Text 1"),
-            new TextTemplate("Template 2", "Desc 2", "Text 2")
+            new TextTemplate("Template 1", "Desc 1", "Text 1", TextTemplate.TemplateType.Other),
+            new TextTemplate("Template 2", "Desc 2", "Text 2", TextTemplate.TemplateType.Email)
         ];
 
         // 3. Configure the full dependency chain required by the view models
@@ -49,20 +52,21 @@ public class TemplatesViewModelTests
     public void Constructor_LoadsTemplatesFromEnforcer()
     {
         // Arrange & Act
-        var viewModel = new TemplatesViewModel(_mockSupportTool.Object);
+        var viewModel = new TemplatesViewModel(_mockSupportTool.Object, _mockFileSystem.Object);
 
         // Assert
         Assert.Equal(2, viewModel.Templates.Count);
-        // The constructor creates a new, blank item for the initial selection.
         Assert.NotNull(viewModel.SelectedTemplate);
-        Assert.True(string.IsNullOrEmpty(viewModel.SelectedTemplate.Template.Name));
+        Assert.True(viewModel.SelectedTemplate == viewModel.Templates[0]);
+        Assert.Equal(TextTemplate.TemplateType.Other, viewModel.Templates[0].Template.Type);
+        Assert.Equal(TextTemplate.TemplateType.Email, viewModel.Templates[1].Template.Type);
     }
 
     [Fact]
     public void RemoveTemplateCommand_RemovesTemplateFromEnforcer_AndRefreshesList()
     {
         // Arrange
-        var viewModel = new TemplatesViewModel(_mockSupportTool.Object);
+        var viewModel = new TemplatesViewModel(_mockSupportTool.Object, _mockFileSystem.Object);
         var templateToRemove = viewModel.Templates.First();
         var modelToRemove = templateToRemove.Template;
 
@@ -70,11 +74,7 @@ public class TemplatesViewModelTests
         viewModel.RemoveTemplateCommand.Execute(templateToRemove);
 
         // Assert
-        // Verify the enforcer's RemoveTemplate method was called with the correct model
         _mockEnforcer.Verify(e => e.RemoveTemplate(modelToRemove), Times.Once);
-        
-        // The view model re-queries the list. To simulate this, we can remove the item from our source list
-        // and then verify the mock was called to get the templates again.
         _mockEnforcer.Verify(e => e.Templates, Times.Exactly(2)); // Once in constructor, once after remove
     }
 
@@ -82,7 +82,7 @@ public class TemplatesViewModelTests
     public void SelectTemplateCommand_ChangesSelectedTemplate()
     {
         // Arrange
-        var viewModel = new TemplatesViewModel(_mockSupportTool.Object);
+        var viewModel = new TemplatesViewModel(_mockSupportTool.Object, _mockFileSystem.Object);
         var templateToSelect = viewModel.Templates[1];
 
         // Act
@@ -90,5 +90,6 @@ public class TemplatesViewModelTests
 
         // Assert
         Assert.Same(templateToSelect, viewModel.SelectedTemplate);
+        Assert.Equal(TextTemplate.TemplateType.Email, viewModel.SelectedTemplate.Template.Type);
     }
 }

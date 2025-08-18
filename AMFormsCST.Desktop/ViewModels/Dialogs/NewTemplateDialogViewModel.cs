@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,10 @@ public partial class NewTemplateDialogViewModel : ObservableObject
     [ObservableProperty]
     private string _templateContent = string.Empty;
 
+    [ObservableProperty]
+    private TextTemplate.TemplateType _templateType = TextTemplate.TemplateType.Other;
+
+
     // Constructor can be empty for default values, or initialize them based on context if needed.
     public NewTemplateDialogViewModel()
     {
@@ -39,5 +44,8 @@ public partial class NewTemplateDialogViewModel : ObservableObject
         window.DialogResult = true;
         window.Close();
     }
+
+    public IEnumerable<TextTemplate.TemplateType> TemplateTypes =>
+        Enum.GetValues(typeof(TextTemplate.TemplateType)) as TextTemplate.TemplateType[];
 }
 

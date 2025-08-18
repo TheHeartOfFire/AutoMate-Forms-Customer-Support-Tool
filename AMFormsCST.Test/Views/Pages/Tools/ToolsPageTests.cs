@@ -8,6 +8,7 @@ using Wpf.Ui;
 using Wpf.Ui.Controls;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class ToolsPageTests
 {
     [WpfFact]

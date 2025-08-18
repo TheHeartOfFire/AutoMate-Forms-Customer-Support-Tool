@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 
-public partial class TemplateItemViewModel : ObservableObject
+public partial class TemplateItemViewModel : ObservableObject, ISelectable
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Output))]
@@ -86,6 +86,9 @@ public partial class TemplateItemViewModel : ObservableObject
     private readonly Guid _id = Guid.NewGuid();
 
     public Guid Id => _id;
+
+    [ObservableProperty]
+    private bool _isSelected;
 
     private void OnVariablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -166,6 +169,16 @@ public partial class TemplateItemViewModel : ObservableObject
 
         // After updating variables, explicitly notify Output to re-evaluate
         OnPropertyChanged(nameof(Output));
+    }
+
+    public void Select()
+    {
+        IsSelected = true;
+    }
+
+    public void Deselect()
+    {
+        IsSelected = false;
     }
 }
 

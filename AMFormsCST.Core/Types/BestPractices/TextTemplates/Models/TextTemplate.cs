@@ -16,20 +16,31 @@ public class TextTemplate : IEquatable<TextTemplate>
     public string Name { get; set; }
     public string Description { get; set; }
     public string Text { get; set; }
-    public TextTemplate(string name, string description, string text)
+    public TemplateType Type { get; set; } 
+    public enum TemplateType
+    {
+        PublishComments,
+        InternalComments,
+        ClosureComments,
+        Email,
+        Other
+    }
+    public TextTemplate(string name, string description, string text, TemplateType type)
     {
         Id = Guid.NewGuid(); // Or pass in an existing ID for editing
         Name = name;
         Description = description;
         Text = text;
+        Type = type;
     }
     [JsonConstructor]
-    public TextTemplate(Guid id, string name, string description, string text)
+    public TextTemplate(Guid id, string name, string description, string text, TemplateType type)
     {
         Id = id;
         Name = name;
         Description = description;
         Text = text;
+        Type = type;
     }
 
     public List<ITextTemplateVariable> GetVariables(ISupportTool supportTool)

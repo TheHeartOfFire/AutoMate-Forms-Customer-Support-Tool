@@ -31,5 +31,11 @@ public partial class TemplatesPage : Page
         DataContext = ViewModel;
 
         InitializeComponent();
+
+        // Ensure the first template is selected if any exist
+        if (ViewModel.Templates is { Count: > 0 })
+        {
+            ViewModel.SelectTemplate(ViewModel.Templates.First());
+        }
     }
 }

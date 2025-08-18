@@ -13,6 +13,7 @@ using Wpf.Ui;
 using Wpf.Ui.Controls;
 using Xunit;
 
+[Collection("STA Tests")]
 public class FormgenUtilitiesPageTests
 {
     [WpfFact]

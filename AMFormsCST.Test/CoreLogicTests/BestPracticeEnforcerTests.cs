@@ -18,7 +18,7 @@ public class BestPracticeEnforcerTests
     {
         _mockFormNamePractice = new Mock<IFormNameBestPractice>();
         _mockTemplateRepository = new Mock<ITemplateRepository>();
-        _templateList = [new TextTemplate("Existing", "Desc", "Text")];
+        _templateList = [new TextTemplate("Existing", "Desc", "Text", TextTemplate.TemplateType.Other)];
 
         // Configure the mock repository to return our in-memory list
         _mockTemplateRepository.Setup(repo => repo.LoadTemplates()).Returns(_templateList);
@@ -45,7 +45,7 @@ public class BestPracticeEnforcerTests
     public void AddTemplate_AddsToCollection_AndSaves()
     {
         // Arrange
-        var newTemplate = new TextTemplate("New", "New Desc", "New Text");
+        var newTemplate = new TextTemplate("New", "New Desc", "New Text", TextTemplate.TemplateType.Other);
 
         // Act
         _enforcer.AddTemplate(newTemplate);
@@ -81,7 +81,7 @@ public class BestPracticeEnforcerTests
     public void AddTemplate_WithEmptyText_ThrowsArgumentException()
     {
         // Arrange
-        var templateWithEmptyText = new TextTemplate("New", "Desc", "");
+        var templateWithEmptyText = new TextTemplate("New", "Desc", "", TextTemplate.TemplateType.Other);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => _enforcer.AddTemplate(templateWithEmptyText));
@@ -105,7 +105,7 @@ public class BestPracticeEnforcerTests
     public void RemoveTemplate_WithNonExistingTemplate_ThrowsArgumentException()
     {
         // Arrange
-        var nonExistingTemplate = new TextTemplate("Non-existent", "Desc", "Text");
+        var nonExistingTemplate = new TextTemplate("Non-existent", "Desc", "Text", TextTemplate.TemplateType.Other);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => _enforcer.RemoveTemplate(nonExistingTemplate));
@@ -116,7 +116,7 @@ public class BestPracticeEnforcerTests
     {
         // Arrange
         var originalTemplate = _templateList[0];
-        var updatedTemplate = new TextTemplate(originalTemplate.Id, "Updated Name", "Updated Desc", "Updated Text");
+        var updatedTemplate = new TextTemplate(originalTemplate.Id, "Updated Name", "Updated Desc", "Updated Text", TextTemplate.TemplateType.Other);
 
         // Act
         _enforcer.UpdateTemplate(updatedTemplate);
@@ -134,7 +134,7 @@ public class BestPracticeEnforcerTests
     {
         // Arrange
         // Create a template with a new, unknown Guid
-        var nonExistingTemplate = new TextTemplate(Guid.NewGuid(), "Non-existent", "Desc", "Text");
+        var nonExistingTemplate = new TextTemplate(Guid.NewGuid(), "Non-existent", "Desc", "Text", TextTemplate.TemplateType.Other);
 
         // Act
         // This should not throw an exception.

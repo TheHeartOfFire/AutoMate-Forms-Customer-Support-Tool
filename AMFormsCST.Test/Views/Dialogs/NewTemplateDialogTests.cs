@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Xunit;
 using AMFormsCST.Test.Helpers;
 
+[Collection("STA Tests")]
 public class NewTemplateDialogTests
 {
     [WpfFact]

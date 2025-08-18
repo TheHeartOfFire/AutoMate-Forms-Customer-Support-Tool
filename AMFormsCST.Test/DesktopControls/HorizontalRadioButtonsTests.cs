@@ -1,9 +1,11 @@
 using AMFormsCST.Desktop.Controls;
 using AMFormsCST.Test.Helpers;
+using Moq;
 using System.Collections;
 using System.Windows.Input;
 using Xunit;
 
+[Collection("STA Tests")]
 public class HorizontalRadioButtonsTests
 {
     [WpfFact]
@@ -25,13 +27,13 @@ public class HorizontalRadioButtonsTests
     {
         // Arrange
         var control = new HorizontalRadioButtons();
-        var command = new DummyCommand();
+        var commandMock = new Mock<ICommand>();
 
         // Act
-        control.RadioButtonCommand = command;
+        control.RadioButtonCommand = commandMock.Object;
 
         // Assert
-        Assert.Same(command, control.RadioButtonCommand);
+        Assert.Same(commandMock.Object, control.RadioButtonCommand);
     }
 
     [WpfFact]
@@ -105,20 +107,12 @@ public class HorizontalRadioButtonsTests
     {
         // Arrange
         var control = new HorizontalRadioButtons();
-        var command = new DummyCommand();
+        var commandMock = new Mock<ICommand>();
 
         // Act
-        control.DeleteCommand = command;
+        control.DeleteCommand = commandMock.Object;
 
         // Assert
-        Assert.Same(command, control.DeleteCommand);
-    }
-
-    // Dummy ICommand implementation for testing
-    private class DummyCommand : ICommand
-    {
-        public event System.EventHandler? CanExecuteChanged;
-        public bool CanExecute(object? parameter) => true;
-        public void Execute(object? parameter) { }
+        Assert.Same(commandMock.Object, control.DeleteCommand);
     }
 }

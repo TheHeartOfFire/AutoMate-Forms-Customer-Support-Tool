@@ -246,7 +246,7 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void OpenTemplateDialog()
     {
-        var vm = new TemplatesViewModel(_supportTool);
+        var vm = new TemplatesViewModel(_supportTool, _fileSystem);
         var page = new TemplatesPage(vm);
 
 

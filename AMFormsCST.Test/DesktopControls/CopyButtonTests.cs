@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Xunit;
 using Xunit.Sdk;
 
+[Collection("STA Tests")]
 public class CopyButtonTests
 {
     [WpfFact]

@@ -8,14 +8,12 @@ namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class PageGroupProperties : IFormgenFileProperties
 {
     private readonly PageGroup _group;
+    public IFormgenFileSettings? Settings { get; } = null;
+    public int PageCount => _group.Pages.Count();
 
     public PageGroupProperties(PageGroup group)
     {
         _group = group;
     }
 
-    public IEnumerable<DisplayProperty> GetDisplayProperties()
-    {
-        yield return new DisplayProperty("Total Pages:", _group.Pages.Count().ToString());
-    }
 }

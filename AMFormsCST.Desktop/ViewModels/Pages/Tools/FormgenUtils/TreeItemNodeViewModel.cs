@@ -33,13 +33,13 @@ public partial class TreeItemNodeViewModel : ObservableObject
         {
             clHeader = line.Settings?.Variable;
             // Use string.Equals for a null-safe comparison.
-            if (string.Equals(clHeader, "F0"))
+            if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Label)
             {
-                clHeader = line.PromptData?.Message;
+                clHeader = $"<----- {line.PromptData?.Message} ----->" ;
             }
-            if (string.IsNullOrWhiteSpace(clHeader))
+            if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Separator)
             {
-                clHeader = "<- Separator ->";
+                clHeader = "<----- Separator ----->";
             }
         }
 

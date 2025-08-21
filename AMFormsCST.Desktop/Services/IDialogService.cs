@@ -9,8 +9,9 @@ namespace AMFormsCST.Desktop.Services
 
         (bool? DialogResult, string TemplateName, string TemplateDescription, string TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, string? content = null);
 
-        bool ShowPageHostDialog(Page contentPage, bool canConfirm = false);
+        bool ShowPageHostDialog(Page contentPage, string title = "Page Prview", bool canConfirm = false);
 
         string? ShowOpenFileDialog(string filter);
+        string? ShowOpenFileDialog(string filter, string defaultDirectory);
     }
 }

@@ -5,6 +5,7 @@ using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Types;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ public static class IO
     private static readonly string _settingsPath;
     public static readonly string BackupPath;
     private static readonly string _templatesPath;
+    private static readonly string _configPath;
     private static JsonSerializerOptions _jsonOptions = new() { WriteIndented = true }; // Default options
 
     public static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
@@ -33,6 +35,7 @@ public static class IO
         _settingsPath = Path.Combine(_rootPath, "AppSettings.json");
         BackupPath = Path.Combine(_rootPath, "FormgenBackup");
         _templatesPath = Path.Combine(_rootPath, "TextTemplates.json");
+        _configPath = Path.Combine(_rootPath, "Config.json");
 
         try
         {
@@ -196,6 +199,38 @@ public static class IO
         catch (Exception ex) 
         {
             Console.WriteLine($"Error saving TextTemplates: {ex.Message}");
+        }
+    }
+
+    public static void SaveConfig(Properties config)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(config, _jsonOptions);
+            File.WriteAllText(_configPath, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving config: {ex.Message}");
+        }
+    }
+
+    public static Properties? LoadConfig()
+    {
+        if (!File.Exists(_configPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_configPath);
+            return JsonSerializer.Deserialize<Properties>(json, _jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading config: {ex.Message}");
+            return null;
         }
     }
 }

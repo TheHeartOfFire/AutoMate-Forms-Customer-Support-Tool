@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Reflection;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class PageProperties : IFormgenFileProperties
@@ -21,12 +22,31 @@ public class PageProperties : IFormgenFileProperties
     {
         if (Settings is PageSettings pageSettings)
         {
-            yield return new DisplayProperty("Page Number:", pageSettings.PageNumber.ToString());
-            yield return new DisplayProperty("Default Font Size:", pageSettings.DefaultFontSize.ToString());
-            yield return new DisplayProperty("Left Margin:", pageSettings.LeftPrinterMargin.ToString());
-            yield return new DisplayProperty("Right Margin:", pageSettings.RightPrinterMargin.ToString());
-            yield return new DisplayProperty("Top Margin:", pageSettings.TopPrinterMargin.ToString());
-            yield return new DisplayProperty("Bottom Margin:", pageSettings.BottomPrinterMargin.ToString());
+            var settingsType = typeof(PageSettings);
+
+            var pageNumberProp = settingsType.GetProperty(nameof(PageSettings.PageNumber));
+            if (pageNumberProp != null)
+                yield return new DisplayProperty(pageSettings, pageNumberProp);
+
+            var defaultFontSizeProp = settingsType.GetProperty(nameof(PageSettings.DefaultFontSize));
+            if (defaultFontSizeProp != null)
+                yield return new DisplayProperty(pageSettings, defaultFontSizeProp);
+
+            var leftMarginProp = settingsType.GetProperty(nameof(PageSettings.LeftPrinterMargin));
+            if (leftMarginProp != null)
+                yield return new DisplayProperty(pageSettings, leftMarginProp);
+
+            var rightMarginProp = settingsType.GetProperty(nameof(PageSettings.RightPrinterMargin));
+            if (rightMarginProp != null)
+                yield return new DisplayProperty(pageSettings, rightMarginProp);
+
+            var topMarginProp = settingsType.GetProperty(nameof(PageSettings.TopPrinterMargin));
+            if (topMarginProp != null)
+                yield return new DisplayProperty(pageSettings, topMarginProp);
+
+            var bottomMarginProp = settingsType.GetProperty(nameof(PageSettings.BottomPrinterMargin));
+            if (bottomMarginProp != null)
+                yield return new DisplayProperty(pageSettings, bottomMarginProp);
         }
         // If Settings is null, yields nothing (empty collection)
     }

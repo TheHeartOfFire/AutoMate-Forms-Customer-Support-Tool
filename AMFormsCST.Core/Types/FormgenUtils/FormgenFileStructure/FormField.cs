@@ -1,13 +1,19 @@
-﻿using System.Xml;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class FormField
+    public partial class FormField : IEquatable<FormField>, INotifyPropertyChanged
     {
-        public FormFieldSettings? Settings { get; set; }
-        public string? Expression { get; set; }
-        public string? SampleData { get; set; }
-        public FormatOption FormattingOption { get; set; }
+        [NotifyPropertyChanged]
+        private FormFieldSettings? _settings;
+        [NotifyPropertyChanged]
+        private string? _expression;
+        [NotifyPropertyChanged]
+        private string? _sampleData;
+        [NotifyPropertyChanged]
+        private FormatOption _formattingOption;
 
         public enum FormatOption
         {
@@ -21,6 +27,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public FormField()
         {
             Settings = new FormFieldSettings();
+            Settings.PropertyChanged += (s, e) => OnPropertyChanged();
         }
 
         public FormField(XmlNode node)
@@ -42,6 +49,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             if (option != null)
                 FormattingOption = GetFormatOption(option);
         }
+
         public static FormatOption GetFormatOption(string option) => option switch
         {
             "None" => FormatOption.None,
@@ -86,5 +94,15 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.WriteEndElement();
 
         }
+
+        public bool Equals(FormField? other) => 
+            other is not null &&
+            Settings?.Equals(other.Settings) == true &&
+            Expression?.Equals(other.Expression) == true &&
+            SampleData?.Equals(other.SampleData) == true &&
+            FormattingOption == other.FormattingOption;
+
+        public override bool Equals(object? obj) => Equals(obj as FormField);
+        public override int GetHashCode() => HashCode.Combine(Settings, Expression, SampleData, FormattingOption);
     }
 }

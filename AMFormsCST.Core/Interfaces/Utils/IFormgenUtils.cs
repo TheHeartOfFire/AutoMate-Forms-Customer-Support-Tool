@@ -16,6 +16,8 @@ public interface IFormgenUtils
     void LoadBackup(string backupPath);
     void OpenFile(string filePath);
     void RenameFile(string newName, bool renameImage);
-    void SaveFile(string filePath);
+    void SaveFile(string filePath, DotFormgen? fileToSave = null);
     void RegenerateUUID();
+    bool HasChanged { get; }
+    event EventHandler? FormgenFileChanged;
 }

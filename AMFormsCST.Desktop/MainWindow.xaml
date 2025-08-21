@@ -18,7 +18,7 @@
         WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
         SizeChanged="MainWindow_OnSizeChanged"
-                 MinWidth="1050" MinHeight="775"
+                 MinWidth="1200" MinHeight="775"
                  Topmost="{Binding ViewModel.IsWindowTopmost, Mode=OneWay}"
                  >
     <Grid>

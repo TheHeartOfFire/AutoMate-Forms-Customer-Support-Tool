@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
@@ -39,7 +40,8 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     }
 
     [ObservableProperty]
-    private IEnumerable<DisplayProperty>? _selectedNodeProperties;
+    [NotifyPropertyChangedFor(nameof(HasChanged))]
+    private ObservableCollection<DisplayProperty>? _selectedNodeProperties;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFileLoaded))]
@@ -60,7 +62,10 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [ObservableProperty]
     private bool _isBusy;
 
+    public bool HasChanged => _supportTool.FormgenUtils.HasChanged || _backupLoaded;
+
     public bool IsFileLoaded => !string.IsNullOrEmpty(FilePath);
+    private bool _backupLoaded = false;
 
     private readonly ISupportTool _supportTool;
     private readonly IDialogService _dialogService;
@@ -71,7 +76,9 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        _supportTool.FormgenUtils.FormgenFileChanged += (s, e) => OnPropertyChanged(nameof(HasChanged));
     }
+
 
     [RelayCommand]
     private void OpenFormgenFile()
@@ -82,6 +89,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         if (!string.IsNullOrEmpty(selectedFile))
         {
             FilePath = selectedFile;
+            _backupLoaded = false;
             LoadFileContent();
         }
     }
@@ -89,7 +97,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [RelayCommand]
     private void SaveFormgenFile()
     {
-        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile is null) return;
+        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile is null || !HasChanged) return;
 
         IsBusy = true;
         try
@@ -97,16 +105,12 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             var originalTitle = _supportTool.FormgenUtils.ParsedFormgenFile.Title ?? _fileSystem.GetFileNameWithoutExtension(FilePath!);
             bool titleHasChanged = !string.Equals(originalTitle, FormTitle, StringComparison.Ordinal);
 
-            // Update the in-memory object before saving.
-            // The properties from the dynamic UI are already updated on the core models
-            // because the desktop wrappers now use pass-through properties.
             _supportTool.FormgenUtils.ParsedFormgenFile.Title = FormTitle;
             _supportTool.FormgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
 
             // Save changes to the current file path.
             _supportTool.FormgenUtils.SaveFile(FilePath!);
 
-            // If the title has changed, rename the file and update the view model's file path.
             if (titleHasChanged)
             {
                 _supportTool.FormgenUtils.RenameFile(FormTitle, ShouldRenameImage);
@@ -123,11 +127,28 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         finally
         {
             IsBusy = false;
-            // Reload content to reflect the saved state. This is important if the file was renamed.
             if (IsFileLoaded)
             {
+                _backupLoaded = false;
                 LoadFileContent();
             }
+        }
+    }
+
+    [RelayCommand]
+    private void LoadBackup()
+    {
+        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile?.Settings.UUID is null) return;
+
+        var backupDir = _fileSystem.CombinePath(AMFormsCST.Core.IO.BackupPath, _supportTool.FormgenUtils.ParsedFormgenFile.Settings.UUID);
+        var filter = "Backup Files (*.bak)|*.bak|All files (*.*)|*.*";
+        var selectedFile = _dialogService.ShowOpenFileDialog(filter, backupDir);
+
+        if (!string.IsNullOrEmpty(selectedFile))
+        {
+            _supportTool.FormgenUtils.LoadBackup(selectedFile);
+            _backupLoaded = true;
+            LoadFileContent(selectedFile);
         }
     }
 
@@ -141,6 +162,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         ShouldRenameImage = false;
         TreeViewNodes.Clear();
         SelectedNode = null;
+        SelectedNodeProperties = null;
         _supportTool.FormgenUtils.CloseFile();
     }
 
@@ -151,7 +173,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         Uuid = Guid.NewGuid().ToString();
     }
 
-    private void LoadFileContent()
+    private void LoadFileContent(string? filePath = null)
     {
         if (!IsFileLoaded) return;
 
@@ -159,16 +181,12 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         TreeViewNodes.Clear();
         SelectedNode = null;
 
+        var path = filePath is not null ? filePath : FilePath;
+
         try
         {
-            _supportTool.FormgenUtils.OpenFile(FilePath!);
-            var fileData = _supportTool.FormgenUtils.ParsedFormgenFile;
-
-            if (fileData == null)
-            {
-                throw new InvalidOperationException("Failed to parse the .formgen file.");
-            }
-
+            _supportTool.FormgenUtils.OpenFile(path!);
+            var fileData = _supportTool.FormgenUtils.ParsedFormgenFile ?? throw new InvalidOperationException("Failed to parse the .formgen file.");
             FormTitle = fileData.Title ?? _fileSystem.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
             Uuid = fileData.Settings.UUID;
 
@@ -216,6 +234,50 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             _ => null
         };
 
-        SelectedNodeProperties = properties?.GetDisplayProperties();
+        if (properties is null) return;
+
+        // List of property names to be marked as read-only
+        var readOnlyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "ID", "UUID", "PublishedUUID", "TotalPages", "PageNumber", "Type", "Title" // Add more as needed
+        };
+
+        var displayProps = new List<DisplayProperty>();
+
+        // Main properties
+        foreach (var p in properties.GetType().GetProperties().Where(p => p.GetMethod != null))
+        {
+            if (p.Name.Equals("Settings") || p.Name.Equals("PromptData")) continue;
+
+            bool isReadOnly = readOnlyNames.Contains(p.Name) || !p.CanWrite;
+            displayProps.Add(new DisplayProperty(properties, p, isReadOnly));
+        }
+
+        // Settings properties
+        if (properties.Settings != null)
+        {
+            foreach (var p in properties.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
+            {
+                bool isReadOnly = readOnlyNames.Contains(p.Name) || !p.CanWrite;
+                displayProps.Add(new DisplayProperty(properties.Settings, p, isReadOnly));
+            }
+        }
+
+        // Pattern matching with a local variable for CodeLineProperties
+        if (properties is CodeLineProperties props && props.PromptData is not null)
+        {
+            foreach (var p in props.PromptData.GetType().GetProperties().Where(p => p.GetMethod != null))
+            {
+                if (p.Name.Equals("Settings")) continue;
+                displayProps.Add(new DisplayProperty(props.PromptData, p));
+            }
+
+            foreach (var p in props.PromptData.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
+            {
+                displayProps.Add(new DisplayProperty(props.PromptData.Settings, p));
+            }
+        }
+
+        SelectedNodeProperties = new ObservableCollection<DisplayProperty>(displayProps);
     }
 }

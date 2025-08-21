@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -52,25 +53,39 @@ public partial class CodeLineProperties : ObservableObject, IFormgenFileProperti
     /// </summary>
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        if (!string.IsNullOrEmpty(Expression))
-        {
-            yield return new DisplayProperty("Expression:", Expression);
-        }
+        // Editable property: Expression
+        var exprProp = typeof(CodeLine).GetProperty(nameof(CodeLine.Expression));
+        if (exprProp != null)
+            yield return new DisplayProperty(_coreCodeLine, exprProp);
 
+        // Editable properties from Settings (Order, Type, Variable)
         if (Settings is CodeLineSettings codeLineSettings)
         {
-            yield return new DisplayProperty("Order:", codeLineSettings.Order.ToString());
-            yield return new DisplayProperty("Type:", codeLineSettings.Type.ToString());
-            yield return new DisplayProperty("Variable:", codeLineSettings.Variable);
+            var settingsType = typeof(CodeLineSettings);
+            var orderProp = settingsType.GetProperty(nameof(CodeLineSettings.Order));
+            if (orderProp != null)
+                yield return new DisplayProperty(codeLineSettings, orderProp);
+
+            var typeProp = settingsType.GetProperty(nameof(CodeLineSettings.Type));
+            if (typeProp != null)
+                yield return new DisplayProperty(codeLineSettings, typeProp);
+
+            var variableProp = settingsType.GetProperty(nameof(CodeLineSettings.Variable));
+            if (variableProp != null)
+                yield return new DisplayProperty(codeLineSettings, variableProp);
         }
 
+        // Editable properties from PromptData (Message, Choices)
         if (PromptData is not null)
         {
-            yield return new DisplayProperty("Prompt Message:", PromptData.Message);
-            if (PromptData.Choices.Any())
-            {
-                yield return new DisplayProperty("Choices:", string.Join(", ", PromptData.Choices));
-            }
+            var promptType = typeof(PromptDataProperties);
+            var messageProp = promptType.GetProperty(nameof(PromptDataProperties.Message));
+            if (messageProp != null)
+                yield return new DisplayProperty(PromptData, messageProp);
+
+            var choicesProp = promptType.GetProperty(nameof(PromptDataProperties.Choices));
+            if (choicesProp != null && PromptData.Choices.Any())
+                yield return new DisplayProperty(PromptData, choicesProp);
         }
     }
 }

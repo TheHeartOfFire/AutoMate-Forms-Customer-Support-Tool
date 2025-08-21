@@ -17,6 +17,12 @@ public class FormgenUtils : IFormgenUtils
     public DotFormgen? ParsedFormgenFile { get; set; }
     public FormgenUtilsProperties Properties { get; } = new();
 
+    public bool HasChanged => !(_backupCopy is null || ParsedFormgenFile is null || _backupCopy.Equals(ParsedFormgenFile));
+    public event EventHandler? FormgenFileChanged;
+    private void OnFormgenFileChanged() => FormgenFileChanged?.Invoke(this, EventArgs.Empty);
+
+    private DotFormgen? _backupCopy;
+
     public FormgenUtils(IFileSystem fileSystem, FormgenUtilsProperties properties)
     {
         _fileSystem = fileSystem;
@@ -25,28 +31,41 @@ public class FormgenUtils : IFormgenUtils
 
     public void OpenFile(string filePath)
     {
-        _filePath = filePath;
+        if (!filePath.Contains("FormgenBackup"))
+            _filePath = filePath;
+
         var xmlContent = _fileSystem.ReadAllText(filePath);
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(xmlContent);
         if (xmlDoc.DocumentElement is null) throw new XmlException("The XML file is empty or missing a root element.");
         ParsedFormgenFile = new DotFormgen(xmlDoc.DocumentElement);
+        _backupCopy = ParsedFormgenFile.Clone(); // Create a backup copy of the original file
+
+        ParsedFormgenFile.PropertyChanged += (s, e) => OnFormgenFileChanged();
+
     }
 
-    public void SaveFile(string filePath)
+    public void SaveFile(string filePath, DotFormgen? fileToSave = null)
     {
-        if (ParsedFormgenFile is null)
-        {
-            return;
-        }
-        var xmlContent = ParsedFormgenFile.GenerateXML();
+        var file = fileToSave is null ? ParsedFormgenFile : fileToSave;
+
+        if (file is null) return;
+
+        var xmlContent = file.GenerateXML();
         _fileSystem.WriteAllText(filePath, xmlContent);
+
+        if (fileToSave is not null) return;
+
+        CreateBackup();
+        _backupCopy = ParsedFormgenFile;
     }
 
     public void CloseFile()
     {
+        if (ParsedFormgenFile is not null) ParsedFormgenFile.PropertyChanged -= (s, e) => OnFormgenFileChanged();
         ParsedFormgenFile = null;
         _filePath = null;
+        _backupCopy = null;
     }
 
     public void RenameFile(string newName, bool renameImage)
@@ -86,6 +105,7 @@ public class FormgenUtils : IFormgenUtils
     {
         if (ParsedFormgenFile is null) return;
         ParsedFormgenFile.Settings.UUID = Guid.NewGuid().ToString();
+        OnFormgenFileChanged();
     }
 
     public CodeLine[] GetCodeLines(CodeLineSettings.CodeType type)
@@ -127,7 +147,7 @@ public class FormgenUtils : IFormgenUtils
         }
 
         var allPrompts = GetPrompts().ToList();
-        int maxIndex = allPrompts.Any() ? allPrompts.Max(p => p.Settings?.Order ?? 0) : 0;
+        int maxIndex = allPrompts.Count != 0 ? allPrompts.Max(p => p.Settings?.Order ?? 0) : 0;
 
         foreach (var promptToClone in selected)
         {
@@ -176,9 +196,9 @@ public class FormgenUtils : IFormgenUtils
 
     public void CreateBackup()
     {
-        if (string.IsNullOrEmpty(_filePath) || ParsedFormgenFile?.Settings.UUID is null) return;
+        if (string.IsNullOrEmpty(_filePath) || _backupCopy is null) return;
 
-        var backupDir = _fileSystem.CombinePath(IO.BackupPath, ParsedFormgenFile.Settings.UUID);
+        var backupDir = _fileSystem.CombinePath(IO.BackupPath, $"{_fileSystem.GetFileNameWithoutExtension(_filePath)}_{_backupCopy.Settings.UUID}");
         _fileSystem.CreateDirectory(backupDir);
 
         // Enforce retention policy
@@ -201,10 +221,10 @@ public class FormgenUtils : IFormgenUtils
 
         // Create new backup
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        var backupFileName = $"{_fileSystem.GetFileNameWithoutExtension(_filePath)}_{timestamp}.bak";
+        var backupFileName = $"{{{timestamp}}}.bak";
         var backupPath = _fileSystem.CombinePath(backupDir, backupFileName);
 
-        SaveFile(backupPath);
+        SaveFile(backupPath, _backupCopy);
     }
 
     public void LoadBackup(string backupPath)
@@ -212,6 +232,7 @@ public class FormgenUtils : IFormgenUtils
         if (_fileSystem.FileExists(backupPath))
         {
             OpenFile(backupPath);
+            OnFormgenFileChanged();
         }
     }
 }

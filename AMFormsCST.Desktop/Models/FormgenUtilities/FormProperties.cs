@@ -2,6 +2,7 @@
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using System.Reflection;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
@@ -104,18 +105,49 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
     // This method replaces GetUIElements()
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        yield return new DisplayProperty("Title:", Title);
-        yield return new DisplayProperty("Form Type:", FormType.ToString());
-        yield return new DisplayProperty("Category:", Category.ToString());
-        yield return new DisplayProperty("Username:", Username);
-        yield return new DisplayProperty("Billing Name:", BillingName);
-        yield return new DisplayProperty("Trade Prompt:", TradePrompt.ToString());
-        yield return new DisplayProperty("Salesperson Prompt:", SalesPersonPrompt.ToString());
+        var formType = typeof(DotFormgen);
+
+        // Editable properties from DotFormgen
+        var titleProp = formType.GetProperty(nameof(DotFormgen.Title));
+        if (titleProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, titleProp, true);
+
+        var formTypeProp = formType.GetProperty(nameof(DotFormgen.FormType));
+        if (formTypeProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, formTypeProp);
+
+        var categoryProp = formType.GetProperty(nameof(DotFormgen.Category));
+        if (categoryProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, categoryProp);
+
+        var usernameProp = formType.GetProperty(nameof(DotFormgen.Username));
+        if (usernameProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, usernameProp);
+
+        var billingNameProp = formType.GetProperty(nameof(DotFormgen.BillingName));
+        if (billingNameProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, billingNameProp);
+
+        var tradePromptProp = formType.GetProperty(nameof(DotFormgen.TradePrompt));
+        if (tradePromptProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, tradePromptProp);
+
+        var salesPersonPromptProp = formType.GetProperty(nameof(DotFormgen.SalesPersonPrompt));
+        if (salesPersonPromptProp != null)
+            yield return new DisplayProperty(_coreFormgenFile, salesPersonPromptProp);
+
         // Add other properties from FormSettings, etc.
         if (Settings is FormSettings formSettings)
         {
-            yield return new DisplayProperty("UUID:", formSettings.PublishedUUID);
-            yield return new DisplayProperty("Total Pages:", formSettings.TotalPages.ToString());
+            var settingsType = typeof(FormSettings);
+
+            var uuidProp = settingsType.GetProperty(nameof(FormSettings.PublishedUUID));
+            if (uuidProp != null)
+                yield return new DisplayProperty(formSettings, uuidProp, true); // UUID is read-only
+
+            var totalPagesProp = settingsType.GetProperty(nameof(FormSettings.TotalPages));
+            if (totalPagesProp != null)
+                yield return new DisplayProperty(formSettings, totalPagesProp);
         }
     }
 }

@@ -1,19 +1,30 @@
-﻿using System;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class DotFormgenSettings
+    public partial class DotFormgenSettings : IEquatable<DotFormgenSettings>, INotifyPropertyChanged
     {
-        public int Version { get; set; }
-        public string UUID { get; set; } = string.Empty;
-        public bool LegacyImport { get; set; }
-        public int TotalPages { get; set; }
-        public int DefaultFontSize { get; set; }
-        public bool MissingSourceJpeg { get; set; }
-        public bool Duplex { get; set; }
-        public int MaxAccessoryLines { get; set; }
-        public bool PreprintedLaserForm { get; set; }
+        [NotifyPropertyChanged]
+        private int _version;
+        [NotifyPropertyChanged]
+        private string _uUID;
+        [NotifyPropertyChanged]
+        private bool _legacyImport;
+        [NotifyPropertyChanged]
+        private int _totalPages;
+        [NotifyPropertyChanged]
+        private int _defaultFontSize;
+        [NotifyPropertyChanged]
+        private bool _missingSourceJpeg;
+        [NotifyPropertyChanged]
+        private bool _duplex;
+        [NotifyPropertyChanged]
+        private int _maxAccessoryLines;
+        [NotifyPropertyChanged]
+        private bool _preprintedLaserForm;
 
         public DotFormgenSettings() { }
 
@@ -57,6 +68,21 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.WriteAttributeString("maxAccessoryLines", MaxAccessoryLines.ToString());
             xml.WriteAttributeString("prePrintedLaserForm", PreprintedLaserForm.ToString().ToLowerInvariant());
         }
+
+        public bool Equals(DotFormgenSettings? other) => 
+            other is not null &&
+            Version == other.Version &&
+            UUID?.Equals(other.UUID) == true &&
+            LegacyImport == other.LegacyImport &&
+            TotalPages == other.TotalPages &&
+            DefaultFontSize == other.DefaultFontSize &&
+            MissingSourceJpeg == other.MissingSourceJpeg &&
+            Duplex == other.Duplex &&
+            MaxAccessoryLines == other.MaxAccessoryLines &&
+            PreprintedLaserForm == other.PreprintedLaserForm;
+        public override bool Equals(object? obj) => Equals(obj as DotFormgenSettings);
+        public override int GetHashCode() => HashCode.Combine(Version, UUID, LegacyImport, TotalPages, 
+            DefaultFontSize, MissingSourceJpeg, Duplex, HashCode.Combine(MaxAccessoryLines, PreprintedLaserForm));
     }
 
 }

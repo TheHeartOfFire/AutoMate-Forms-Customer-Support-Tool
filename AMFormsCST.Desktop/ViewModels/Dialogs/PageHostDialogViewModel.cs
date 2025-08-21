@@ -16,10 +16,11 @@ public partial class PageHostDialogViewModel : ObservableObject
     private Visibility _canConfirm = Visibility.Collapsed;
     public object HostedPageViewModel { get; }
 
-    public PageHostDialogViewModel(object hostedPageViewModel, bool canConfirm = false)
+    public PageHostDialogViewModel(object hostedPageViewModel, string title = "Page Preview", bool canConfirm = false)
     {
         HostedPageViewModel = hostedPageViewModel;
         _canConfirm = canConfirm ? Visibility.Visible : Visibility.Collapsed;
+        _dialogTitle = title;
     }
 
     [RelayCommand]

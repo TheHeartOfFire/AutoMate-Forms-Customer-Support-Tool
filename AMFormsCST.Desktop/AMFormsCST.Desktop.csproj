@@ -11,6 +11,13 @@
     <FileVersion>$(assemblyversion)</FileVersion>
     <Version>$(assemblyversion)</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Helpers\**" />
+    <EmbeddedResource Remove="Helpers\**" />
+    <None Remove="Helpers\**" />
+    <Page Remove="Helpers\**" />
+  </ItemGroup>
 	
 	<ItemGroup>
 		<InternalsVisibleTo Include="AMFormsCST.Test" />
@@ -51,10 +58,6 @@
     <Resource Include="Assets\AMLogo.png" />
     <Resource Include="Assets\Solera_Logo_Full.png" />
     <Resource Include="Assets\Solera_Logo_Symbol_Only.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Helpers\" />
   </ItemGroup>
 	  <Target Name="VeloPack" AfterTargets="Publish">
 		<Exec Command="vpk pack -u SoleraCaseManagementTool -v $(assemblyversion) -p .\bin\Release\net9.0-windows7.0\win-x86 -e SoleraCaseManagementTool.exe" />

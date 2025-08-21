@@ -12,6 +12,7 @@
 
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" Invert="True" />
         <converters:RadioButtonCommandParameterConverter x:Key="CommandParameterConverter" />
         <converters:ContentFallbackConverter x:Key="FallbackConverter" />
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
@@ -63,7 +64,7 @@
                             Padding="2"
                             Height="20" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
                                         <ui:Button.Visibility>
-                                            <Binding Path="IsBlank" Converter="{StaticResource BooleanToVisibilityConverter}"  ConverterParameter="Inverse" />
+                                            <Binding Path="IsBlank" Converter="{StaticResource InverseBooleanToVisibilityConverter}" />
                                         </ui:Button.Visibility>
                                         <ui:Button.Style>
                                             <Style TargetType="Button">

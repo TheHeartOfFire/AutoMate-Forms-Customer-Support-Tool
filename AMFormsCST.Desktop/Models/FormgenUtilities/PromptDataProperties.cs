@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings;
+using System.Reflection;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -34,24 +36,36 @@ public partial class PromptDataProperties : ObservableObject, IFormgenFileProper
         }
     }
 
-    public UIElement GetUIElements()
-    {
-        return BasicStats.GetSettingsAndPropertiesUIElements(this);
-    }
-
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        yield return new DisplayProperty("Message:", Message);
-        if (Choices.Any())
-        {
-            yield return new DisplayProperty("Choices:", string.Join(", ", Choices));
-        }
+        var promptType = typeof(PromptData);
 
+        // Editable property: Message
+        var messageProp = promptType.GetProperty(nameof(PromptData.Message));
+        if (messageProp != null)
+            yield return new DisplayProperty(_corePromptData, messageProp);
+
+        // Editable property: Choices (if any)
+        var choicesProp = promptType.GetProperty(nameof(PromptData.Choices));
+        if (choicesProp != null && _corePromptData.Choices.Count != 0)
+            yield return new DisplayProperty(_corePromptData, choicesProp);
+
+        // Editable properties from PromptDataSettings
         if (Settings is PromptDataSettings promptSettings)
         {
-            yield return new DisplayProperty("Type:", promptSettings.Type.ToString());
-            yield return new DisplayProperty("Length:", promptSettings.Length.ToString());
-            yield return new DisplayProperty("Required:", promptSettings.Required.ToString());
+            var settingsType = typeof(PromptDataSettings);
+
+            var typeProp = settingsType.GetProperty(nameof(PromptDataSettings.Type));
+            if (typeProp != null)
+                yield return new DisplayProperty(promptSettings, typeProp);
+
+            var lengthProp = settingsType.GetProperty(nameof(PromptDataSettings.Length));
+            if (lengthProp != null)
+                yield return new DisplayProperty(promptSettings, lengthProp);
+
+            var requiredProp = settingsType.GetProperty(nameof(PromptDataSettings.Required));
+            if (requiredProp != null)
+                yield return new DisplayProperty(promptSettings, requiredProp);
         }
     }
 }

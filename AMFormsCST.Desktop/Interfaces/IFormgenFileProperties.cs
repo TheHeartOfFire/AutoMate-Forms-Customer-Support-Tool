@@ -6,5 +6,5 @@ namespace AMFormsCST.Desktop.Interfaces;
 
 public interface IFormgenFileProperties
 {
-    IEnumerable<DisplayProperty> GetDisplayProperties();
+    IFormgenFileSettings? Settings { get; }
 }

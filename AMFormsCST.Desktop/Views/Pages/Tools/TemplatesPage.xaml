@@ -35,9 +35,9 @@
         </ListBox>
 
         <WrapPanel Grid.Column="1" Orientation="Vertical">
-            <ui:TextBlock Text="{Binding SelectedTemplate.Template.Name}" HorizontalAlignment="Center"/>
-            <ui:TextBlock Text="{Binding SelectedTemplate.Template.Description}" HorizontalAlignment="Center"/>
-            <ui:TextBlock Text="{Binding SelectedTemplate.Template.Type}" HorizontalAlignment="Center"/>
+            <Label Content="{Binding SelectedTemplate.Template.Name}" HorizontalAlignment="Center"/>
+            <Label Content="{Binding SelectedTemplate.Template.Description}" HorizontalAlignment="Center"/>
+            <Label Content="{Binding SelectedTemplate.Template.Type}" HorizontalAlignment="Center"/>
             <ui:TextBox Text="{Binding SelectedTemplate.Output, Mode=OneWay}" TextWrapping="Wrap" Margin="10" IsReadOnly="True" IsReadOnlyCaretVisible="True"/>
             <ItemsControl ItemsSource="{Binding SelectedTemplate.Variables}" HorizontalAlignment="Left">
                 <ItemsControl.ItemTemplate>

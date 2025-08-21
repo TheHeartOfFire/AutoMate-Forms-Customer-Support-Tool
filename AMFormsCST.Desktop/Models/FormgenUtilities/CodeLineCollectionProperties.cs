@@ -9,18 +9,16 @@ namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class CodeLineCollectionProperties : IFormgenFileProperties
 {
     private readonly CodeLineCollection _collection;
+    public IFormgenFileSettings? Settings { get; } = null;
+
+    public int TotalLines => _collection.CodeLines.Count();
+    public int InitLines => _collection.CodeLines.Count(c => c.Settings?.Type == CodeType.INIT);
+    public int PromptLines => _collection.CodeLines.Count(c => c.Settings?.Type == CodeType.PROMPT && (!c.Settings?.Variable?.Equals("F0") ?? true));
+    public int PostLines => _collection.CodeLines.Count(c => c.Settings?.Type == CodeType.POST);
+
 
     public CodeLineCollectionProperties(CodeLineCollection collection)
     {
         _collection = collection;
-    }
-
-    public IEnumerable<DisplayProperty> GetDisplayProperties()
-    {
-        var allLines = _collection.CodeLines.ToList();
-        yield return new DisplayProperty("Total Code Lines:", allLines.Count.ToString());
-        yield return new DisplayProperty("INIT Count:", allLines.Count(c => c.Settings?.Type == CodeType.INIT).ToString());
-        yield return new DisplayProperty("PROMPT Count:", allLines.Count(c => c.Settings?.Type == CodeType.PROMPT && (!c.Settings?.Variable?.Equals("F0") ?? true)).ToString());
-        yield return new DisplayProperty("POST Count:", allLines.Count(c => c.Settings?.Type == CodeType.POST).ToString());
     }
 }

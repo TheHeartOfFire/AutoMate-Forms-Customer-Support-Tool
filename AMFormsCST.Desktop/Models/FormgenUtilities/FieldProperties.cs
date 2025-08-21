@@ -2,7 +2,9 @@
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows;
+using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormField;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -38,18 +40,48 @@ public partial class FieldProperties : ObservableObject, IFormgenFileProperties
 
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        yield return new DisplayProperty("Expression:", Expression);
-        yield return new DisplayProperty("Sample Data:", SampleData);
-        yield return new DisplayProperty("Formatting:", FormattingOption.ToString());
+        // Editable properties from FormField
+        var fieldType = typeof(FormField);
+        var exprProp = fieldType.GetProperty(nameof(FormField.Expression));
+        if (exprProp != null)
+            yield return new DisplayProperty(_coreField, exprProp);
 
+        var sampleDataProp = fieldType.GetProperty(nameof(FormField.SampleData));
+        if (sampleDataProp != null)
+            yield return new DisplayProperty(_coreField, sampleDataProp);
+
+        var formatOptionProp = fieldType.GetProperty(nameof(FormField.FormattingOption));
+        if (formatOptionProp != null)
+            yield return new DisplayProperty(_coreField, formatOptionProp);
+
+        // Editable properties from FieldSettings
         if (Settings is FieldSettings fieldSettings)
         {
-            yield return new DisplayProperty("ID:", fieldSettings.ID.ToString());
-            yield return new DisplayProperty("Type:", fieldSettings.GetFieldType());
-            yield return new DisplayProperty("Font Size:", fieldSettings.FontSize.ToString());
-            yield return new DisplayProperty("Alignment:", fieldSettings.GetFontAlignment());
-            yield return new DisplayProperty("Bold:", fieldSettings.Bold.ToString());
-            yield return new DisplayProperty("Shrink to Fit:", fieldSettings.ShrinkToFit.ToString());
+            var settingsType = typeof(FieldSettings);
+
+            var idProp = settingsType.GetProperty(nameof(FieldSettings.ID));
+            if (idProp != null)
+                yield return new DisplayProperty(fieldSettings, idProp, true); // ID is usually read-only
+
+            var typeProp = settingsType.GetProperty(nameof(FieldSettings.Type));
+            if (typeProp != null)
+                yield return new DisplayProperty(fieldSettings, typeProp);
+
+            var fontSizeProp = settingsType.GetProperty(nameof(FieldSettings.FontSize));
+            if (fontSizeProp != null)
+                yield return new DisplayProperty(fieldSettings, fontSizeProp);
+
+            var fontAlignmentProp = settingsType.GetProperty(nameof(FieldSettings.FontAlignment));
+            if (fontAlignmentProp != null)
+                yield return new DisplayProperty(fieldSettings, fontAlignmentProp);
+
+            var boldProp = settingsType.GetProperty(nameof(FieldSettings.Bold));
+            if (boldProp != null)
+                yield return new DisplayProperty(fieldSettings, boldProp);
+
+            var shrinkToFitProp = settingsType.GetProperty(nameof(FieldSettings.ShrinkToFit));
+            if (shrinkToFitProp != null)
+                yield return new DisplayProperty(fieldSettings, shrinkToFitProp);
         }
     }
 }

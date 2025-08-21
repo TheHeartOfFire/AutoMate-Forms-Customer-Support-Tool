@@ -30,9 +30,9 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
-    public bool ShowPageHostDialog(Page contentPage, bool canConfirm = false)
+    public bool ShowPageHostDialog(Page contentPage, string title = "Page Prview", bool canConfirm = false)
     {
-        var dialog = new PageHostDialog(contentPage, canConfirm);
+        var dialog = new PageHostDialog(contentPage, title, canConfirm);
         dialog.ShowDialog();
         return dialog.ConfirmSelected;
     }
@@ -43,6 +43,22 @@ public class DialogService : IDialogService
         {
             Filter = filter,
             Title = "Open File"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            return openFileDialog.FileName;
+        }
+
+        return null;
+    }
+    public string? ShowOpenFileDialog(string filter, string defaultDirectory)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Filter = filter,
+            Title = "Open File",
+            DefaultDirectory = defaultDirectory
         };
 
         if (openFileDialog.ShowDialog() == true)

@@ -1,26 +1,42 @@
-﻿using System.Drawing;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System.Drawing;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class FormFieldSettings
+    public partial class FormFieldSettings : IEquatable<FormFieldSettings>, INotifyPropertyChanged
     {
-
-        public int ID { get; set; }
-        public FieldType Type { get; set; }
-        public Point ImpactPosition { get; set; }
-        public Rectangle LaserRect { get; set; }
-        public bool ManualSize { get; set; }
-        public int FontSize { get; set; }
-        public bool Bold { get; set; }
-        public bool ShrinkToFit { get; set; }
-        public int Length { get; set; }
-        public int DecimalPlaces { get; set; }
-        public bool DisplayPartial { get; set; }
-        public int StartIndex { get; set; }
-        public int EndIndex { get; set; }
-        public int Kearning { get; set; }
-        public Alignment FontAlignment { get; set; }
+        [NotifyPropertyChanged]
+        private int _iD;
+        [NotifyPropertyChanged]
+        private FieldType _type;
+        [NotifyPropertyChanged]
+        private Point _impactPosition;
+        [NotifyPropertyChanged]
+        private Rectangle _laserRect;
+        [NotifyPropertyChanged]
+        private bool _manualSize;
+        [NotifyPropertyChanged]
+        private int _fontSize;
+        [NotifyPropertyChanged]
+        private bool _bold;
+        [NotifyPropertyChanged]
+        private bool _shrinkToFit;
+        [NotifyPropertyChanged]
+        private int _length;
+        [NotifyPropertyChanged]
+        private int _decimalPlaces;
+        [NotifyPropertyChanged]
+        private bool _displayPartial;
+        [NotifyPropertyChanged]
+        private int _startIndex;
+        [NotifyPropertyChanged]
+        private int _endIndex;
+        [NotifyPropertyChanged]
+        private int _kearning;
+        [NotifyPropertyChanged]
+        private Alignment _fontAlignment;
 
         public enum FieldType
         {
@@ -161,5 +177,26 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.WriteAttributeString("alignment", GetAlignment(FontAlignment));
 
         }
+
+        public bool Equals(FormFieldSettings? other) => other is not null &&
+            ID == other.ID &&
+            Type == other.Type &&
+            ImpactPosition.Equals(other.ImpactPosition) &&
+            LaserRect.Equals(other.LaserRect) &&
+            ManualSize == other.ManualSize &&
+            FontSize == other.FontSize &&
+            Bold == other.Bold &&
+            ShrinkToFit == other.ShrinkToFit &&
+            Length == other.Length &&
+            DecimalPlaces == other.DecimalPlaces &&
+            DisplayPartial == other.DisplayPartial &&
+            StartIndex == other.StartIndex &&
+            EndIndex == other.EndIndex &&
+            Kearning == other.Kearning &&
+            FontAlignment == other.FontAlignment;
+
+        public override bool Equals(object? obj) => Equals(obj as FormFieldSettings);
+        public override int GetHashCode() => HashCode.Combine(ID, Type, ImpactPosition, LaserRect, ManualSize, FontSize, Bold, 
+            HashCode.Combine(ShrinkToFit, Length, DecimalPlaces, DisplayPartial, StartIndex,  EndIndex, Kearning, FontAlignment));
     }
 }

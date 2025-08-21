@@ -15,11 +15,13 @@ public class SupportTool : ISupportTool
     public IFormgenUtils FormgenUtils { get; set; }
     public INotebook Notebook { get; set; }
     public ISettings Settings { get; set; }
-    private readonly Properties _properties = new();
+    private readonly Properties _properties;
 
     public SupportTool(IFileSystem fileSystem, IFormNameBestPractice formNameBestPractice, ISettings defaultSettings, ITemplateRepository templateRepository)
     {
-        _properties = new Properties();
+        // Load Properties from config file, or use defaults if not found
+        _properties = IO.LoadConfig() ?? new Properties();
+
         CodeBlocks = new CodeBlocks();
         Notebook = new Notebook();
         FormgenUtils = new FormgenUtils(fileSystem, _properties.FormgenUtils);
@@ -28,11 +30,11 @@ public class SupportTool : ISupportTool
         // Load saved settings, or use the default ones if no file exists
         Settings = IO.LoadSettings() ?? defaultSettings;
         Settings.UserSettings.Organization.InstantiateVariables(Enforcer, Notebook);
-        
     }
 
     public void SaveAllSettings()
     {
         IO.SaveSettings(Settings);
+        IO.SaveConfig(_properties);
     }
 }

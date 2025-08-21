@@ -250,7 +250,7 @@ public partial class DashboardViewModel : ViewModel
         var page = new TemplatesPage(vm);
 
 
-        var dialog = new PageHostDialog(page);
+        var dialog = new PageHostDialog(page, "Templates");
 
 
         dialog.Show();
@@ -263,7 +263,7 @@ public partial class DashboardViewModel : ViewModel
         var page = new CodeSnippetsPage(vm);
 
 
-        var dialog = new PageHostDialog(page);
+        var dialog = new PageHostDialog(page, "Code Snippets");
 
 
         dialog.Show();
@@ -277,7 +277,7 @@ public partial class DashboardViewModel : ViewModel
         var page = new FormgenUtilitiesPage(vm, navigationService, _dialogService);
 
 
-        var dialog = new PageHostDialog(page);
+        var dialog = new PageHostDialog(page, "Formgen Utilities");
 
 
         dialog.Show();
@@ -290,7 +290,7 @@ public partial class DashboardViewModel : ViewModel
         var page = new FormNameGeneratorPage(vm); 
 
         
-        var dialog = new PageHostDialog(page, true);
+        var dialog = new PageHostDialog(page, "Form Name Generator", true);
 
         
         dialog.Show();

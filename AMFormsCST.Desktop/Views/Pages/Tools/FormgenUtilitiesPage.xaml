@@ -7,18 +7,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages.Tools"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils"
+    xmlns:vms="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils"
+    xmlns:models="clr-namespace:AMFormsCST.Desktop.Models.FormgenUtilities"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools"
     d:DataContext="{d:DesignInstance Type=viewModels:FormgenUtilitiesViewModel,
                                      IsDesignTimeCreatable=False}"
-    mc:Ignorable="d">
+    mc:Ignorable="d" MinWidth="1100" MinHeight="500">
 
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" Invert="True" />
         <converters:NullableBoolToSymbolConverter x:Key="NullableBoolToSymbolConverter" />
         <converters:NullableBoolToTextConverter x:Key="NullableBoolToTextConverter" />
+        <converters:StringListToStringConverter x:Key="StringListToStringConverter" />
+        <converters:EnumValuesConverter x:Key="EnumValuesConverter" />
+        <converters:IntToDoubleConverter x:Key="IntToDoubleConverter" />
     </Page.Resources>
 
     <Grid Margin="12">
@@ -46,6 +50,20 @@
                     Command="{Binding SaveFormgenFileCommand}"
                     Content="Save"
                     Icon="{ui:SymbolIcon Save24}"
+                    IsEnabled="{Binding HasChanged}" />
+                <ui:Button
+                    Margin="0,8,0,0"
+                    Appearance="Secondary"
+                    Command="{Binding LoadBackupCommand}"
+                    Content="Load Backup"
+                    Icon="{ui:SymbolIcon History24}"
+                    IsEnabled="{Binding IsFileLoaded}" />
+                <ui:Button
+                    Margin="0,8,0,0"
+                    Appearance="Danger"
+                    Command="{Binding ClearFileCommand}"
+                    Content="Close"
+                    Icon="{ui:SymbolIcon Dismiss24}"
                     IsEnabled="{Binding IsFileLoaded}" />
             </StackPanel>
 
@@ -73,16 +91,16 @@
                             </Style>
                         </TreeView.ItemContainerStyle>
                         <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type models:TreeItemNodeViewModel}" ItemsSource="{Binding Children}">
+                            <HierarchicalDataTemplate DataType="{x:Type vms:TreeItemNodeViewModel}" ItemsSource="{Binding Children}">
                                 <TextBlock Text="{Binding Header}" />
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
 
-                    <TextBlock
+                    <Label
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Text="Load a .formgen file to begin"
+                        Content="Load a .formgen file to begin"
                         Visibility="{Binding IsFileLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </Grid>
             </Border>
@@ -94,7 +112,7 @@
             IsEnabled="{Binding IsFileLoaded}"
             VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical">
-                <ui:CardControl Header="Form Details">
+                <ui:CardControl Header="Form Details" HorizontalContentAlignment="Left">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Form Title" />
                         <ui:TextBox Margin="0,4,0,0" Text="{Binding FormTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -117,7 +135,7 @@
                     </StackPanel>
                 </ui:CardControl>
 
-                <ui:CardControl Margin="0,12,0,0" Header="Image Options">
+                <ui:CardControl Margin="0,12,0,0" Header="Image Options" HorizontalContentAlignment="Left">
                     <StackPanel Orientation="Vertical">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -146,16 +164,42 @@
                 </ui:CardControl>
 
                 <ItemsControl ItemsSource="{Binding SelectedNodeProperties}">
+                    <ItemsControl.Resources>
+                        <DataTemplate x:Key="StringEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <ui:TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="IntEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <ui:NumberBox Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToDoubleConverter}}" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="BoolEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <ui:ToggleSwitch IsChecked="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="EnumEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <ComboBox ItemsSource="{Binding Type, Converter={StaticResource EnumValuesConverter}}"
+              SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="ListStringEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <ui:TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringListToStringConverter}}"
+                AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MinHeight="80" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="ReadOnlyEditorTemplate" DataType="{x:Type models:DisplayProperty}">
+                            <Label Content="{Binding Value}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                        <models:DisplayPropertyTemplateSelector x:Key="DisplayPropertyTemplateSelector"
+    StringTemplate="{StaticResource StringEditorTemplate}"
+    IntTemplate="{StaticResource IntEditorTemplate}"
+    BoolTemplate="{StaticResource BoolEditorTemplate}"
+    EnumTemplate="{StaticResource EnumEditorTemplate}"
+    ListStringTemplate="{StaticResource ListStringEditorTemplate}"
+    ReadOnlyTemplate="{StaticResource ReadOnlyEditorTemplate}" />
+                    </ItemsControl.Resources>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" MinWidth="150"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" Text="{Binding Value, Mode=OneWay}" IsReadOnly="True" VerticalAlignment="Center"/>
-                            </Grid>
+                        <DataTemplate DataType="{x:Type models:DisplayProperty}">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <!-- Editable controls based on type and IsReadOnly -->
+                                <ContentControl Content="{Binding}" ContentTemplateSelector="{StaticResource DisplayPropertyTemplateSelector}" />
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

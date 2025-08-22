@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -40,6 +42,7 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
     public Guid Id { get; } = Guid.NewGuid();
     [ObservableProperty]
     private bool _isSelected  = false;
+    internal IForm CoreType = new Core.Types.Notebook.Form();
     public void Select()
     {
         IsSelected = true;
@@ -80,6 +83,16 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
         TestDeals.Add(new TestDeal()); 
 
         SelectTestDeal(TestDeals.FirstOrDefault());
+
+        SubscribeToInitialChildren();
+    }
+    public Form(IForm form)
+    {
+        CoreType = form ?? throw new ArgumentNullException(nameof(form), "Cannot create a Form from a null item.");
+        TestDeals = [..form.TestDeals.ConvertAll(td => new TestDeal(td))];
+        TestDeals.CollectionChanged += ChildCollection_CollectionChanged;
+
+        SelectTestDeal(TestDeals.Where(c => c.CoreType.Id == form.TestDeals.SelectedItem?.Id).First());
 
         SubscribeToInitialChildren();
     }
@@ -130,5 +143,18 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
     private void SubscribeToInitialChildren()
     {
         foreach (var deal in TestDeals) { ((ObservableObject)deal).PropertyChanged += ChildItem_IsBlankChanged; }
+    }
+
+    public static implicit operator Core.Types.Notebook.Form(Form form)
+    {
+        if (form is null) return new Core.Types.Notebook.Form();
+
+        return new Core.Types.Notebook.Form(form.Id)
+        {
+            Name = form.Name ?? string.Empty,
+            Notes = form.Notes ?? string.Empty,
+            Notable = form.Notable,
+            TestDeals = [..form.TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td).ToList()]
+        };
     }
 }

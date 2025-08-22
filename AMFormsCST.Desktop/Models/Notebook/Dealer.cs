@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -49,6 +51,7 @@ namespace AMFormsCST.Desktop.Models
 
         [ObservableProperty]
         private bool _isSelected = false;
+        internal IDealer CoreType = new Core.Types.Notebook.Dealer();
         public void Select()
         {
             IsSelected = true;
@@ -59,12 +62,22 @@ namespace AMFormsCST.Desktop.Models
         }
         public Dealer()
         {
-
             Companies = [];
             Companies.CollectionChanged += ChildCollection_CollectionChanged;
             Companies.Add(new Company()); 
 
             SelectCompany(Companies.FirstOrDefault());
+
+            SubscribeToInitialChildren();
+        }
+
+        public Dealer(IDealer dealer)
+        {
+            CoreType = dealer ?? throw new ArgumentNullException(nameof(dealer), "Cannot create a Dealer from a null item.");
+            Companies = [..dealer.Companies.ConvertAll(c => new Company(c))];
+            Companies.CollectionChanged += ChildCollection_CollectionChanged;
+
+            SelectCompany(Companies.Where(c => c.CoreType.Id == dealer.Companies.SelectedItem?.Id).First());
 
             SubscribeToInitialChildren();
         }
@@ -123,6 +136,18 @@ namespace AMFormsCST.Desktop.Models
         private void SubscribeToInitialChildren()
         {
             foreach (var company in Companies) { ((ObservableObject)company).PropertyChanged += ChildItem_IsBlankChanged; }
+        }
+
+        public static implicit operator Core.Types.Notebook.Dealer(Dealer dealer)
+        {
+            if (dealer is null) return new Core.Types.Notebook.Dealer();
+
+            return new Core.Types.Notebook.Dealer(dealer.Id)
+            {
+                Name = dealer.Name ?? string.Empty,
+                ServerCode = dealer.ServerCode ?? string.Empty,
+                Companies = [.. dealer.Companies.Select(c => (Core.Types.Notebook.Company)c).ToList()]
+            };
         }
     }
 }

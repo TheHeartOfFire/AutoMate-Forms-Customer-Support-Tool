@@ -50,6 +50,12 @@ public class AutomateFormsOrgVariables : IOrgVariables
         {
             return [];
         }
+        var selectedNote = Notebook.Notes.SelectedItem;
+        var selectedDealer = selectedNote?.Dealers.SelectedItem;
+        var selectedCompany = selectedDealer?.Companies.SelectedItem;
+        var selectedContact = selectedNote?.Contacts.SelectedItem;
+        var selectedForm = selectedNote?.Forms.SelectedItem;
+        var selectedTestDeal = selectedForm?.TestDeals.SelectedItem;
 
         return
         [
@@ -59,7 +65,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description: "Server ID#",
              aliases: [ "server", "serv"],
-             getValue: () => Notebook.CurrentNote.ServerId ?? string.Empty
+             getValue: () => selectedDealer?.ServerCode ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:Companies",
@@ -67,7 +73,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Company#(s)",
              aliases: ["company", "comp", "co"],
-             getValue: () => Notebook.CurrentNote.Companies ?? string.Empty
+             getValue: () => selectedCompany?.CompanyCode ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:Dealership",
@@ -75,7 +81,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Dealership Name",
              aliases: ["dealer", "dlr"],
-             getValue: () => Notebook.CurrentNote.Dealership ?? string.Empty
+             getValue: () => selectedCompany?.Name ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:ContactName",
@@ -83,7 +89,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Contact Name",
              aliases: ["name"],
-             getValue: () => Notebook.CurrentNote.ContactName ?? string.Empty
+             getValue: () => selectedContact?.Name ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:EmailAddress",
@@ -91,7 +97,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"E-Mail Address",
              aliases: ["email"],
-             getValue: () => Notebook.CurrentNote.Email ?? string.Empty
+             getValue: () => selectedContact?.Email ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:Phone",
@@ -99,7 +105,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Phone#",
              aliases: [],
-             getValue: () => Notebook.CurrentNote.Phone ?? string.Empty
+             getValue: () => selectedContact?.Phone ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:Notes",
@@ -107,7 +113,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Notes",
              aliases: [],
-             getValue: () => Notebook.CurrentNote.NotesText ?? string.Empty
+             getValue: () => selectedNote?.NotesText ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:CaseNumber",
@@ -115,7 +121,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Case#",
              aliases: [ "caseno", "case" ],
-             getValue: () => Notebook.CurrentNote.CaseText ?? string.Empty
+             getValue: () => selectedNote?.CaseText ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "Notes:Forms",
@@ -123,7 +129,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Forms",
              aliases: [ "form" ],
-             getValue: () => Notebook.CurrentNote.FormsText ?? string.Empty
+             getValue: () => ">"+string.Join("\n>", selectedNote?.Forms.Select(f => f.Name) ?? [])
             ),
             new TextTemplateVariable(
              properName: "Notes:FirstName",
@@ -134,8 +140,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              getValue: () =>
              {
 
-                 if(!string.IsNullOrEmpty(Notebook.CurrentNote.ContactName) && Notebook.CurrentNote.ContactName.Contains(' '))
-                     return Notebook.CurrentNote.ContactName.Split(' ').FirstOrDefault() ?? string.Empty;
+                 if(!string.IsNullOrEmpty(selectedContact?.Name) && selectedContact?.Name.Contains(' ') == true)
+                     return selectedContact?.Name.Split(' ').FirstOrDefault() ?? string.Empty;
 
                    return string.Empty;
              }
@@ -210,7 +216,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "notes:",
              description:"Deal#",
              aliases: [ "dealno", "deal" ],
-             getValue: () => Notebook.CurrentNote.DealText ?? string.Empty
+             getValue: () => selectedTestDeal?.DealNumber ?? string.Empty
             ),
             new TextTemplateVariable(
              properName: "User:Input",

@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ public partial class TestDeal : ObservableObject, IBlankMaybe, ISelectable
     public Guid Id { get; } = Guid.NewGuid();
     [ObservableProperty]
     private bool _isSelected = false;
+    internal ITestDeal CoreType = new Core.Types.Notebook.TestDeal();
     public void Select()
     {
         IsSelected = true;
@@ -34,5 +36,23 @@ public partial class TestDeal : ObservableObject, IBlankMaybe, ISelectable
     public void Deselect()
     {
         IsSelected = false;
+    }
+    public TestDeal() { }
+    public TestDeal(ITestDeal testDeal)
+    {
+        CoreType = testDeal ?? throw new ArgumentNullException(nameof(testDeal), "Cannot create a TestDeal from a null item.");
+        DealNumber = testDeal.DealNumber ?? string.Empty;
+        Purpose = testDeal.Purpose ?? string.Empty;
+    }
+
+    public static implicit operator Core.Types.Notebook.TestDeal(TestDeal testDeal)
+    {
+        if (testDeal is null) return new Core.Types.Notebook.TestDeal();
+
+        return new Core.Types.Notebook.TestDeal(testDeal.Id)
+        {
+            DealNumber = testDeal.DealNumber ?? string.Empty,
+            Purpose = testDeal.Purpose ?? string.Empty
+        };
     }
 }

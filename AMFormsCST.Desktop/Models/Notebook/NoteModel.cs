@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -64,6 +66,29 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         SubscribeToInitialChildren();
 
         
+        SelectDealer(Dealers.FirstOrDefault() ?? new Dealer());
+        SelectContact(Contacts.FirstOrDefault() ?? new Contact(phoneExtensionDelimiter));
+        SelectForm(Forms.FirstOrDefault() ?? new Form());
+    }
+    public NoteModel(INote note, string phoneExtensionDelimiter)
+    {
+
+        Dealers = [..note.Dealers.ConvertAll(d => new Dealer(d))];
+        Dealers.CollectionChanged += ChildCollection_CollectionChanged;
+        Dealers.Add(new Dealer());
+
+        Contacts = [.. note.Contacts.ConvertAll(c => new Contact(c))];
+        Contacts.CollectionChanged += ChildCollection_CollectionChanged;
+        Contacts.Add(new Contact(phoneExtensionDelimiter));
+
+        Forms = [.. note.Forms.ConvertAll(f => new Form(f))];
+        Forms.CollectionChanged += ChildCollection_CollectionChanged;
+        Forms.Add(new Form());
+
+
+        SubscribeToInitialChildren();
+
+
         SelectDealer(Dealers.FirstOrDefault() ?? new Dealer());
         SelectContact(Contacts.FirstOrDefault() ?? new Contact(phoneExtensionDelimiter));
         SelectForm(Forms.FirstOrDefault() ?? new Form());
@@ -202,28 +227,17 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         foreach (var form in Forms) { form.PropertyChanged += ChildItem_IsBlankChanged; }
     }
 
-    public static implicit operator Core.Types.Notebook.Note(NoteModel note)
+    public static implicit operator Note(NoteModel note)
     {
-        if (note is null)
+        if (note is null) return new Note();
+        
+        return new Note(note.Id)
         {
-            return new Core.Types.Notebook.Note();
-        }
-        string companiesText = note.SelectedDealer?.Companies?.Select(d => d.CompanyCode) != null
-                           ? string.Join(", ", note.SelectedDealer.Companies.Select(d => d.CompanyCode))
-                           : string.Empty;
-        return new Core.Types.Notebook.Note(note.Id)
-        {
-            ServerId = note.SelectedDealer?.ServerCode,
-            Companies = companiesText,
-            Dealership = note.SelectedDealer?.Name,
-            ContactName = note.SelectedContact?.Name,
-            Email = note.SelectedContact?.Email,
-            Phone = note.SelectedContact?.Phone,
-            PhoneExt = note.SelectedContact?.PhoneExtension,
-            NotesText = note.Notes,
-            CaseText = note.CaseNumber,
-            FormsText = note.SelectedForm?.Name,
-            DealText = note.SelectedForm?.SelectedTestDeal?.DealNumber
+            CaseText = note.CaseNumber ?? string.Empty,
+            NotesText = note.Notes ?? string.Empty,
+            Dealers = [..note.Dealers.Select(d => (Core.Types.Notebook.Dealer)d).ToList()],
+            Contacts = [..note.Contacts.Select(c => (Core.Types.Notebook.Contact)c).ToList()],
+            Forms = [.. note.Forms.Select(f => (Core.Types.Notebook.Form)f).ToList()]
         };
     }
 }

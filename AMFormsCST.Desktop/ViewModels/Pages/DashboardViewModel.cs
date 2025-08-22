@@ -1,7 +1,6 @@
 ﻿using AMFormsCST.Core;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
@@ -16,6 +15,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using Wpf.Ui;
+using System.Timers;
+using AMFormsCST.Core.Interfaces.Notebook;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages;
 
@@ -80,7 +81,20 @@ public partial class DashboardViewModel : ViewModel
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _fileSystem = fileSystem;
-        Notes.Add(new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator));
+
+        if (_supportTool.Notebook.Notes.Count == 0)
+            Notes.Add(new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator));
+        
+        foreach(var note in _supportTool.Notebook.Notes)
+        {
+            var noteModel = new NoteModel(note, _supportTool.Settings.UserSettings.ExtSeparator);
+            noteModel.PropertyChanged += OnModelPropertyChanged;
+            noteModel.Dealers.CollectionChanged += OnChildCollectionChanged;
+            noteModel.Contacts.CollectionChanged += OnChildCollectionChanged;
+            noteModel.Forms.CollectionChanged += OnChildCollectionChanged;
+            SubscribeNoteChildren(noteModel);
+            Notes.Add(noteModel);
+        }
 
         _selectedNote = Notes[0];
         Notes[0].Select();
@@ -94,13 +108,6 @@ public partial class DashboardViewModel : ViewModel
             SubscribeNoteChildren(_selectedNote);
 
         }
-        #region DEBUG
-#if DEBUG
-        IsDebugMode = true;
-#endif
-        #endregion
-
-        if (IsDebugMode) _debugVisibility = Visibility.Visible;
 
         if (_selectedNote is null)
         {
@@ -439,14 +446,39 @@ public partial class DashboardViewModel : ViewModel
             }
         }
     }
+    private System.Timers.Timer? _debounceTimer;
+    private const int DebounceIntervalMs = 5000; 
+
+    private void ScheduleAutosave()
+    {
+        if (_debounceTimer == null)
+        {
+            _debounceTimer = new System.Timers.Timer(DebounceIntervalMs);
+            _debounceTimer.Elapsed += (s, e) =>
+            {
+                _debounceTimer?.Stop();
+                _debounceTimer?.Dispose();
+                _debounceTimer = null; 
+                IO.SaveNotes([.. Notes.Select(n => (Core.Types.Notebook.Note)n).Cast<INote>()]);
+            };
+            _debounceTimer.AutoReset = false;
+        }
+        else
+        {
+            _debounceTimer.Stop();
+        }
+        _debounceTimer.Start();
+    }
+
     private void UpdateNotebook()
     {
         _supportTool.Notebook.Notes.Clear();
         foreach (var note in Notes)
         {
-            _supportTool.Notebook.AddNote((Note)note, false);
+            _supportTool.Notebook.AddNote((Core.Types.Notebook.Note)note, false);
         }
-        _supportTool.Notebook.SelectNote((Note)SelectedNote);
+        _supportTool.Notebook.SelectNote((Core.Types.Notebook.Note)SelectedNote);
+        ScheduleAutosave();
     }
     private void EnsureBlankItem<T>(ObservableCollection<T> collection, Func<T> factory)
     where T : class, IBlankMaybe, INotifyPropertyChanged

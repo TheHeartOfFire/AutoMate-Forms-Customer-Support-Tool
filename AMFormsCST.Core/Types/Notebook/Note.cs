@@ -1,50 +1,35 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces.Notebook;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace AMFormsCST.Core.Types.Notebook;
 public class Note : INote
 {
-    public string? ServerId { get; set; }
-    public string? Companies { get; set; }
-    public string? Dealership { get; set; }
-    public string? ContactName { get; set; }
-    public string? Email { get; set; }
-    public string? Phone { get; set; }
-    public string? PhoneExt { get; set; }
-    public string? NotesText { get; set; }
-    public string? CaseText { get; set; }
-    public string? FormsText { get; set; }
-    public string? DealText { get; set; }
+    public string CaseText { get; set; } = string.Empty;
+    public string NotesText { get; set; } = string.Empty;
+    public SelectableList<IDealer> Dealers { get; set; } = [];
+    public SelectableList<IContact> Contacts { get; set; } = [];
+    public SelectableList<IForm> Forms { get; set; } = [];
 
-    public Guid _id = Guid.NewGuid();
     public Guid Id => _id;
 
-    public static Note Clone(Note note) => new()
-    {
-        ServerId = note.ServerId,
-        Companies = note.Companies,
-        Dealership = note.Dealership,
-        ContactName = note.ContactName,
-        Email = note.Email,
-        Phone = note.Phone,
-        PhoneExt = note.PhoneExt,
-        NotesText = note.NotesText,
-        CaseText = note.CaseText,
-        FormsText = note.FormsText,
-        DealText = note.DealText
-    };
-
-
-    public Note()
-    {
-        
-    }
+    public Note() { }
     public Note(Guid id)
     {
         _id = id;
     }
 
     #region Interface Implementation
+    private readonly Guid _id = Guid.NewGuid();
+    public INote Clone() => new Note()
+    {
+        CaseText = CaseText,
+        NotesText = NotesText,
+        Dealers = [..Dealers.ConvertAll(d => d.Clone())],
+        Contacts = [.. Contacts.ConvertAll(c => c.Clone())],
+        Forms = [.. Forms.ConvertAll(f => f.Clone())],
+    };
     public bool Equals(INote? other)
     {
         if (other == null) return false;
@@ -69,19 +54,18 @@ public class Note : INote
 
     public int GetHashCode([DisallowNull] INote obj) => obj.Id.GetHashCode();
 
-    public string Dump() =>
-        $"ServerId: {ServerId}\n" +
-        $"Companies: {Companies}\n" +
-        $"Dealership: {Dealership}\n" +
-        $"ContactName: {ContactName}\n" +
-        $"Email: {Email}\n" +
-        $"Phone: {Phone}\n" +
-        $"PhoneExt: {PhoneExt}\n" +
-        $"NotesText: {NotesText}\n" +
-        $"CaseText: {CaseText}\n" +
-        $"FormsText: {FormsText}\n" +
-        $"DealText: {DealText}\n" +
-        $"Id: {_id}";
+    public string Dump() 
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Note Dump:");
+        sb.AppendLine($"Id: {_id}");
+        sb.AppendLine($"CaseText: {CaseText}");
+        sb.AppendLine($"NotesText: {NotesText}");
+        sb.AppendLine($"Dealers: {string.Join(", ", Dealers.Select(d => d.Dump()))}");
+        sb.AppendLine($"Contacts: {string.Join(", ", Contacts.Select(c => c.Dump()))}");
+        sb.AppendLine($"Forms: {string.Join(", ", Forms.Select(f => f.Dump()))}");
+        return sb.ToString();
+    }
     #endregion
 
 }

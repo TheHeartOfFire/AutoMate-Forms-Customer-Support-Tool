@@ -1,17 +1,17 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.Notebook;
 
 namespace AMFormsCST.Core.Utils;
 public class Notebook : INotebook
 {
-    public IList<INote> Notes { get; set; } = IO.LoadNotes();
-    public INote CurrentNote { get; set; }
+    public SelectableList<INote> Notes { get; set; } = [.. IO.LoadNotes()];
 
     public Notebook()
     {
         if (Notes.Count == 0) Notes.Add(new Note());
-        CurrentNote = Notes[0];
+        Notes.SelectedItem = Notes.FirstOrDefault();
     }
 
     public void AddNote(bool select = false) => AddNote(new Note(), select);
@@ -20,7 +20,7 @@ public class Notebook : INotebook
         Notes.Add(note);
 
         if (select)
-            CurrentNote = note;
+            Notes.SelectedItem = note;
 
     }
 
@@ -31,13 +31,13 @@ public class Notebook : INotebook
 
         if (Notes.Count == 0)
         {
-            CurrentNote = new Note();
-            Notes.Add(CurrentNote);
+            Notes.SelectedItem = new Note();
+            Notes.Add(Notes.SelectedItem);
             return;
         }
 
-        if (CurrentNote == note)
-            CurrentNote = Notes[0];
+        if (Notes.SelectedItem == note)
+            Notes.SelectedItem = Notes[0];
     }
 
     
@@ -45,14 +45,14 @@ public class Notebook : INotebook
     public void Clear()
     {
         Notes.Clear();
-        CurrentNote = new Note();
-        Notes.Add(CurrentNote);
+        Notes.SelectedItem = new Note();
+        Notes.Add(Notes.SelectedItem);
     }
 
     public void SelectNote(INote note)
     {
         ErrorHandler.Notes.NoteNotFoundErrorCheck(note, Notes);
-        CurrentNote = note;
+        Notes.SelectedItem = note;
     }
 
     public void SwapNotes(INote note1, INote note2)
@@ -67,12 +67,12 @@ public class Notebook : INotebook
 
     
 
-    internal void Load(IList<INote> notes)
+    internal void Load(SelectableList<INote> notes)
     {
         ErrorHandler.Notes.NoNotesErrorCheck(notes);
 
         Notes = notes;
-        CurrentNote = Notes[0];
+        Notes.SelectedItem = Notes[0];
     }
 
     

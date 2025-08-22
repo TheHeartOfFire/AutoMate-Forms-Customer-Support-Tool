@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -23,10 +25,20 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 
     [ObservableProperty]
     private bool _isSelected = false;
-
+    internal IContact CoreType = new Core.Types.Notebook.Contact();
     public Contact(string extensionDelimiter)
     {
         PhoneExtensionDelimiter = extensionDelimiter;
+    }
+    public Contact(IContact contact)
+    {
+        CoreType = contact ?? throw new ArgumentNullException(nameof(contact), "Cannot create a Contact from a null item."); ;
+        Name = contact.Name ?? string.Empty;
+        Email = contact.Email ?? string.Empty;
+        Phone = contact.Phone ?? string.Empty;
+        PhoneExtension = contact.PhoneExtension ?? string.Empty;
+        PhoneExtensionDelimiter = contact.PhoneExtensionDelimiter;
+
     }
     public void Select()
     {
@@ -78,5 +90,18 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
     partial void OnPhoneExtensionDelimiterChanged(string value)
     {
         OnPropertyChanged(nameof(FullPhone));
+    }
+    public static implicit operator Core.Types.Notebook.Contact(Contact contact)
+    {
+        if (contact is null) return new Core.Types.Notebook.Contact();
+
+        return new Core.Types.Notebook.Contact(contact.Id)
+        {
+            Name = contact.Name ?? string.Empty,
+            Email = contact.Email ?? string.Empty,
+            Phone = contact.Phone ?? string.Empty,
+            PhoneExtension = contact.PhoneExtension ?? string.Empty,
+            PhoneExtensionDelimiter = contact.PhoneExtensionDelimiter ?? " "
+        };
     }
 }

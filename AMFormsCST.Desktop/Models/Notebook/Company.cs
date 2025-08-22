@@ -1,4 +1,6 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -16,6 +18,17 @@ public partial class Company : ObservableObject, ISelectable, IBlankMaybe
     public Guid Id { get; } = Guid.NewGuid();
     [ObservableProperty]
     private bool _isSelected = false;
+    internal ICompany CoreType = new Core.Types.Notebook.Company();
+    public Company()
+    {
+            
+    }
+    public Company(ICompany company)
+    {
+        CoreType = company ?? throw new ArgumentNullException(nameof(company), "Cannot create a Company from a null item.");
+        Name = company.Name;
+        CompanyCode = company.CompanyCode;
+    }
     public void Select()
     {
         IsSelected = true;
@@ -32,6 +45,17 @@ public partial class Company : ObservableObject, ISelectable, IBlankMaybe
 
     partial void OnCompanyCodeChanged(string? value)
     {
-        OnPropertyChanged(nameof(IsBlank)); 
+        OnPropertyChanged(nameof(IsBlank));
+    }
+
+    public static implicit operator Core.Types.Notebook.Company(Company company)
+    {
+        if (company is null) return new Core.Types.Notebook.Company();
+
+        return new Core.Types.Notebook.Company(company.Id)
+        {
+            Name = company.Name ?? string.Empty,
+            CompanyCode = company.CompanyCode ?? string.Empty
+        };
     }
 }

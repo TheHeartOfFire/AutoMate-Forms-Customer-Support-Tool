@@ -1,4 +1,6 @@
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Desktop.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,27 +9,89 @@ namespace AMFormsCST.Desktop.Services;
 
 public class FileSystem : IFileSystem
 {
-    public bool FileExists(string? path) => File.Exists(path);
+    private readonly ILogService? _logger;
 
-    public string? GetDirectoryName(string? path) => Path.GetDirectoryName(path);
+    public FileSystem(ILogService? logger = null)
+    {
+        _logger = logger;
+        _logger?.LogInfo("FileSystem initialized.");
+    }
 
-    public string? GetFileName(string? path) => Path.GetFileName(path);
+    public bool FileExists(string? path)
+    {
+        var exists = File.Exists(path);
+        _logger?.LogDebug($"FileExists('{path}') => {exists}");
+        return exists;
+    }
 
-    public string? GetFileNameWithoutExtension(string? path) => Path.GetFileNameWithoutExtension(path);
+    public string? GetDirectoryName(string? path)
+    {
+        var result = Path.GetDirectoryName(path);
+        _logger?.LogDebug($"GetDirectoryName('{path}') => '{result}'");
+        return result;
+    }
 
-    public string CombinePath(string path1, string path2) => Path.Combine(path1, path2);
+    public string? GetFileName(string? path)
+    {
+        var result = Path.GetFileName(path);
+        _logger?.LogDebug($"GetFileName('{path}') => '{result}'");
+        return result;
+    }
 
-    public string ReadAllText(string path) => File.ReadAllText(path);
+    public string? GetFileNameWithoutExtension(string? path)
+    {
+        var result = Path.GetFileNameWithoutExtension(path);
+        _logger?.LogDebug($"GetFileNameWithoutExtension('{path}') => '{result}'");
+        return result;
+    }
 
-    public void WriteAllText(string path, string contents) => File.WriteAllText(path, contents);
+    public string CombinePath(string path1, string path2)
+    {
+        var result = Path.Combine(path1, path2);
+        _logger?.LogDebug($"CombinePath('{path1}', '{path2}') => '{result}'");
+        return result;
+    }
 
-    public void MoveFile(string sourceFileName, string destFileName) => File.Move(sourceFileName, destFileName);
+    public string ReadAllText(string path)
+    {
+        _logger?.LogInfo($"ReadAllText('{path}')");
+        return File.ReadAllText(path);
+    }
 
-    public void CreateDirectory(string path) => Directory.CreateDirectory(path);
+    public void WriteAllText(string path, string contents)
+    {
+        _logger?.LogInfo($"WriteAllText('{path}')");
+        File.WriteAllText(path, contents);
+    }
 
-    public IEnumerable<string> GetFiles(string path) => Directory.GetFiles(path);
+    public void MoveFile(string sourceFileName, string destFileName)
+    {
+        _logger?.LogInfo($"MoveFile('{sourceFileName}', '{destFileName}')");
+        File.Move(sourceFileName, destFileName);
+    }
 
-    public DateTime GetLastWriteTime(string path) => File.GetLastWriteTime(path);
+    public void CreateDirectory(string path)
+    {
+        _logger?.LogInfo($"CreateDirectory('{path}')");
+        Directory.CreateDirectory(path);
+    }
 
-    public void DeleteFile(string path) => File.Delete(path);
+    public IEnumerable<string> GetFiles(string path)
+    {
+        _logger?.LogInfo($"GetFiles('{path}')");
+        return Directory.GetFiles(path);
+    }
+
+    public DateTime GetLastWriteTime(string path)
+    {
+        var result = File.GetLastWriteTime(path);
+        _logger?.LogDebug($"GetLastWriteTime('{path}') => {result}");
+        return result;
+    }
+
+    public void DeleteFile(string path)
+    {
+        _logger?.LogInfo($"DeleteFile('{path}')");
+        File.Delete(path);
+    }
 }

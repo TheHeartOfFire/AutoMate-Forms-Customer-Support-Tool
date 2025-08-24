@@ -17,24 +17,43 @@ public class SupportTool : ISupportTool
     public ISettings Settings { get; set; }
     private readonly Properties _properties;
 
-    public SupportTool(IFileSystem fileSystem, IFormNameBestPractice formNameBestPractice, ISettings defaultSettings, ITemplateRepository templateRepository)
-    {
-        // Load Properties from config file, or use defaults if not found
-        _properties = IO.LoadConfig() ?? new Properties();
+    // Add logging service property
+    public ILogService Logger { get; }
 
-        CodeBlocks = new CodeBlocks();
-        Notebook = new Notebook();
-        FormgenUtils = new FormgenUtils(fileSystem, _properties.FormgenUtils);
-        Enforcer = new BestPracticeEnforcer(formNameBestPractice, templateRepository);
+    // Add ILogService to constructor
+    public SupportTool(
+        IFileSystem fileSystem,
+        IFormNameBestPractice formNameBestPractice,
+        ISettings defaultSettings,
+        ITemplateRepository templateRepository,
+        INotebook notebook,
+        ILogService logger)
+    {
+        Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        Logger.LogInfo("Initializing SupportTool.");
+
+        IO.ConfigureLogger(logger);
+
+        // Load Properties from config file, or use defaults if not found
+        _properties = IO.LoadConfig() ?? new Properties(logger);
+
+        CodeBlocks = new CodeBlocks(logger);
+        Notebook = notebook ?? new Notebook(logger);
+        FormgenUtils = new FormgenUtils(fileSystem, _properties.FormgenUtils, logger);
+        Enforcer = new BestPracticeEnforcer(formNameBestPractice, templateRepository, logger);
 
         // Load saved settings, or use the default ones if no file exists
         Settings = IO.LoadSettings() ?? defaultSettings;
         Settings.UserSettings.Organization.InstantiateVariables(Enforcer, Notebook);
+
+        Logger.LogInfo("SupportTool initialized successfully.");
     }
 
     public void SaveAllSettings()
     {
+        Logger.LogInfo("Saving all settings.");
         IO.SaveSettings(Settings);
         IO.SaveConfig(_properties);
+        Logger.LogInfo("Settings saved.");
     }
 }

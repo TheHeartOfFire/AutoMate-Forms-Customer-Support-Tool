@@ -1,6 +1,9 @@
 ﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Types.Notebook;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
+[JsonDerivedType(typeof(Form), typeDiscriminator: "form")]
 
 public interface IForm : INotable<IForm>
 {

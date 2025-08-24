@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,11 @@ using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSe
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public class FieldSettings : IFormgenFileSettings
 {
-    public FieldSettings(FormFieldSettings? settings = null)
+    private readonly ILogService? _logger;
+
+    public FieldSettings(FormFieldSettings? settings = null, ILogService? logger = null)
     {
+        _logger = logger;
         if (settings != null)
         {
             DecimalPlaces = settings.DecimalPlaces;
@@ -30,6 +34,7 @@ public class FieldSettings : IFormgenFileSettings
             ShrinkToFit = settings.ShrinkToFit;
             StartIndex = settings.StartIndex;
             Type = settings.Type;
+            _logger?.LogInfo($"FieldSettings initialized: ID={ID}, Type={Type}, FontSize={FontSize}");
         }
     }
 
@@ -65,5 +70,4 @@ public class FieldSettings : IFormgenFileSettings
         FieldType.INITIALS => "INITIALS",
         _ => "TEXT"
     };
-    
 }

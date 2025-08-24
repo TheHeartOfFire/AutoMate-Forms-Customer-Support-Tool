@@ -1,16 +1,16 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog.Context;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 {
+    private readonly ILogService? _logger;
+
     [ObservableProperty]
     private string _name = string.Empty;
     [ObservableProperty]
@@ -25,28 +25,35 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 
     [ObservableProperty]
     private bool _isSelected = false;
-    internal IContact CoreType = new Core.Types.Notebook.Contact();
-    public Contact(string extensionDelimiter)
+    internal IContact? CoreType { get; set; }
+    internal NoteModel? Parent { get; set; }
+
+    public Contact(string extensionDelimiter, ILogService? logger = null)
     {
+        _logger = logger;
         PhoneExtensionDelimiter = extensionDelimiter;
+        _logger?.LogInfo("Contact initialized.");
     }
-    public Contact(IContact contact)
+    public Contact(IContact contact, ILogService? logger = null)
     {
-        CoreType = contact ?? throw new ArgumentNullException(nameof(contact), "Cannot create a Contact from a null item."); ;
+        _logger = logger;
+        CoreType = contact;
         Name = contact.Name ?? string.Empty;
         Email = contact.Email ?? string.Empty;
         Phone = contact.Phone ?? string.Empty;
         PhoneExtension = contact.PhoneExtension ?? string.Empty;
         PhoneExtensionDelimiter = contact.PhoneExtensionDelimiter;
-
+        _logger?.LogInfo("Contact loaded from core type.");
     }
     public void Select()
     {
         IsSelected = true;
+        _logger?.LogInfo("Contact selected.");
     }
     public void Deselect()
     {
         IsSelected = false;
+        _logger?.LogInfo("Contact deselected.");
     }
 
     public string FullPhone
@@ -63,34 +70,101 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 
     public void ParsePhone(string phone)
     { 
-        // TODO: This is not robust enough. It should parse all sorts of phone numbers.
         if (string.IsNullOrEmpty(phone))
             return;
         var parts = phone.Split(' ');
         Phone = parts[0];
         if (parts.Length > 1)
             PhoneExtension = parts[1];
+        _logger?.LogInfo($"Phone parsed: {Phone}, Extension: {PhoneExtension}");
     }
     public bool IsBlank { get { return string.IsNullOrEmpty(Name) &&
                                  string.IsNullOrEmpty(Email) &&
                                  string.IsNullOrEmpty(Phone) &&
                                  string.IsNullOrEmpty(PhoneExtension); } }
-    partial void OnNameChanged(string value) { OnPropertyChanged(nameof(IsBlank)); }
-    partial void OnEmailChanged(string value) { OnPropertyChanged(nameof(IsBlank)); }
-    partial void OnPhoneChanged(string value) 
-    { 
+    partial void OnNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsBlank));
+        UpdateCore();
+        using (LogContext.PushProperty("ContactId", Id))
+        using (LogContext.PushProperty("Name", value))
+        using (LogContext.PushProperty("Email", Email))
+        using (LogContext.PushProperty("Phone", Phone))
+        using (LogContext.PushProperty("PhoneExtension", PhoneExtension))
+        {
+            _logger?.LogInfo($"Contact name changed: {value}");
+        }
+    }
+    partial void OnEmailChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsBlank));
+        UpdateCore();
+        using (LogContext.PushProperty("ContactId", Id))
+        using (LogContext.PushProperty("Name", Name))
+        using (LogContext.PushProperty("Email", value))
+        using (LogContext.PushProperty("Phone", Phone))
+        using (LogContext.PushProperty("PhoneExtension", PhoneExtension))
+        {
+            _logger?.LogInfo($"Contact email changed: {value}");
+        }
+    }
+    partial void OnPhoneChanged(string value)
+    {
         OnPropertyChanged(nameof(IsBlank));
         OnPropertyChanged(nameof(FullPhone));
+        UpdateCore();
+        using (LogContext.PushProperty("ContactId", Id))
+        using (LogContext.PushProperty("Name", Name))
+        using (LogContext.PushProperty("Email", Email))
+        using (LogContext.PushProperty("Phone", value))
+        using (LogContext.PushProperty("PhoneExtension", PhoneExtension))
+        {
+            _logger?.LogInfo($"Contact phone changed: {value}");
+        }
     } 
-    partial void OnPhoneExtensionChanged(string value) 
-    { 
+    partial void OnPhoneExtensionChanged(string value)
+    {
         OnPropertyChanged(nameof(IsBlank));
         OnPropertyChanged(nameof(FullPhone));
+        UpdateCore();
+        using (LogContext.PushProperty("ContactId", Id))
+        using (LogContext.PushProperty("Name", Name))
+        using (LogContext.PushProperty("Email", Email))
+        using (LogContext.PushProperty("Phone", Phone))
+        using (LogContext.PushProperty("PhoneExtension", value))
+        {
+            _logger?.LogInfo($"Contact phone extension changed: {value}");
+        }
     }
     partial void OnPhoneExtensionDelimiterChanged(string value)
     {
         OnPropertyChanged(nameof(FullPhone));
+        UpdateCore();
+        using (LogContext.PushProperty("ContactId", Id))
+        using (LogContext.PushProperty("Name", Name))
+        using (LogContext.PushProperty("Email", Email))
+        using (LogContext.PushProperty("Phone", Phone))
+        using (LogContext.PushProperty("PhoneExtension", PhoneExtension))
+        using (LogContext.PushProperty("PhoneExtensionDelimiter", value))
+        {
+            _logger?.LogInfo($"Contact phone extension delimiter changed: {value}");
+        }
     }
+
+    internal void UpdateCore()
+    {
+        if (CoreType == null && Parent?.CoreType != null)
+            CoreType = Parent.CoreType.Contacts.FirstOrDefault(c => c.Id == Id);
+        if (CoreType == null) return;
+        CoreType.Name = Name ?? string.Empty;
+        CoreType.Email = Email ?? string.Empty;
+        CoreType.Phone = Phone ?? string.Empty;
+        CoreType.PhoneExtension = PhoneExtension ?? string.Empty;
+        CoreType.PhoneExtensionDelimiter = PhoneExtensionDelimiter ?? " ";
+        Parent?.UpdateCore();
+        _logger?.LogDebug("Contact core updated.");
+    }
+
     public static implicit operator Core.Types.Notebook.Contact(Contact contact)
     {
         if (contact is null) return new Core.Types.Notebook.Contact();

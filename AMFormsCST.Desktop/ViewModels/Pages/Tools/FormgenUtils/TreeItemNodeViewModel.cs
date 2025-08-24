@@ -1,9 +1,11 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Models.FormgenUtilities.Grouping;
+using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Linq;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
+using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils;
 
@@ -21,21 +23,23 @@ public partial class TreeItemNodeViewModel : ObservableObject
     public object Data { get; }
     public ObservableCollection<TreeItemNodeViewModel> Children { get; } = [];
     private readonly FormgenUtilitiesViewModel _parentViewModel;
+    private readonly ILogService? _logger;
 
-    public TreeItemNodeViewModel(object data, FormgenUtilitiesViewModel parentViewModel)
+    public TreeItemNodeViewModel(object data, FormgenUtilitiesViewModel parentViewModel, ILogService? logger = null)
     {
         Data = data;
         _parentViewModel = parentViewModel;
+        _logger = logger;
 
         var clHeader = "Code";
 
-        if(data is CodeLine line)
+        if (data is CodeLine line)
         {
             clHeader = line.Settings?.Variable;
             // Use string.Equals for a null-safe comparison.
             if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Label)
             {
-                clHeader = $"<----- {line.PromptData?.Message} ----->" ;
+                clHeader = $"<----- {line.PromptData?.Message} ----->";
             }
             if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Separator)
             {
@@ -56,28 +60,30 @@ public partial class TreeItemNodeViewModel : ObservableObject
             _ => "Unknown"
         };
 
+        _logger?.LogDebug($"TreeItemNodeViewModel created: Header='{Header}', DataType='{data.GetType().Name}'");
+
         // Populate children based on the type of data
         switch (data)
         {
             case DotFormgen formgenFile:
                 // Root node: Add CodeLines and Pages groups
-                Children.Add(new TreeItemNodeViewModel(new CodeLineCollection(formgenFile.CodeLines), _parentViewModel) { IsExpanded = true });
-                Children.Add(new TreeItemNodeViewModel(new PageGroup(formgenFile.Pages), _parentViewModel));
+                Children.Add(new TreeItemNodeViewModel(new CodeLineCollection(formgenFile.CodeLines, _logger), _parentViewModel, _logger) { IsExpanded = true });
+                Children.Add(new TreeItemNodeViewModel(new PageGroup(formgenFile.Pages, _logger), _parentViewModel, _logger));
                 break;
 
             case CodeLineCollection codeLineCollection:
                 // CodeLines node: Add INIT, PROMPT, and POST groups
                 var allCodeLines = codeLineCollection.CodeLines.ToList();
-                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.INIT, allCodeLines.Where(c => c.Settings?.Type == CodeType.INIT)), _parentViewModel));
-                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.PROMPT, allCodeLines.Where(c => c.Settings?.Type == CodeType.PROMPT)), _parentViewModel) { IsExpanded = true });
-                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.POST, allCodeLines.Where(c => c.Settings?.Type == CodeType.POST)), _parentViewModel));
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.INIT, allCodeLines.Where(c => c.Settings?.Type == CodeType.INIT), _logger), _parentViewModel, _logger));
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.PROMPT, allCodeLines.Where(c => c.Settings?.Type == CodeType.PROMPT), _logger), _parentViewModel, _logger) { IsExpanded = true });
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.POST, allCodeLines.Where(c => c.Settings?.Type == CodeType.POST), _logger), _parentViewModel, _logger));
                 break;
 
             case PageGroup pageGroup:
                 // Pages node: Add each FormPage as a child
                 foreach (var page in pageGroup.Pages)
                 {
-                    Children.Add(new TreeItemNodeViewModel(page, _parentViewModel));
+                    Children.Add(new TreeItemNodeViewModel(page, _parentViewModel, _logger));
                 }
                 break;
 
@@ -85,7 +91,7 @@ public partial class TreeItemNodeViewModel : ObservableObject
                 // INIT/PROMPT/POST node: Add each individual CodeLine as a child
                 foreach (var codeLine in codeLineGroup.CodeLines)
                 {
-                    Children.Add(new TreeItemNodeViewModel(codeLine, _parentViewModel));
+                    Children.Add(new TreeItemNodeViewModel(codeLine, _parentViewModel, _logger));
                 }
                 break;
 
@@ -93,7 +99,7 @@ public partial class TreeItemNodeViewModel : ObservableObject
                 // Page node: Add each FormField as a child
                 foreach (var field in page.Fields)
                 {
-                    Children.Add(new TreeItemNodeViewModel(field, _parentViewModel));
+                    Children.Add(new TreeItemNodeViewModel(field, _parentViewModel, _logger));
                 }
                 break;
         }
@@ -104,6 +110,7 @@ public partial class TreeItemNodeViewModel : ObservableObject
         if (value)
         {
             _parentViewModel.SelectedNode = this;
+            _logger?.LogDebug($"TreeItemNodeViewModel selected: Header='{Header}'");
         }
     }
 }

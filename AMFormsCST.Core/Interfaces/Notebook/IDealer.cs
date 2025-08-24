@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace AMFormsCST.Core.Interfaces.Notebook;
+namespace AMFormsCST.Core.Interfaces.Notebook; 
+[JsonDerivedType(typeof(Dealer), typeDiscriminator: "dealer")]
 public interface IDealer : INotable<IDealer>
 {
     string Name { get; set; }

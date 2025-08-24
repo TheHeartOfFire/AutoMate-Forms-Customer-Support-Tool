@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
@@ -11,31 +12,46 @@ namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public partial class FieldProperties : ObservableObject, IFormgenFileProperties
 {
     private readonly FormField _coreField;
+    private readonly ILogService? _logger;
 
     public IFormgenFileSettings Settings { get; set; }
 
     public string? Expression
     {
         get => _coreField.Expression;
-        set => SetProperty(_coreField.Expression, value, _coreField, (f, v) => f.Expression = v);
+        set
+        {
+            SetProperty(_coreField.Expression, value, _coreField, (f, v) => f.Expression = v);
+            _logger?.LogInfo($"Field Expression changed: {value}");
+        }
     }
 
     public string? SampleData
     {
         get => _coreField.SampleData;
-        set => SetProperty(_coreField.SampleData, value, _coreField, (f, v) => f.SampleData = v);
+        set
+        {
+            SetProperty(_coreField.SampleData, value, _coreField, (f, v) => f.SampleData = v);
+            _logger?.LogInfo($"Field SampleData changed: {value}");
+        }
     }
 
     public FormField.FormatOption FormattingOption
     {
         get => _coreField.FormattingOption;
-        set => SetProperty(_coreField.FormattingOption, value, _coreField, (f, v) => f.FormattingOption = v);
+        set
+        {
+            SetProperty(_coreField.FormattingOption, value, _coreField, (f, v) => f.FormattingOption = v);
+            _logger?.LogInfo($"Field FormattingOption changed: {value}");
+        }
     }
 
-    public FieldProperties(FormField field)
+    public FieldProperties(FormField field, ILogService? logger = null)
     {
         _coreField = field;
-        Settings = new FieldSettings(field.Settings);
+        _logger = logger;
+        Settings = new FieldSettings(field.Settings, _logger);
+        _logger?.LogInfo("FieldProperties initialized.");
     }
 
     public IEnumerable<DisplayProperty> GetDisplayProperties()
@@ -44,15 +60,15 @@ public partial class FieldProperties : ObservableObject, IFormgenFileProperties
         var fieldType = typeof(FormField);
         var exprProp = fieldType.GetProperty(nameof(FormField.Expression));
         if (exprProp != null)
-            yield return new DisplayProperty(_coreField, exprProp);
+            yield return new DisplayProperty(_coreField, exprProp, false, _logger);
 
         var sampleDataProp = fieldType.GetProperty(nameof(FormField.SampleData));
         if (sampleDataProp != null)
-            yield return new DisplayProperty(_coreField, sampleDataProp);
+            yield return new DisplayProperty(_coreField, sampleDataProp, false, _logger);
 
         var formatOptionProp = fieldType.GetProperty(nameof(FormField.FormattingOption));
         if (formatOptionProp != null)
-            yield return new DisplayProperty(_coreField, formatOptionProp);
+            yield return new DisplayProperty(_coreField, formatOptionProp, false, _logger);
 
         // Editable properties from FieldSettings
         if (Settings is FieldSettings fieldSettings)
@@ -61,27 +77,27 @@ public partial class FieldProperties : ObservableObject, IFormgenFileProperties
 
             var idProp = settingsType.GetProperty(nameof(FieldSettings.ID));
             if (idProp != null)
-                yield return new DisplayProperty(fieldSettings, idProp, true); // ID is usually read-only
+                yield return new DisplayProperty(fieldSettings, idProp, true, _logger); // ID is usually read-only
 
             var typeProp = settingsType.GetProperty(nameof(FieldSettings.Type));
             if (typeProp != null)
-                yield return new DisplayProperty(fieldSettings, typeProp);
+                yield return new DisplayProperty(fieldSettings, typeProp, false, _logger);
 
             var fontSizeProp = settingsType.GetProperty(nameof(FieldSettings.FontSize));
             if (fontSizeProp != null)
-                yield return new DisplayProperty(fieldSettings, fontSizeProp);
+                yield return new DisplayProperty(fieldSettings, fontSizeProp, false, _logger);
 
             var fontAlignmentProp = settingsType.GetProperty(nameof(FieldSettings.FontAlignment));
             if (fontAlignmentProp != null)
-                yield return new DisplayProperty(fieldSettings, fontAlignmentProp);
+                yield return new DisplayProperty(fieldSettings, fontAlignmentProp, false, _logger);
 
             var boldProp = settingsType.GetProperty(nameof(FieldSettings.Bold));
             if (boldProp != null)
-                yield return new DisplayProperty(fieldSettings, boldProp);
+                yield return new DisplayProperty(fieldSettings, boldProp, false, _logger);
 
             var shrinkToFitProp = settingsType.GetProperty(nameof(FieldSettings.ShrinkToFit));
             if (shrinkToFitProp != null)
-                yield return new DisplayProperty(fieldSettings, shrinkToFitProp);
+                yield return new DisplayProperty(fieldSettings, shrinkToFitProp, false, _logger);
         }
     }
 }

@@ -19,6 +19,8 @@ using static System.Net.Mime.MediaTypeNames;
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class TemplatesViewModel : ViewModel
 {
+    private readonly ILogService? _logger;
+
     [ObservableProperty]
     private ObservableCollection<TemplateItemViewModel> _templates;
 
@@ -26,78 +28,105 @@ public partial class TemplatesViewModel : ViewModel
     private TemplateItemViewModel? _selectedTemplate;
 
     private ISupportTool _supportTool;
-    private readonly IFileSystem _fileSystem; // Or inject via constructor
-    public TemplatesViewModel(ISupportTool supportTool, IFileSystem fs)
+    private readonly IFileSystem _fileSystem;
+
+    public TemplatesViewModel(ISupportTool supportTool, IFileSystem fs, ILogService? logger = null)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool)); 
         _fileSystem = fs ?? throw new ArgumentNullException(nameof(fs));
+        _logger = logger;
         _templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
         if (_templates.Count > 0)
         {
             SelectTemplate(_selectedTemplate = _templates.First());
         }
+        _logger?.LogInfo($"TemplatesViewModel initialized with {_templates.Count} templates.");
     }
 
     [RelayCommand]
     private void AddTemplate()
     {
-        var dialog = new NewTemplateDialog();
+        try
+        {
+            var dialog = new NewTemplateDialog();
+            bool? result = dialog.ShowDialog();
 
-        bool? result = dialog.ShowDialog();
+            if (result is not true) return;
 
-        if (result is not true) return;
+            var template = new TemplateItemViewModel(
+                new TextTemplate(
+                    dialog.TemplateName, 
+                    dialog.TemplateDescription, 
+                    dialog.TemplateContent,
+                    dialog.Type), 
+                _supportTool);
 
-        var template = new TemplateItemViewModel(
-            new TextTemplate(
-                dialog.TemplateName, 
-                dialog.TemplateDescription, 
-                dialog.TemplateContent,
-                dialog.Type), 
-            _supportTool);
+            _supportTool.Enforcer.AddTemplate(template.Template);
 
-        _supportTool.Enforcer.AddTemplate(template.Template);
+            Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
-
-        Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
-
-        SelectTemplate(template);
+            SelectTemplate(template);
+            _logger?.LogInfo($"Template added: {template.Template.Name}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error adding template.", ex);
+        }
     }
+
     [RelayCommand]
     private void EditTemplate()
     {
-        if (SelectedTemplate == null) return; 
+        try
+        {
+            if (SelectedTemplate == null) return; 
 
-        var dialog = new NewTemplateDialog(
-            SelectedTemplate.Template.Name, 
-            SelectedTemplate.Template.Description,
-            SelectedTemplate.Template.Text, 
-            SelectedTemplate.Template.Type); 
+            var dialog = new NewTemplateDialog(
+                SelectedTemplate.Template.Name, 
+                SelectedTemplate.Template.Description,
+                SelectedTemplate.Template.Text, 
+                SelectedTemplate.Template.Type); 
 
-        bool? result = dialog.ShowDialog();
+            bool? result = dialog.ShowDialog();
 
-        if (result is not true) return; 
+            if (result is not true) return; 
 
-        SelectedTemplate.Template.Name = dialog.TemplateName;
-        SelectedTemplate.Template.Description = dialog.TemplateDescription;
-        SelectedTemplate.Template.Text = dialog.TemplateContent;
-        SelectedTemplate.Template.Type = dialog.Type;
+            SelectedTemplate.Template.Name = dialog.TemplateName;
+            SelectedTemplate.Template.Description = dialog.TemplateDescription;
+            SelectedTemplate.Template.Text = dialog.TemplateContent;
+            SelectedTemplate.Template.Type = dialog.Type;
 
-        SelectedTemplate.RefreshTemplateData();
-        _supportTool.Enforcer.UpdateTemplate(SelectedTemplate.Template);
-        SelectTemplate(SelectedTemplate);
+            SelectedTemplate.RefreshTemplateData();
+            _supportTool.Enforcer.UpdateTemplate(SelectedTemplate.Template);
+            SelectTemplate(SelectedTemplate);
+            _logger?.LogInfo($"Template edited: {SelectedTemplate.Template.Name}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error editing template.", ex);
+        }
     }
+
     [RelayCommand]
     private void RemoveTemplate()
     {
-        if (SelectedTemplate is null) return;
+        try
+        {
+            if (SelectedTemplate is null) return;
 
-        _supportTool.Enforcer.RemoveTemplate(SelectedTemplate.Template);
-        Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
+            _supportTool.Enforcer.RemoveTemplate(SelectedTemplate.Template);
+            Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
-        // Always select the first item after collection change
-        SelectTemplate(Templates.FirstOrDefault());
+            SelectTemplate(Templates.FirstOrDefault());
+            _logger?.LogInfo($"Template removed: {SelectedTemplate?.Template.Name}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error removing template.", ex);
+        }
     }
+
     [RelayCommand]
     internal void SelectTemplate(TemplateItemViewModel? item)
     {
@@ -106,59 +135,78 @@ public partial class TemplatesViewModel : ViewModel
         SelectedTemplate?.Deselect();
         SelectedTemplate = item;
         SelectedTemplate?.Select();
+        _logger?.LogInfo($"Template selected: {item?.Template.Name}");
     }
+
     [RelayCommand]
     private void CopyTemplate(TemplateItemViewModel item)
     {
-        if (item == SelectedTemplate) return;
+        try
+        {
+            if (item == SelectedTemplate) return;
 
-        Clipboard.SetText(SelectedTemplate?.Output);
+            Clipboard.SetText(SelectedTemplate?.Output);
+            _logger?.LogInfo($"Template output copied: {SelectedTemplate?.Template.Name}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error copying template output.", ex);
+        }
     }
+
     [RelayCommand]
     private void ResetTemplate(TemplateItemViewModel item)
     {
+        _logger?.LogInfo($"ResetTemplate called for: {item.Template.Name}");
     }
+
     [RelayCommand]
     private void ImportTemplate(TemplateItemViewModel item)
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog
+        try
         {
-            Title = "Import Templates",
-            Filter = "JSON Files (*.json)|*.json",
-            InitialDirectory = _fileSystem.CombinePath(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "FormgenAssistant"
-            ),
-            FileName = "Templates.json",
-            CheckFileExists = true,
-            CheckPathExists = true
-        };
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Import Templates",
+                Filter = "JSON Files (*.json)|*.json",
+                InitialDirectory = _fileSystem.CombinePath(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "FormgenAssistant"
+                ),
+                FileName = "Templates.json",
+                CheckFileExists = true,
+                CheckPathExists = true
+            };
 
-        bool? result = dialog.ShowDialog();
-        if (result != true) return;
+            bool? result = dialog.ShowDialog();
+            if (result != true) return;
 
-        var filePath = dialog.FileName;
-        if (!_fileSystem.FileExists(filePath)) return;
+            var filePath = dialog.FileName;
+            if (!_fileSystem.FileExists(filePath)) return;
 
-        var json = _fileSystem.ReadAllText(filePath);
+            var json = _fileSystem.ReadAllText(filePath);
 
-        // Deserialize to a list of DeprecatedTemplate
-        var importedTemplates = System.Text.Json.JsonSerializer.Deserialize<DeprecatedTemplateList>(json);
+            var importedTemplates = System.Text.Json.JsonSerializer.Deserialize<DeprecatedTemplateList>(json);
 
-        if (importedTemplates is null || importedTemplates.TemplateList.Count == 0)
-        {
-            MessageBox.Show("No templates found in the selected file.", "Import Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            if (importedTemplates is null || importedTemplates.TemplateList.Count == 0)
+            {
+                MessageBox.Show("No templates found in the selected file.", "Import Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _logger?.LogWarning("ImportTemplate: No templates found in the selected file.");
+                return;
+            }
+
+            foreach (var deprecated in importedTemplates.TemplateList)
+            {
+                var converted = (TextTemplate)deprecated;
+                _supportTool.Enforcer.AddTemplate(converted);
+            }
+
+            Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
+            _logger?.LogInfo($"Templates imported from: {filePath}");
         }
-
-        // Example: Convert and add to your current templates
-        foreach (var deprecated in importedTemplates.TemplateList)
+        catch (Exception ex)
         {
-            var converted = (TextTemplate)deprecated;
-            _supportTool.Enforcer.AddTemplate(converted);
+            _logger?.LogError("Error importing templates.", ex);
         }
-
-        Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
     }
-
 }

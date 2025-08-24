@@ -1,4 +1,4 @@
-﻿using AMFormsCST.Core.Interfaces.Utils;
+﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.ControlsLookup;
 using AMFormsCST.Desktop.Services;
@@ -19,27 +19,29 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
     public partial class FormgenUtilitiesPage : Page
     {
         private readonly INavigationService _navigationService;
+        private readonly ILogService? _logger;
         public FormgenUtilitiesViewModel ViewModel { get; }
 
         public FormgenUtilitiesPage(
             FormgenUtilitiesViewModel viewModel,
             INavigationService navigationService,
-            IDialogService dialogService
+            ILogService? logger = null
         )
         {
             ViewModel = viewModel;
             DataContext = ViewModel;
             _navigationService = navigationService;
+            _logger = logger;
 
             InitializeComponent();
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            _logger?.LogInfo("FormgenUtilitiesPage initialized.");
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Ensure Application.Current and Dispatcher are available
             if (Application.Current?.Dispatcher == null)
                 return;
 
@@ -54,28 +56,27 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools
 
                     navigationView.IsBackButtonVisible = Wpf.Ui.Controls.NavigationViewBackButtonVisible.Visible;
 
-                    // Traverse the visual tree upwards to find the parent ScrollViewer.
                     var parentScrollViewer = FindParent<ScrollViewer>(this);
                     if (parentScrollViewer != null)
                     {
                         parentScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
                     }
+                    _logger?.LogInfo("FormgenUtilitiesPage loaded. Back button visible, scroll disabled.");
                 })
             );
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
-            // Traverse the visual tree upwards to find the parent ScrollViewer.
             var parentScrollViewer = FindParent<ScrollViewer>(this);
             if (parentScrollViewer != null)
             {
-                // Re-enable its scrolling for other pages that may need it.
                 parentScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             }
 
             Loaded -= OnLoaded;
             Unloaded -= OnUnloaded;
+            _logger?.LogInfo("FormgenUtilitiesPage unloaded. Scroll re-enabled.");
         }
 
         /// <summary>

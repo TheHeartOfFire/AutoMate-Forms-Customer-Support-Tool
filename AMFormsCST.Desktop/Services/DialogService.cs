@@ -1,7 +1,9 @@
 using AMFormsCST.Desktop.Views.Dialogs;
+using AMFormsCST.Desktop.Interfaces;
 using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
+using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Services;
 
@@ -10,6 +12,14 @@ namespace AMFormsCST.Desktop.Services;
 /// </summary>
 public class DialogService : IDialogService
 {
+    private readonly ILogService? _logger;
+
+    public DialogService(ILogService? logger = null)
+    {
+        _logger = logger;
+        _logger?.LogInfo("DialogService initialized.");
+    }
+
     /// <inheritdoc />
     public MessageBoxResult ShowMessageBox(
         string messageBoxText,
@@ -18,27 +28,33 @@ public class DialogService : IDialogService
         MessageBoxImage icon
     )
     {
+        _logger?.LogInfo($"ShowMessageBox called: '{caption}' - '{messageBoxText}'");
         return MessageBox.Show(messageBoxText, caption, button, icon);
     }
 
     /// <inheritdoc />
     public (bool? DialogResult, string TemplateName, string TemplateDescription, string TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, string? content = null)
     {
+        _logger?.LogInfo("ShowNewTemplateDialog called.");
         var dialog = new NewTemplateDialog(name, description, content);
         var result = dialog.ShowDialog();
+        _logger?.LogInfo($"NewTemplateDialog result: {result}");
         return (result, dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent);
     }
 
     /// <inheritdoc />
     public bool ShowPageHostDialog(Page contentPage, string title = "Page Prview", bool canConfirm = false)
     {
+        _logger?.LogInfo($"ShowPageHostDialog called: Title='{title}', CanConfirm={canConfirm}");
         var dialog = new PageHostDialog(contentPage, title, canConfirm);
         dialog.ShowDialog();
+        _logger?.LogInfo($"PageHostDialog closed: ConfirmSelected={dialog.ConfirmSelected}");
         return dialog.ConfirmSelected;
     }
 
     public string? ShowOpenFileDialog(string filter)
     {
+        _logger?.LogInfo($"ShowOpenFileDialog called: Filter='{filter}'");
         var openFileDialog = new OpenFileDialog
         {
             Filter = filter,
@@ -47,13 +63,16 @@ public class DialogService : IDialogService
 
         if (openFileDialog.ShowDialog() == true)
         {
+            _logger?.LogInfo($"File selected: {openFileDialog.FileName}");
             return openFileDialog.FileName;
         }
 
+        _logger?.LogInfo("No file selected.");
         return null;
     }
     public string? ShowOpenFileDialog(string filter, string defaultDirectory)
     {
+        _logger?.LogInfo($"ShowOpenFileDialog called: Filter='{filter}', DefaultDirectory='{defaultDirectory}'");
         var openFileDialog = new OpenFileDialog
         {
             Filter = filter,
@@ -63,9 +82,11 @@ public class DialogService : IDialogService
 
         if (openFileDialog.ShowDialog() == true)
         {
+            _logger?.LogInfo($"File selected: {openFileDialog.FileName}");
             return openFileDialog.FileName;
         }
 
+        _logger?.LogInfo("No file selected.");
         return null;
     }
 }

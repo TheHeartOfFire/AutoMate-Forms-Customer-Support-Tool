@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.ControlsLookup;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.ControlsLookup;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using System;
@@ -25,11 +26,15 @@ namespace AMFormsCST.Desktop.Views.Pages.Tools;
 public partial class FormNameGeneratorPage : Page
 {
     public FormNameGeneratorViewModel ViewModel { get; }
-    public FormNameGeneratorPage(FormNameGeneratorViewModel viewModel)
+    private readonly ILogService? _logger;
+
+    public FormNameGeneratorPage(FormNameGeneratorViewModel viewModel, ILogService? logger = null)
     {
         ViewModel = viewModel;
+        _logger = logger;
         DataContext = ViewModel;
 
         InitializeComponent();
+        _logger?.LogInfo("FormNameGeneratorPage initialized.");
     }
 }

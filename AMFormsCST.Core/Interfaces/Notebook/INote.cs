@@ -1,7 +1,10 @@
 ﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Types.Notebook;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
+[JsonDerivedType(typeof(Note), typeDiscriminator: "note")]
 public interface INote : INotable<INote>
 {
     string CaseText { get; set; }

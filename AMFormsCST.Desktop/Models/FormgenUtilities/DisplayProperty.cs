@@ -1,10 +1,12 @@
 using AMFormsCST.Desktop.Converters;
+using AMFormsCST.Desktop.Interfaces;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Wpf.Ui.Controls;
 using System.Reflection;
+using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -16,11 +18,12 @@ public class DisplayProperty : INotifyPropertyChanged
     private object? _value;
     private readonly object? _source;
     private readonly PropertyInfo? _propertyInfo;
+    private readonly ILogService? _logger;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     // For editable properties
-    public DisplayProperty(object source, PropertyInfo propertyInfo, bool isReadOnly = false)
+    public DisplayProperty(object source, PropertyInfo propertyInfo, bool isReadOnly = false, ILogService? logger = null)
     {
         Name = propertyInfo.Name;
         Type = propertyInfo.PropertyType;
@@ -28,10 +31,12 @@ public class DisplayProperty : INotifyPropertyChanged
         _source = source;
         _propertyInfo = propertyInfo;
         _value = propertyInfo.GetValue(source);
+        _logger = logger;
+        _logger?.LogInfo($"DisplayProperty created for '{Name}' (Type: {Type.Name}, ReadOnly: {IsReadOnly})");
     }
 
     // For summary/statistic properties
-    public DisplayProperty(string name, object? value, Type type, bool isReadOnly = true)
+    public DisplayProperty(string name, object? value, Type type, bool isReadOnly = true, ILogService? logger = null)
     {
         Name = name;
         Type = type;
@@ -39,6 +44,8 @@ public class DisplayProperty : INotifyPropertyChanged
         _value = value;
         _source = null;
         _propertyInfo = null;
+        _logger = logger;
+        _logger?.LogInfo($"DisplayProperty summary created for '{Name}' (Type: {Type.Name}, ReadOnly: {IsReadOnly})");
     }
 
     public object? Value
@@ -56,14 +63,15 @@ public class DisplayProperty : INotifyPropertyChanged
                     if (setMethod != null)
                     {
                         setMethod.Invoke(_source, new[] { value });
-                    }
-                    else
-                    {
+                      }
+                      else
+                      {
                         _propertyInfo.SetValue(_source, value);
-                    }
-                }
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-            }
-        }
-    }
-}
+                      }
+                      _logger?.LogInfo($"DisplayProperty '{Name}' value changed: {value}");
+                  }
+                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+              }
+          }
+      }
+  }

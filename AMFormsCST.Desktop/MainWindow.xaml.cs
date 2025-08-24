@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Interfaces;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Views.Pages.Tools;
@@ -22,31 +23,26 @@ namespace AMFormsCST.Desktop;
 /// </summary>
 public partial class MainWindow : IWindow
 {
-    // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Set up persistent notes. Regularly save current notes to file to be retrieved upon crash or between sessions.
-    // TODO: Notes Importing(from clipboard, eventually from headless browser)
-    // TODO: Docs
-    // TODO: Readme
-    // TODO: Tooltips
-    // TODO: Design Time Data
-    // TODO: Finish setting up Velopack and ship v2.0 - implement CD
-
     public MainWindowViewModel ViewModel { get; }
+    private readonly ILogService _logger;
 
     private bool _isUserClosedPane;
-
     private bool _isPaneOpenedOrClosedFromCode;
+
     public MainWindow(
         MainWindowViewModel viewModel,
         INavigationService navigationService,
         IServiceProvider serviceProvider,
         ISnackbarService snackbarService,
-        IContentDialogService contentDialogService
+        IContentDialogService contentDialogService,
+        ILogService logger
     )
     {
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
 
         ViewModel = viewModel;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger.LogInfo("MainWindow initialized.");
         DataContext = this;
 
         ViewModel.NavigationItems =
@@ -66,10 +62,12 @@ public partial class MainWindow : IWindow
         navigationService.SetNavigationControl(NavigationView);
         contentDialogService.SetDialogHost(RootContentDialog);
     }
+
     private void OnNavigationSelectionChanged(object sender, RoutedEventArgs e)
     {
         if (sender is not NavigationView navigationView)
         {
+            _logger.LogWarning("Navigation selection changed but sender is not NavigationView.");
             return;
         }
 
@@ -79,6 +77,7 @@ public partial class MainWindow : IWindow
                 ? Visibility.Visible
                 : Visibility.Collapsed
         );
+        _logger.LogInfo($"Navigation selection changed: {navigationView.SelectedItem?.TargetPageType}");
     }
 
     private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -91,6 +90,7 @@ public partial class MainWindow : IWindow
         _isPaneOpenedOrClosedFromCode = true;
         NavigationView.SetCurrentValue(NavigationView.IsPaneOpenProperty, e.NewSize.Width > 1200);
         _isPaneOpenedOrClosedFromCode = false;
+        _logger.LogDebug($"MainWindow size changed: {e.NewSize}");
     }
 
     private void NavigationView_OnPaneOpened(NavigationView sender, RoutedEventArgs args)
@@ -101,6 +101,7 @@ public partial class MainWindow : IWindow
         }
 
         _isUserClosedPane = false;
+        _logger.LogInfo("Navigation pane opened.");
     }
 
     private void NavigationView_OnPaneClosed(NavigationView sender, RoutedEventArgs args)
@@ -111,5 +112,6 @@ public partial class MainWindow : IWindow
         }
 
         _isUserClosedPane = true;
+        _logger.LogInfo("Navigation pane closed.");
     }
 }

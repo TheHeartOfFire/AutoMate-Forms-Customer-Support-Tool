@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
@@ -10,54 +11,85 @@ namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public partial class FormProperties : ObservableObject, IFormgenFileProperties
 {
     private readonly DotFormgen _coreFormgenFile;
+    private readonly ILogService? _logger;
     public IFormgenFileSettings Settings { get; set; }
 
     public string? Title
     {
         get => _coreFormgenFile.Title;
-        set => SetProperty(_coreFormgenFile.Title, value, _coreFormgenFile, (f, v) => f.Title = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.Title, value, _coreFormgenFile, (f, v) => f.Title = v);
+            _logger?.LogInfo($"Form Title changed: {value}");
+        }
     }
 
     public bool TradePrompt
     {
         get => _coreFormgenFile.TradePrompt;
-        set => SetProperty(_coreFormgenFile.TradePrompt, value, _coreFormgenFile, (f, v) => f.TradePrompt = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.TradePrompt, value, _coreFormgenFile, (f, v) => f.TradePrompt = v);
+            _logger?.LogInfo($"Form TradePrompt changed: {value}");
+        }
     }
 
     public Format FormType
     {
         get => _coreFormgenFile.FormType;
-        set => SetProperty(_coreFormgenFile.FormType, value, _coreFormgenFile, (f, v) => f.FormType = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.FormType, value, _coreFormgenFile, (f, v) => f.FormType = v);
+            _logger?.LogInfo($"Form FormType changed: {value}");
+        }
     }
 
     public bool SalesPersonPrompt
     {
         get => _coreFormgenFile.SalesPersonPrompt;
-        set => SetProperty(_coreFormgenFile.SalesPersonPrompt, value, _coreFormgenFile, (f, v) => f.SalesPersonPrompt = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.SalesPersonPrompt, value, _coreFormgenFile, (f, v) => f.SalesPersonPrompt = v);
+            _logger?.LogInfo($"Form SalesPersonPrompt changed: {value}");
+        }
     }
 
     public string? Username
     {
         get => _coreFormgenFile.Username;
-        set => SetProperty(_coreFormgenFile.Username, value, _coreFormgenFile, (f, v) => f.Username = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.Username, value, _coreFormgenFile, (f, v) => f.Username = v);
+            _logger?.LogInfo($"Form Username changed: {value}");
+        }
     }
 
     public string? BillingName
     {
         get => _coreFormgenFile.BillingName;
-        set => SetProperty(_coreFormgenFile.BillingName, value, _coreFormgenFile, (f, v) => f.BillingName = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.BillingName, value, _coreFormgenFile, (f, v) => f.BillingName = v);
+            _logger?.LogInfo($"Form BillingName changed: {value}");
+        }
     }
 
     public FormCategory Category
     {
         get => _coreFormgenFile.Category;
-        set => SetProperty(_coreFormgenFile.Category, value, _coreFormgenFile, (f, v) => f.Category = v);
+        set
+        {
+            SetProperty(_coreFormgenFile.Category, value, _coreFormgenFile, (f, v) => f.Category = v);
+            _logger?.LogInfo($"Form Category changed: {value}");
+        }
     }
 
-    public FormProperties(DotFormgen formgenFile)
+    public FormProperties(DotFormgen formgenFile, ILogService? logger = null)
     {
         _coreFormgenFile = formgenFile;
-        Settings = new FormSettings(formgenFile.Settings);
+        _logger = logger;
+        Settings = new FormSettings(formgenFile.Settings, _logger);
+        _logger?.LogInfo("FormProperties initialized.");
     }
 
     public string GetFormType() =>
@@ -71,7 +103,6 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
             Format.ImpactLabelSheet => "Impact Label Sheet",
             Format.LaserLabelSheet => "Laser Label Sheet",
             _ => "Unknown"
-
         };
 
     public string GetCategory() =>
@@ -110,31 +141,31 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
         // Editable properties from DotFormgen
         var titleProp = formType.GetProperty(nameof(DotFormgen.Title));
         if (titleProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, titleProp, true);
+            yield return new DisplayProperty(_coreFormgenFile, titleProp, true, _logger);
 
         var formTypeProp = formType.GetProperty(nameof(DotFormgen.FormType));
         if (formTypeProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, formTypeProp);
+            yield return new DisplayProperty(_coreFormgenFile, formTypeProp, false, _logger);
 
         var categoryProp = formType.GetProperty(nameof(DotFormgen.Category));
         if (categoryProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, categoryProp);
+            yield return new DisplayProperty(_coreFormgenFile, categoryProp, false, _logger);
 
         var usernameProp = formType.GetProperty(nameof(DotFormgen.Username));
         if (usernameProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, usernameProp);
+            yield return new DisplayProperty(_coreFormgenFile, usernameProp, false, _logger);
 
         var billingNameProp = formType.GetProperty(nameof(DotFormgen.BillingName));
         if (billingNameProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, billingNameProp);
+            yield return new DisplayProperty(_coreFormgenFile, billingNameProp, false, _logger);
 
         var tradePromptProp = formType.GetProperty(nameof(DotFormgen.TradePrompt));
         if (tradePromptProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, tradePromptProp);
+            yield return new DisplayProperty(_coreFormgenFile, tradePromptProp, false, _logger);
 
         var salesPersonPromptProp = formType.GetProperty(nameof(DotFormgen.SalesPersonPrompt));
         if (salesPersonPromptProp != null)
-            yield return new DisplayProperty(_coreFormgenFile, salesPersonPromptProp);
+            yield return new DisplayProperty(_coreFormgenFile, salesPersonPromptProp, false, _logger);
 
         // Add other properties from FormSettings, etc.
         if (Settings is FormSettings formSettings)
@@ -143,11 +174,11 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
 
             var uuidProp = settingsType.GetProperty(nameof(FormSettings.PublishedUUID));
             if (uuidProp != null)
-                yield return new DisplayProperty(formSettings, uuidProp, true); // UUID is read-only
+                yield return new DisplayProperty(formSettings, uuidProp, true, _logger); // UUID is read-only
 
             var totalPagesProp = settingsType.GetProperty(nameof(FormSettings.TotalPages));
             if (totalPagesProp != null)
-                yield return new DisplayProperty(formSettings, totalPagesProp);
+                yield return new DisplayProperty(formSettings, totalPagesProp, false, _logger);
         }
     }
 }

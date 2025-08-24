@@ -14,6 +14,7 @@ namespace AMFormsCST.Desktop.ViewModels;
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly ISupportTool _supportTool;
+    private readonly ILogService _logger;
 
     [ObservableProperty]
     private string _applicationTitle = "Case Management Tool";
@@ -30,9 +31,11 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<object> _navigationFooter = [];
 
-    public MainWindowViewModel(ISupportTool supportTool)
+    public MainWindowViewModel(ISupportTool supportTool, ILogService logger)
     {
         _supportTool = supportTool;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger.LogInfo("MainWindowViewModel initialized.");
 
         // Initialize and subscribe to setting changes
         var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
@@ -40,6 +43,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             IsWindowTopmost = aotSetting.IsEnabled;
             aotSetting.PropertyChanged += OnUiSettingsChanged;
+            _logger.LogDebug($"AlwaysOnTopSetting initialized: {IsWindowTopmost}");
         }
 
         var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
@@ -47,43 +51,69 @@ public partial class MainWindowViewModel : ObservableObject
         {
             IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
             themeSetting.PropertyChanged += OnUiSettingsChanged;
+            _logger.LogDebug($"ThemeSetting initialized: {IsLightTheme}");
         }
     }
 
     private void OnUiSettingsChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(AlwaysOnTopSetting.IsEnabled) && sender is AlwaysOnTopSetting aotSetting)
+        try
         {
-            IsWindowTopmost = aotSetting.IsEnabled;
+            if (e.PropertyName == nameof(AlwaysOnTopSetting.IsEnabled) && sender is AlwaysOnTopSetting aotSetting)
+            {
+                IsWindowTopmost = aotSetting.IsEnabled;
+                _logger.LogInfo($"AlwaysOnTopSetting changed: {IsWindowTopmost}");
+            }
+            else if (e.PropertyName == nameof(ThemeSetting.Theme) && sender is ThemeSetting themeSetting)
+            {
+                IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
+                _logger.LogInfo($"ThemeSetting changed: {IsLightTheme}");
+            }
         }
-        else if (e.PropertyName == nameof(ThemeSetting.Theme) && sender is ThemeSetting themeSetting)
+        catch (Exception ex)
         {
-            IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
+            _logger.LogError("Error in OnUiSettingsChanged.", ex);
         }
     }
 
     partial void OnIsWindowTopmostChanged(bool value)
     {
-        var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
-        if (aotSetting != null && aotSetting.IsEnabled != value)
+        try
         {
-            aotSetting.IsEnabled = value;
-            _supportTool.SaveAllSettings();
+            var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
+            if (aotSetting != null && aotSetting.IsEnabled != value)
+            {
+                aotSetting.IsEnabled = value;
+                _supportTool.SaveAllSettings();
+                _logger.LogInfo($"IsWindowTopmost changed: {value}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error in OnIsWindowTopmostChanged.", ex);
         }
     }
 
     partial void OnIsLightThemeChanged(bool value)
     {
-        var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
-        if (themeSetting != null)
+        try
         {
-            var newTheme = value ? ApplicationTheme.Light : ApplicationTheme.Dark;
-            if (themeSetting.Theme != newTheme)
+            var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
+            if (themeSetting != null)
             {
-                themeSetting.Theme = newTheme;
-                ApplicationThemeManager.Apply(newTheme);
-                _supportTool.SaveAllSettings();
+                var newTheme = value ? ApplicationTheme.Light : ApplicationTheme.Dark;
+                if (themeSetting.Theme != newTheme)
+                {
+                    themeSetting.Theme = newTheme;
+                    ApplicationThemeManager.Apply(newTheme);
+                    _supportTool.SaveAllSettings();
+                    _logger.LogInfo($"IsLightTheme changed: {value}");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error in OnIsLightThemeChanged.", ex);
         }
     }
 }

@@ -12,20 +12,23 @@ using System.Windows;
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class FormNameGeneratorViewModel : ViewModel
 {
+    private readonly ILogService? _logger;
+
     [ObservableProperty]
     private Form _form;
     [ObservableProperty]
-    private bool _isPdfSelected; // This will initially be false by default
+    private bool _isPdfSelected;
     partial void OnIsPdfSelectedChanged(bool value)
     {
-        if (value) // If this button is checked
+        if (value)
         {
             Form.AddTag(Form.Tag.Pdf);
+            _logger?.LogInfo("PDF tag added.");
         }
-        else // If this button is unchecked
+        else
         {
-            // Only remove if it was explicitly unchecked (e.g., by another button in its group)
             Form.RemoveTag(Form.Tag.Pdf);
+            _logger?.LogInfo("PDF tag removed.");
         }
     }
 
@@ -36,10 +39,12 @@ public partial class FormNameGeneratorViewModel : ViewModel
         if (value)
         {
             Form.AddTag(Form.Tag.Impact);
+            _logger?.LogInfo("Impact tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.Impact);
+            _logger?.LogInfo("Impact tag removed.");
         }
     }
 
@@ -51,10 +56,12 @@ public partial class FormNameGeneratorViewModel : ViewModel
         {
             IsTradeSelected = false;
             Form.AddTag(Form.Tag.Sold);
+            _logger?.LogInfo("Sold tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.Sold);
+            _logger?.LogInfo("Sold tag removed.");
         }
     }
 
@@ -66,14 +73,14 @@ public partial class FormNameGeneratorViewModel : ViewModel
         {
             IsSoldSelected = false;
             Form.AddTag(Form.Tag.Trade);
+            _logger?.LogInfo("Trade tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.Trade);
+            _logger?.LogInfo("Trade tag removed.");
         }
     }
-
-    // --- Properties for ToggleButtons (independent) ---
 
     [ObservableProperty]
     private bool _isLawSelected;
@@ -82,10 +89,12 @@ public partial class FormNameGeneratorViewModel : ViewModel
         if (value)
         {
             Form.AddTag(Form.Tag.Law);
+            _logger?.LogInfo("Law tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.Law);
+            _logger?.LogInfo("Law tag removed.");
         }
     }
 
@@ -96,10 +105,12 @@ public partial class FormNameGeneratorViewModel : ViewModel
         if (value)
         {
             Form.AddTag(Form.Tag.Custom);
+            _logger?.LogInfo("Custom tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.Custom);
+            _logger?.LogInfo("Custom tag removed.");
         }
     }
 
@@ -110,36 +121,50 @@ public partial class FormNameGeneratorViewModel : ViewModel
         if (value)
         {
             Form.AddTag(Form.Tag.VehicleMerchandising);
+            _logger?.LogInfo("VehicleMerchandising tag added.");
         }
         else
         {
             Form.RemoveTag(Form.Tag.VehicleMerchandising);
+            _logger?.LogInfo("VehicleMerchandising tag removed.");
         }
     }
 
     private readonly ISupportTool _supportTool;
-    // Constructor to set initial UI state and synchronize with model
-    public FormNameGeneratorViewModel(ISupportTool supportTool)
+
+    public FormNameGeneratorViewModel(ISupportTool supportTool, ILogService? logger = null)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
-        _form = new Form(_supportTool);
-        _isPdfSelected = true; 
+        _logger = logger;
+        _form = new Form(_supportTool, _logger);
+        _isPdfSelected = true;
+        _logger?.LogInfo("FormNameGeneratorViewModel initialized.");
     }
+
     [RelayCommand]
     private void CopyFileName()
     {
         if (!string.IsNullOrEmpty(Form.FileName))
         {
-            Clipboard.SetText(Form.FileName);
-            // Optionally, provide user feedback, e.g., a simple notification or toast.
-            
+            try
+            {
+                Clipboard.SetText(Form.FileName);
+                _logger?.LogInfo($"Form file name copied: {Form.FileName}");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError("Error copying form file name to clipboard.", ex);
+            }
+        }
+        else
+        {
+            _logger?.LogWarning("CopyFileName called but file name is empty.");
         }
     }
 
     [RelayCommand]
     private void ClearForm()
     {
-        // 1. Clear the data in the model
         Form.Clear();
 
         IsPdfSelected = true;
@@ -149,5 +174,6 @@ public partial class FormNameGeneratorViewModel : ViewModel
         IsLawSelected = false;
         IsCustomSelected = false;
         IsVehicleMerchandisingSelected = false;
+        _logger?.LogInfo("Form cleared and UI reset.");
     }
 }

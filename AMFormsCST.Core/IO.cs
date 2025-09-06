@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Interfaces;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.UserSettings;
@@ -63,6 +64,12 @@ public static class IO
     public static void ConfigureJson(JsonSerializerOptions options)
     {
         _jsonOptions = options;
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<ICompany>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IContact>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IDealer>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IForm>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<ITestDeal>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<INote>());
         Logger?.LogInfo("IO JSON serializer configured.");
     }
 

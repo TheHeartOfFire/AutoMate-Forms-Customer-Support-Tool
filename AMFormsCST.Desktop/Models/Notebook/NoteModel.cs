@@ -1,6 +1,8 @@
-﻿using AMFormsCST.Core.Interfaces;
+﻿using AMFormsCST.Core;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using AMFormsCST.Desktop.ViewModels.Pages;
@@ -9,13 +11,13 @@ using Serilog.Context;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
+public partial class NoteModel : ManagedObservableCollectionItem
 {
-    private readonly ILogService? _logger;
-    public string DebugId => Id.ToString();
+    private bool _isInit;
 
     [ObservableProperty]
     private int _uiRefreshCounter;
@@ -72,29 +74,40 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
     }
 
     public ManagedObservableCollection<Dealer> Dealers { get; set; }
+    public Dealer? SelectedDealer => Dealers.SelectedItem;
     public ManagedObservableCollection<Contact> Contacts { get; set; }
+    public Contact? SelectedContact => Contacts.SelectedItem;
     public ManagedObservableCollection<Form> Forms { get; set; }
+    public Form? SelectedForm => Forms.SelectedItem;
+    public override Guid Id { get; } = Guid.NewGuid();
+    public override bool IsBlank
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(CaseNumber) || !string.IsNullOrEmpty(Notes))
+                return false;
+            if (Dealers.Any(d => !d.IsBlank) ||
+                Contacts.Any(c => !c.IsBlank) ||
+                Forms.Any(f => !f.IsBlank))
+                return false;
+            return true;
+        }
+    }
 
     internal INote? CoreType { get; set; }
+    internal DashboardViewModel? Parent { get; set; }
 
-    public NoteModel(string phoneExtensionDelimiter, ILogService? logger = null)
+    public NoteModel(string phoneExtensionDelimiter, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
-        Dealers = new(() => new Dealer(_logger), _logger);
-        Contacts = new(() => new Contact(phoneExtensionDelimiter, _logger), _logger);
-        Forms = new(() => new Form(_logger), _logger);
+        _isInit = true;
+        CoreType = new Note(logger);
 
-        Dealers.CollectionChanged += Dealers_CollectionChanged;
-        Contacts.CollectionChanged += Contacts_CollectionChanged;
-        Forms.CollectionChanged += Forms_CollectionChanged;
+        InitContacts(phoneExtensionDelimiter);
+        InitDealers();
+        InitForms();
 
-        foreach (var dealer in Dealers) dealer.Parent = this;
-        foreach (var contact in Contacts) contact.Parent = this;
-        foreach (var form in Forms) form.Parent = this;
-
-        SelectDealer(Dealers.FirstOrDefault(x => !x.IsBlank));
-        SelectContact(Contacts.FirstOrDefault(x => !x.IsBlank));
-        SelectForm(Forms.FirstOrDefault(x => !x.IsBlank));
+        _isInit = false;
+        UpdateCore();
 
         using (LogContext.PushProperty("NoteId", Id))
         using (LogContext.PushProperty("Case#", CaseNumber))
@@ -107,42 +120,122 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         }
     }
 
-    public NoteModel(INote note, string phoneExtensionDelimiter, ILogService? logger = null)
+    public NoteModel(INote note, string phoneExtensionDelimiter, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInit = true;
         CoreType = note;
-        Dealers = new(() => new Dealer(_logger), _logger);
-        foreach (var d in note.Dealers)
-        {
-            var dealer = new Dealer(d, _logger) { Parent = this };
-            Dealers.Add(dealer);
-        }
 
-        Contacts = new(() => new Contact(phoneExtensionDelimiter, _logger), _logger);
-        foreach (var c in note.Contacts)
-        {
-            var contact = new Contact(c, _logger) { Parent = this };
-            Contacts.Add(contact);
-        }
-
-        Forms = new(() => new Form(_logger), _logger);
-        foreach (var f in note.Forms)
-        {
-            var form = new Form(f, _logger) { Parent = this };
-            Forms.Add(form);
-        }
-
-        Dealers.CollectionChanged += Dealers_CollectionChanged;
-        Contacts.CollectionChanged += Contacts_CollectionChanged;
-        Forms.CollectionChanged += Forms_CollectionChanged;
-
-        SelectDealer(Dealers.FirstOrDefault(x => !x.IsBlank));
-        SelectContact(Contacts.FirstOrDefault(x => !x.IsBlank));
-        SelectForm(Forms.FirstOrDefault(x => !x.IsBlank));
+        InitDealers();
+        InitContacts(phoneExtensionDelimiter);
+        InitForms();
 
         CaseNumber = note.CaseText;
         Notes = note.NotesText;
-        _logger?.LogInfo($"NoteModel loaded from core type. ID: {Id}\tCore ID: {CoreType.Id}");
+        _isInit = false;
+        UpdateCore();
+
+        { 
+            using (LogContext.PushProperty("NoteId", Id))
+            using (LogContext.PushProperty("Case#", CaseNumber))
+            using (LogContext.PushProperty("Notes", Notes))
+            using (LogContext.PushProperty("Dealers", Dealers.Count))
+            using (LogContext.PushProperty("Contacts", Contacts.Count))
+            using (LogContext.PushProperty("Forms", Forms.Count))
+            {
+                _logger?.LogInfo($"NoteModel loaded from core type.");
+            }
+        }
+    }
+    private void InitDealers()
+    {
+        var dealers = CoreType?.Dealers.ToList()
+                .Select(coreDealer =>
+                {
+                    var dealer = new Dealer(coreDealer, _logger)
+                    {
+                        CoreType = coreDealer,
+                        Parent = this
+                    };
+                    dealer.PropertyChanged += OnDealerPropertyChanged;
+                    return dealer;
+                });
+
+        Dealers = new ManagedObservableCollection<Dealer>(
+            () => new Dealer(_logger),
+            dealers,
+            _logger
+        );
+        Dealers.CollectionChanged += Dealers_CollectionChanged;
+        Dealers.FirstOrDefault()?.Select();
+    }
+    private void InitContacts(string phoneExtensionDelimiter)
+    {
+        var contacts = CoreType?.Contacts.ToList()
+                .Select(coreContact =>
+                {
+                    var contact = new Contact(coreContact, _logger)
+                    {
+                        CoreType = coreContact,
+                        Parent = this
+                    };
+                    contact.PropertyChanged += OnContactPropertyChanged;
+                    return contact;
+                });
+
+        Contacts = new ManagedObservableCollection<Contact>(
+            () => new Contact(phoneExtensionDelimiter, _logger),
+            contacts,
+            _logger
+        );
+        Contacts.CollectionChanged += Contacts_CollectionChanged;
+        Contacts.FirstOrDefault()?.Select();
+    }
+    private void InitForms()
+    {
+        var forms = CoreType?.Forms.ToList()
+                .Select(coreForm =>
+                {
+                    var form = new Form(coreForm, _logger)
+                    {
+                        CoreType = coreForm,
+                        Parent = this
+                    };
+                    form.PropertyChanged += OnFormPropertyChanged;
+                    return form;
+                });
+
+        Forms = new ManagedObservableCollection<Form>(
+            () => new Form(_logger),
+            forms,
+            _logger
+        );
+        Forms.CollectionChanged += Forms_CollectionChanged;
+        Forms.FirstOrDefault()?.Select();
+    }
+
+    private void OnDealerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Dealer>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedDealer));
+        }
+    }
+
+    private void OnContactPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+
+        if (e.PropertyName == nameof(ManagedObservableCollection<Contact>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedContact));
+        }
+    }
+
+    private void OnFormPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Form>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedForm));
+        }
     }
 
     private void Dealers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -167,82 +260,9 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         _logger?.LogDebug("Forms collection changed.");
     }
 
-    private Dealer? _selectedDealer; 
-    public Dealer? SelectedDealer
-    {
-        get => _selectedDealer;
-        set => SetProperty(ref _selectedDealer, value);
-    }
-    private Contact? _selectedContact; 
-    public Contact? SelectedContact
-    {
-        get => _selectedContact;
-        set => SetProperty(ref _selectedContact, value);
-    }
-    private Form? _selectedForm;
-    public Form SelectedForm
-    {
-        get => _selectedForm ?? Forms.FirstOrDefault();
-        set => SetProperty(ref _selectedForm, value);
-    }
-    public Guid Id { get; } = Guid.NewGuid();
-    public bool IsBlank
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(CaseNumber) || !string.IsNullOrEmpty(Notes))
-                return false;
-            if (Dealers.Any(d => !d.IsBlank) ||
-                Contacts.Any(c => !c.IsBlank) ||
-                Forms.Any(f => !f.IsBlank))
-                return false;
-            return true;
-        }
-    }
-
-    [ObservableProperty]
-    private bool _isSelected;
-    public void Select()
-    {
-        IsSelected = true;
-        _logger?.LogInfo("NoteModel selected.");
-    }
-    public void Deselect()
-    {
-        IsSelected = false;
-        _logger?.LogInfo("NoteModel deselected.");
-    }
-
-    public void SelectDealer(ISelectable selectedDealer)
-    {
-        if (selectedDealer is null) return;
-        foreach (var dealer in Dealers) dealer.Deselect();
-        SelectedDealer = Dealers.FirstOrDefault(c => c.Id == selectedDealer.Id);
-        SelectedDealer?.Select();
-        _logger?.LogInfo($"Dealer selected: {SelectedDealer?.Id}");
-    }
-
-    public void SelectContact(ISelectable selectedContact)
-    {
-        if (selectedContact is null) return;
-        foreach (var contact in Contacts) contact.Deselect();
-        SelectedContact = Contacts.FirstOrDefault(c => c.Id == selectedContact.Id);
-        SelectedContact?.Select();
-        _logger?.LogInfo($"Contact selected: {SelectedContact?.Id}");
-    }
-
-    public void SelectForm(ISelectable selectedForm)
-    {
-        if (selectedForm is null) return;
-        foreach (var form in Forms) form.Deselect();
-        SelectedForm = Forms.FirstOrDefault(c => c.Id == selectedForm.Id) ?? Forms.FirstOrDefault();
-        SelectedForm?.Select();
-        _logger?.LogInfo($"Form selected: {SelectedForm?.Id}");
-    }
-
     internal void UpdateCore()
     {
-        if (CoreType == null) return;
+        if (CoreType == null || _isInit) return;
         CoreType.CaseText = CaseNumber ?? string.Empty;
         CoreType.NotesText = Notes ?? string.Empty;
         CoreType.Dealers.Clear();
@@ -256,8 +276,8 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
 
     public static implicit operator Note(NoteModel note)
     {
-        if (note is null) return new Note();
-        return new Note(note.Id)
+        if (note is null || note.CoreType is null) return new Note();
+        return new Note(note.CoreType.Id)
         {
             CaseText = note.CaseNumber ?? string.Empty,
             NotesText = note.Notes ?? string.Empty,
@@ -267,5 +287,9 @@ public partial class NoteModel : ObservableObject, ISelectable, IBlankMaybe
         };
     }
 
-    internal DashboardViewModel? Parent { get; set; }
+    internal void RaiseChildPropertyChanged()
+    {
+        OnPropertyChanged(string.Empty); // An empty string signals that all properties have changed.
+    }
+
 }

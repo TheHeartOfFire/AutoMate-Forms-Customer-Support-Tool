@@ -2,7 +2,9 @@
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
 using AMFormsCST.Desktop.Services;
@@ -14,7 +16,7 @@ using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
-using System.Timers;
+using System.Runtime.ExceptionServices;
 using System.Windows;
 using Wpf.Ui;
 
@@ -23,93 +25,153 @@ namespace AMFormsCST.Desktop.ViewModels.Pages;
 public partial class DashboardViewModel : ViewModel
 {
     private readonly ILogService _logger;
+    private readonly IDebounceService _debounceService;
 
-    [ObservableProperty]
     private ManagedObservableCollection<NoteModel> _notes = new(() => new NoteModel(""));
-
-    public string DebugSelectedNoteId => SelectedNote?.Id.ToString() ?? "None";
-
-    private NoteModel _selectedNote;
-    public NoteModel SelectedNote
-    {
-        get => _selectedNote;
-        set
-        {
-            if (_selectedNote != null)
-            {
-                _selectedNote.PropertyChanged -= OnNoteModelPropertyChanged;
-            }
-
-            SetProperty(ref _selectedNote, value);
-
-            if (_selectedNote != null)
-            {
-                _selectedNote.PropertyChanged += OnNoteModelPropertyChanged;
-                _logger?.LogInfo($"Selected note changed: {_selectedNote.Id}");
-            }
-        }
-    }
-
-    [ObservableProperty]
-    private bool _isDebugMode = false;
-
-    [ObservableProperty]
-    private Visibility _debugVisibility = Visibility.Collapsed;
+    public ManagedObservableCollection<NoteModel> Notes => _notes;
+    public NoteModel? SelectedNote => Notes.SelectedItem;
 
     private int _uiRefreshCounter;
     public int UiRefreshCounter
     {
         get => _uiRefreshCounter;
-        private set => SetProperty(ref _uiRefreshCounter, value); 
+        private set => SetProperty(ref _uiRefreshCounter, value);
     }
 
     private readonly ISupportTool _supportTool;
     private readonly IDialogService _dialogService;
     private readonly IFileSystem _fileSystem;
 
-    public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, ILogService logger)
+    private NoteModel? _lastSelectedNote;
+    private Models.Form? _lastSelectedForm;
+
+    public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, ILogService logger, IDebounceService debounceService)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _fileSystem = fileSystem;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _logger.LogInfo("DashboardViewModel initialized.");
+        _debounceService = debounceService;
+        _debounceService.DebouncedElapsed += AutosaveTimerElapsed;
 
+        void postCreationAction(NoteModel note)
+        {
+            note.Parent = this;
+            note.PropertyChanged += OnNoteModelPropertyChanged;
+        }
+
+        // Populate Notes collection
         if (_supportTool.Notebook.Notes.Count == 0)
         {
-            Notes.Add(new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger));
-            _logger.LogInfo("Added blank note to Notes collection.");
+            var initialNote = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);
+            postCreationAction(initialNote);
+
+            _notes = new ManagedObservableCollection<NoteModel>(
+                () => new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger),
+                [initialNote],
+                _logger,
+                postCreationAction
+            );
+        }
+        else
+        {
+            var notes = _supportTool.Notebook.Notes
+                .Select(note =>
+                {
+                    var noteModel = new NoteModel(note, _supportTool.Settings.UserSettings.ExtSeparator, _logger);
+                    postCreationAction(noteModel);
+                    return noteModel;
+                });
+
+            _notes = new ManagedObservableCollection<NoteModel>(
+                () => new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger),
+                notes,
+                _logger,
+                postCreationAction
+            );
         }
 
-        foreach(var note in _supportTool.Notebook.Notes)
+        _notes.PropertyChanged += Notes_PropertyChanged;
+        // Initial subscription
+        if (_notes.SelectedItem is not null)
         {
-            var noteModel = new NoteModel(note, _supportTool.Settings.UserSettings.ExtSeparator, _logger);
-            noteModel.CoreType = note;
-            noteModel.Parent = this;
-            noteModel.PropertyChanged += OnNoteModelPropertyChanged;
-            Notes.Add(noteModel);
+            Notes_PropertyChanged(this, new PropertyChangedEventArgs(nameof(Notes.SelectedItem)));
+        }
+    }
+
+    private void AutosaveTimerElapsed(object? sender, EventArgs e) => IO.SaveNotes([.. Notes.Select(n => n.CoreType).Cast<INote>()]);
+
+    private void Notes_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ManagedObservableCollection<NoteModel>.SelectedItem)) return;
+
+        if (_lastSelectedNote != null)
+        {
+            _lastSelectedNote.Dealers.PropertyChanged -= SelectedNote_Dealers_PropertyChanged;
+            _lastSelectedNote.Contacts.PropertyChanged -= SelectedNote_Contacts_PropertyChanged;
+            _lastSelectedNote.Forms.PropertyChanged -= SelectedNote_Forms_PropertyChanged;
         }
 
-        _selectedNote = Notes.FirstOrDefault(x => !x.IsBlank);
-        _selectedNote?.Select();
+        OnPropertyChanged(nameof(SelectedNote));
 
-        if (_selectedNote != null)
+        if (SelectedNote != null)
         {
-            _selectedNote.PropertyChanged += OnNoteModelPropertyChanged;
+            SelectedNote.Dealers.PropertyChanged += SelectedNote_Dealers_PropertyChanged;
+            SelectedNote.Contacts.PropertyChanged += SelectedNote_Contacts_PropertyChanged;
+            SelectedNote.Forms.PropertyChanged += SelectedNote_Forms_PropertyChanged;
         }
 
-        if (_selectedNote is null)
+        _lastSelectedNote = SelectedNote;
+    }
+
+    private void SelectedNote_Dealers_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Models.Dealer>.SelectedItem))
         {
-            _selectedNote = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);
-            Notes.Add(_selectedNote);
-            _selectedNote.Select();
+            OnPropertyChanged(nameof(SelectedNote));
+        }
+    }
+
+    private void SelectedNote_Contacts_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Models.Contact>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedNote));
+        }
+    }
+
+    private void SelectedNote_Forms_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ManagedObservableCollection<Models.Form>.SelectedItem)) return;
+        
+        if (_lastSelectedForm != null)
+        {
+            _lastSelectedForm.TestDeals.PropertyChanged -= SelectedForm_TestDeals_PropertyChanged;
+        }
+
+        OnPropertyChanged(nameof(SelectedNote));
+
+        if (SelectedNote?.SelectedForm != null)
+        {
+            SelectedNote.SelectedForm.TestDeals.PropertyChanged += SelectedForm_TestDeals_PropertyChanged;
+        }
+
+        _lastSelectedForm = SelectedNote?.SelectedForm;
+    }
+
+    private void SelectedForm_TestDeals_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Models.TestDeal>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedNote));
         }
     }
 
     private void OnNoteModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         UiRefreshCounter++;
-        ScheduleAutosave();
+        _debounceService.ScheduleEvent();
         _logger?.LogDebug($"Note property changed: {e.PropertyName} on {sender}");
     }
 
@@ -118,19 +180,12 @@ public partial class DashboardViewModel : ViewModel
     {
         try
         {
-            if (SelectedNote is null || caseId == SelectedNote.Id) return;
+            if (Notes.SelectedItem is null || caseId == Notes.SelectedItem.Id) return;
 
-            foreach (var note in Notes.ToList())
-            {
-                if (note.Id == caseId)
-                {
-                    SelectedNote = note;
-                    note.Select();
-                    _logger?.LogInfo($"Note clicked and selected: {note.Id}");
-                    continue;
-                }
-                note.Deselect();
-            }
+            Notes.First(x => x.Id == caseId).Select();
+
+            _logger?.LogInfo($"Note clicked and selected: {caseId}");
+
         }
         catch (Exception ex)
         {
@@ -139,16 +194,16 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnDealerClicked(ISelectable company)
+    private void OnDealerClicked(Models.Dealer dealer)
     {
         try
         {
             if (SelectedNote is null ||
-                SelectedNote.SelectedDealer is null || 
-                company.Id == SelectedNote.SelectedDealer.Id) return;
+                SelectedNote.SelectedDealer is null ||
+                dealer.Id == SelectedNote.SelectedDealer.Id) return;
+            dealer.Select();
 
-            SelectedNote.SelectDealer(company);
-            _logger?.LogInfo($"Dealer clicked and selected: {company.Id}");
+            _logger?.LogInfo($"Dealer clicked and selected: {dealer.Id}");
         }
         catch (Exception ex)
         {
@@ -157,16 +212,17 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnCompanyClicked(ISelectable company)
+    private void OnCompanyClicked(Models.Company company)
     {
         try
         {
             if (SelectedNote is null ||
-                SelectedNote.SelectedDealer is null || 
+                SelectedNote.SelectedDealer is null ||
                 SelectedNote.SelectedDealer.SelectedCompany is null ||
                 company.Id == SelectedNote.SelectedDealer.SelectedCompany.Id) return;
 
-            SelectedNote.SelectedDealer.SelectCompany(company);
+            company.Select();
+
             _logger?.LogInfo($"Company clicked and selected: {company.Id}");
         }
         catch (Exception ex)
@@ -176,7 +232,7 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnContactClicked(ISelectable contact)
+    private void OnContactClicked(Models.Contact contact)
     {
         try
         {
@@ -184,7 +240,7 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedContact is null ||
                 contact.Id == SelectedNote.SelectedContact.Id) return;
 
-            SelectedNote.SelectContact(contact);
+            contact.Select();
             _logger?.LogInfo($"Contact clicked and selected: {contact.Id}");
         }
         catch (Exception ex)
@@ -194,7 +250,7 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnFormClicked(ISelectable form)
+    private void OnFormClicked(Models.Form form)
     {
         try
         {
@@ -202,7 +258,7 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedForm is null ||
                 form.Id == SelectedNote.SelectedForm.Id) return;
 
-            SelectedNote.SelectForm(form);
+            form.Select();
             _logger?.LogInfo($"Form clicked and selected: {form.Id}");
         }
         catch (Exception ex)
@@ -212,7 +268,7 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnDealClicked(ISelectable deal)
+    private void OnDealClicked(Models.TestDeal deal)
     {
         try
         {
@@ -221,7 +277,7 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedForm.SelectedTestDeal is null ||
                 deal.Id == SelectedNote.SelectedForm.SelectedTestDeal.Id) return;
 
-            SelectedNote.SelectedForm.SelectTestDeal(deal);
+            deal.Select();
             _logger?.LogInfo($"Deal clicked and selected: {deal.Id}");
         }
         catch (Exception ex)
@@ -231,82 +287,49 @@ public partial class DashboardViewModel : ViewModel
     }
 
     [RelayCommand]
-    private void OnDeleteItemClicked(object itemToDelete)
+    private void OnDeleteItemClicked(ManagedObservableCollectionItem itemToDelete)
     {
         try
         {
             if (itemToDelete == null) return;
 
-            if (itemToDelete is NoteModel noteToDelete)
+            switch (itemToDelete)
             {
-                bool isDeletingSelected = SelectedNote == noteToDelete;
-                int deletedIndex = Notes.IndexOf(noteToDelete);
-
-                // Only remove if more than one note exists, or if not blank
-                if (Notes.Count > 1 || !noteToDelete.IsBlank)
+                case NoteModel noteToDelete:
                     Notes.Remove(noteToDelete);
+                    _logger?.LogInfo($"Note deleted: {noteToDelete.Id}");
+                    break;
 
-                // Select next note by index, or previous if at end
-                if (Notes.Count > 0)
-                {
-                    int nextIndex = Math.Min(deletedIndex, Notes.Count - 1);
-                    SelectedNote = Notes[nextIndex];
-                    SelectedNote?.Select();
-                }
-                else
-                {
-                    SelectedNote = null;
-                }
-                _logger?.LogInfo($"Note deleted: {noteToDelete.Id}");
-            }
-            else if (itemToDelete is Dealer dealerToDelete)
-            {
-                bool isDeletingSelected = SelectedNote.SelectedDealer == dealerToDelete;
-                SelectedNote.Dealers.Remove(dealerToDelete);
+                case Models.Dealer dealerToDelete when SelectedNote is not null:
+                    SelectedNote.Dealers.Remove(dealerToDelete);
+                    _logger?.LogInfo($"Dealer deleted: {dealerToDelete.Id}");
+                    break;
 
-                if (isDeletingSelected)
-                {
-                    SelectedNote.SelectDealer(SelectedNote.Dealers.FirstOrDefault(x => !x.IsBlank));
-                    SelectedNote.SelectedDealer?.Select();
-                }
-                _logger?.LogInfo($"Dealer deleted: {dealerToDelete.Id}");
-            }
-            else if (itemToDelete is Company companyToDelete && SelectedNote.SelectedDealer is not null)
-            {
-                bool isDeletingSelected = SelectedNote.SelectedDealer.SelectedCompany == companyToDelete;
-                SelectedNote.SelectedDealer.Companies.Remove(companyToDelete);
+                case Models.Company companyToDelete when
+                SelectedNote is not null &&
+                SelectedNote.SelectedDealer is not null:
+                    SelectedNote.SelectedDealer.Companies.Remove(companyToDelete);
+                    _logger?.LogInfo($"Company deleted: {companyToDelete.Id}");
+                    break;
 
-                if (isDeletingSelected)
-                {
-                    SelectedNote.SelectedDealer.SelectCompany(SelectedNote.SelectedDealer.Companies.FirstOrDefault(x => !x.IsBlank));
-                    SelectedNote.SelectedDealer.SelectedCompany?.Select();
-                }
-                _logger?.LogInfo($"Company deleted: {companyToDelete.Id}");
-            }
-            else if (itemToDelete is Contact contactToDelete)
-            {
-                bool isDeletingSelected = SelectedNote.SelectedContact == contactToDelete;
-                SelectedNote.Contacts.Remove(contactToDelete);
+                case Models.Contact contactToDelete when SelectedNote is not null:
+                    SelectedNote.Contacts.Remove(contactToDelete);
+                    _logger?.LogInfo($"Contact deleted: {contactToDelete.Id}");
+                    break;
 
-                if (isDeletingSelected)
-                {
-                    SelectedNote.SelectContact(SelectedNote.Contacts.FirstOrDefault(x => !x.IsBlank));
-                    SelectedNote.SelectedContact?.Select();
-                }
-                _logger?.LogInfo($"Contact deleted: {contactToDelete.Id}");
-            }
-            else if (itemToDelete is Form formToDelete)
-            {
-                bool isDeletingSelected = SelectedNote.SelectedForm == formToDelete;
-                SelectedNote.Forms.Remove(formToDelete);
+                case Models.Form formToDelete when SelectedNote is not null:
+                    SelectedNote.Forms.Remove(formToDelete);
+                    _logger?.LogInfo($"Form deleted: {formToDelete.Id}");
+                    break;
 
-                if (isDeletingSelected)
-                {
-                    SelectedNote.SelectForm(SelectedNote.Forms.FirstOrDefault(x => !x.IsBlank));
-                    SelectedNote.SelectedForm?.Select();
-                }
-                _logger?.LogInfo($"Form deleted: {formToDelete.Id}");
+                case Models.TestDeal dealToDelete when
+                SelectedNote?.SelectedForm is not null:
+                    SelectedNote.SelectedForm.TestDeals.Remove(dealToDelete);
+                    _logger?.LogInfo($"TestDeal deleted: {dealToDelete.Id}");
+                    break;
             }
+
+            _debounceService.ScheduleEvent();
         }
         catch (Exception ex)
         {
@@ -372,7 +395,7 @@ public partial class DashboardViewModel : ViewModel
         try
         {
             var vm = new FormNameGeneratorViewModel(_supportTool);
-            var page = new FormNameGeneratorPage(vm); 
+            var page = new FormNameGeneratorPage(vm);
             var dialog = new PageHostDialog(page, "Form Name Generator", true);
             dialog.Show();
             dialog.Closed += FormNameDialogClosed;
@@ -397,13 +420,13 @@ public partial class DashboardViewModel : ViewModel
             var name = vm.Form.FileName ?? string.Empty;
 
             if (dialog.ConfirmSelected)
-                if(SelectedNote.SelectedForm.IsBlank)
+                if (SelectedNote?.SelectedForm?.IsBlank == true)
                 {
                     SelectedNote.SelectedForm.Name = name;
                 }
-                else
+                else if (SelectedNote is not null)
                 {
-                    SelectedNote.Forms.Last().Name = name;
+                    SelectedNote.Forms.Last().Name = name ?? string.Empty;
                 }
             dialog.Closed -= FormNameDialogClosed;
             _logger?.LogInfo("Form Name Dialog closed.");
@@ -422,44 +445,9 @@ public partial class DashboardViewModel : ViewModel
         _logger?.LogInfo("LoadCase command executed.");
     }
 
-    public void ToggleDebugMode(bool? debugModeEnable)
-    {
-        if (!debugModeEnable.HasValue)
-            debugModeEnable = !IsDebugMode;
-
-        IsDebugMode = debugModeEnable.Value;
-        DebugVisibility = IsDebugMode ? Visibility.Visible : Visibility.Collapsed;
-        _logger?.LogInfo($"Debug mode toggled: {IsDebugMode}");
-    }
-
-    public void TriggerRadioButtonRefresh()
-    {
-        UiRefreshCounter++;
-        _logger?.LogDebug("RadioButton refresh triggered.");
-    }
-
-    private System.Timers.Timer? _debounceTimer;
-    private const int DebounceIntervalMs = 5000; 
-
-    private void ScheduleAutosave()
-    {
-        if (_debounceTimer == null)
-        {
-            _debounceTimer = new System.Timers.Timer(DebounceIntervalMs);
-            _debounceTimer.Elapsed += (s, e) =>
-            {
-                _debounceTimer?.Stop();
-                _debounceTimer?.Dispose();
-                _debounceTimer = null; 
-                IO.SaveNotes([.. Notes.Select(n => (Core.Types.Notebook.Note)n).Cast<INote>()]);
-                _logger?.LogInfo("Autosave triggered.");
-            };
-            _debounceTimer.AutoReset = false;
-        }
-        else
-        {
-            _debounceTimer.Stop();
-        }
-        _debounceTimer.Start();
-    }
+    //public void TriggerRadioButtonRefresh()
+    //{
+    //    UiRefreshCounter++;
+    //    _logger?.LogDebug("RadioButton refresh triggered.");
+    //}
 }

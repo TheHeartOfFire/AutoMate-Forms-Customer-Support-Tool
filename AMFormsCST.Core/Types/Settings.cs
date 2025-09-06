@@ -9,14 +9,8 @@ public class Settings : ISettings
 {
     private readonly ILogService? _logger;
 
-    [JsonIgnore] // This property is for convenience and should not be serialized
-    public List<ISetting> AllSettings
-    {
-        get
-        {
-            return [UserSettings, UiSettings];
-        }
-    }
+    [JsonIgnore]
+    public List<ISetting> AllSettings => [UserSettings, UiSettings];
 
     [JsonInclude]
     public IUserSettings UserSettings
@@ -61,23 +55,18 @@ public class Settings : ISettings
     private IUserSettings _userSettings;
     private IUiSettings _uiSettings;
 
-    public Settings(IUserSettings userSettings, IUiSettings uiSettings, ILogService? logger = null)
+    [JsonConstructor]
+    public Settings(IUserSettings userSettings, IUiSettings uiSettings)
+    {
+        _userSettings = userSettings ?? throw new ArgumentNullException(nameof(userSettings), "User settings cannot be null.");
+        _uiSettings = uiSettings ?? throw new ArgumentNullException(nameof(uiSettings), "UI settings cannot be null.");
+    }
+
+    // Logger-initializing constructor for runtime use only
+    public Settings(IUserSettings userSettings, IUiSettings uiSettings, ILogService? logger)
+        : this(userSettings, uiSettings)
     {
         _logger = logger;
-        if (userSettings is null)
-        {
-            var ex = new ArgumentNullException(nameof(userSettings), "User settings cannot be null.");
-            _logger?.LogError("Constructor received null for userSettings.", ex);
-            throw ex;
-        }
-        if (uiSettings is null)
-        {
-            var ex = new ArgumentNullException(nameof(uiSettings), "UI settings cannot be null.");
-            _logger?.LogError("Constructor received null for uiSettings.", ex);
-            throw ex;
-        }
-        _userSettings = userSettings;
-        _uiSettings = uiSettings;
         _logger?.LogInfo("Settings initialized.");
     }
 }

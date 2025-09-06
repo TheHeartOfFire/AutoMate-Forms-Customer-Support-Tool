@@ -1,50 +1,46 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class Company : ObservableObject, ISelectable, IBlankMaybe
+public partial class Company : ManagedObservableCollectionItem
 {
-    private readonly ILogService? _logger;
+    private bool _isInitializing;
 
     [ObservableProperty]
     private string? _name = string.Empty;
     [ObservableProperty]
     private string? _companyCode = string.Empty;
-    public Guid Id { get; } = Guid.NewGuid();
     [ObservableProperty]
-    private bool _isSelected = false;
+    private bool _notable;
+
+    public override bool IsBlank { get { return string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(CompanyCode); }}
+    public override Guid Id { get; } = Guid.NewGuid();
     internal ICompany? CoreType { get; set; }
     internal Dealer? Parent { get; set; }
 
-    public Company(ILogService? logger = null)
+    public Company(ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInitializing = true;
         _logger?.LogInfo("Company initialized.");
+        _isInitializing = false;
     }
-    public Company(ICompany company, ILogService? logger = null)
+    public Company(ICompany company, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInitializing = true;
         CoreType = company;
         Name = company.Name;
         CompanyCode = company.CompanyCode;
+        Notable = company.Notable;
         _logger?.LogInfo("Company loaded from core type.");
+        _isInitializing = false;
+        UpdateCore();
     }
-    public void Select()
-    {
-        IsSelected = true;
-        _logger?.LogInfo("Company selected.");
-    }
-    public void Deselect()
-    {
-        IsSelected = false;
-        _logger?.LogInfo("Company deselected.");
-    }
-    public bool IsBlank { get { return string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(CompanyCode); }}
     partial void OnNameChanged(string? value)
     {
         OnPropertyChanged(nameof(IsBlank));
@@ -69,14 +65,28 @@ public partial class Company : ObservableObject, ISelectable, IBlankMaybe
         }
     }
 
+    partial void OnNotableChanged(bool value)
+    {
+        UpdateCore();
+        using (LogContext.PushProperty("CompanyId", Id))
+        using (LogContext.PushProperty("Notable", value))
+        {
+            _logger?.LogInfo($"Company notable changed: {value}");
+        }
+    }
+
     internal void UpdateCore()
     {
+        if (_isInitializing) return;
+
         if (CoreType == null && Parent?.CoreType != null)
             CoreType = Parent.CoreType.Companies.FirstOrDefault(c => c.Id == Id);
         if (CoreType == null) return;
         CoreType.Name = Name ?? string.Empty;
         CoreType.CompanyCode = CompanyCode ?? string.Empty;
+        CoreType.Notable = Notable;
         Parent?.UpdateCore();
+        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Company core updated.");
     }
 
@@ -87,7 +97,8 @@ public partial class Company : ObservableObject, ISelectable, IBlankMaybe
         return new Core.Types.Notebook.Company(company.Id)
         {
             Name = company.Name ?? string.Empty,
-            CompanyCode = company.CompanyCode ?? string.Empty
+            CompanyCode = company.CompanyCode ?? string.Empty,
+            Notable = company.Notable
         };
     }
 }

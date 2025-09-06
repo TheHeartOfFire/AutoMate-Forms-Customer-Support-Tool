@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Utils;
 public class Properties
@@ -13,6 +14,14 @@ public class Properties
     public FormgenUtilsProperties FormgenUtils { get; set; }
     public ErrorMessages ErrorMessages { get; set; }
 
+    [JsonConstructor]
+    public Properties(FormgenUtilsProperties formgenUtils, ErrorMessages errorMessages)
+    {
+        FormgenUtils = formgenUtils;
+        ErrorMessages = errorMessages;
+    }
+
+    // Logger-initializing constructor for runtime use only
     public Properties(ILogService? logger = null)
     {
         _logger = logger;
@@ -40,6 +49,13 @@ public class FormgenUtilsProperties
         }
     }
 
+    [JsonConstructor]
+    public FormgenUtilsProperties(uint backupRetentionQty)
+    {
+        _backupRetentionQty = backupRetentionQty;
+    }
+
+    // Runtime constructor for logger injection
     public FormgenUtilsProperties(ILogService? logger = null)
     {
         _logger = logger;
@@ -51,6 +67,11 @@ public class ErrorMessages
 {
     private readonly ILogService? _logger;
     public NotesErrorMessages Notes { get; set; }
+    [JsonConstructor]
+    public ErrorMessages()
+    {
+        Notes = new NotesErrorMessages();
+    }
 
     public ErrorMessages(ILogService? logger = null)
     {
@@ -117,7 +138,11 @@ public class NotesErrorMessages
             }
         }
     }
-
+    [JsonConstructor]   
+    public NotesErrorMessages()
+    {
+        
+    }
     public NotesErrorMessages(ILogService? logger = null)
     {
         _logger = logger;

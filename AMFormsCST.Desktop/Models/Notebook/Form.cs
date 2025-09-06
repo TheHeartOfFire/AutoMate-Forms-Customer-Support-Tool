@@ -1,6 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,51 +12,23 @@ using System.ComponentModel;
 using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class Form : ObservableObject, ISelectable, IBlankMaybe
+public partial class Form : ManagedObservableCollectionItem
 {
-    private readonly ILogService? _logger;
+    private bool _isInitializing;
 
     [ObservableProperty]
     private string? _name = string.Empty;
     [ObservableProperty]
     private string? _notes = string.Empty;
-
     public ManagedObservableCollection<TestDeal> TestDeals { get; set; }
-    internal IForm? CoreType { get; set; }
-    internal NoteModel? Parent { get; set; }
-
-    private TestDeal? _selectedTestDeal;
-    public TestDeal? SelectedTestDeal
-    {
-        get => _selectedTestDeal;
-        set => SetProperty(ref _selectedTestDeal, value);
-    }
     [ObservableProperty]
     private bool _notable = true;
     [ObservableProperty]
     private FormFormat _format = FormFormat.Pdf;
-
-    public enum FormFormat
-    {
-        LegacyImpact,
-        Pdf
-    }
-    public Guid Id { get; } = Guid.NewGuid();
-    [ObservableProperty]
-    private bool _isSelected  = false;
-    internal IForm CoreTypeInstance = new Core.Types.Notebook.Form();
-    public void Select()
-    {
-        IsSelected = true;
-        _logger?.LogInfo("Form selected.");
-    }
-    public void Deselect()
-    {
-        IsSelected = false;
-        _logger?.LogInfo("Form deselected.");
-    }
-
-    public bool IsBlank
+    internal IForm? CoreType { get; set; }
+    internal NoteModel? Parent { get; set; }
+    public override Guid Id { get; } = Guid.NewGuid();
+    public override bool IsBlank
     {
         get
         {
@@ -65,6 +38,13 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
                 return false;
             return true;
         }
+    }
+    public TestDeal? SelectedTestDeal => TestDeals.SelectedItem;
+
+    public enum FormFormat
+    {
+        LegacyImpact,
+        Pdf
     }
     partial void OnNameChanged(string? value)
     {
@@ -91,31 +71,88 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
         }
     }
 
-    public Form(ILogService? logger = null)
+    partial void OnNotableChanged(bool value)
     {
-        _logger = logger;
-        TestDeals = new(() => new TestDeal(_logger), _logger);
-        TestDeals.CollectionChanged += TestDeals_CollectionChanged;
-        foreach (var td in TestDeals) td.Parent = this;
-        SelectTestDeal(TestDeals.FirstOrDefault(x => !x.IsBlank));
-        _logger?.LogInfo("Form initialized.");
-    }
-    public Form(IForm form, ILogService? logger = null)
-    {
-        _logger = logger;
-        CoreType = form;
-        TestDeals = new(() => new TestDeal(_logger), _logger);
-        foreach (var td in form.TestDeals)
+        UpdateCore();
+        using (LogContext.PushProperty("FormId", Id))
+        using (LogContext.PushProperty("Notable", value))
         {
-            var testDeal = new TestDeal(td, _logger) { Parent = this };
-            TestDeals.Add(testDeal);
+            _logger?.LogInfo($"Form notable changed: {value}");
         }
-        TestDeals.CollectionChanged += TestDeals_CollectionChanged;
-        SelectTestDeal(TestDeals.FirstOrDefault(x => !x.IsBlank));
+    }
+
+    public Form(ILogService? logger = null) : base(logger)
+    {
+        _isInitializing = true;
+        CoreType = new Core.Types.Notebook.Form();
+
+        InitTestDeals();
+
+        TestDeals ??= new ManagedObservableCollection<TestDeal>(
+            () => new TestDeal(_logger),
+            null,
+            _logger
+        );
+
+        _logger?.LogInfo("Form initialized.");
+        _isInitializing = false;
+    }
+    public Form(IForm form, ILogService? logger = null) : base(logger)
+    {
+        _isInitializing = true;
+        CoreType = form;
+
+        InitTestDeals();
+
+        TestDeals ??= new ManagedObservableCollection<TestDeal>(
+            () => new TestDeal(_logger),
+            null,
+            _logger
+        );
+
         Name = form.Name ?? string.Empty;
         Notes = form.Notes ?? string.Empty;
         Notable = form.Notable;
         _logger?.LogInfo("Form loaded from core type.");
+        _isInitializing = false;
+        UpdateCore();
+    }
+    private void InitTestDeals()
+    {
+        var testDeals = CoreType?.TestDeals.ToList()
+                .Select(coreTestDeal =>
+                {
+                    var testDeal = new TestDeal(coreTestDeal, _logger)
+                    {
+                        CoreType = coreTestDeal,
+                        Parent = this
+                    };
+                    testDeal.PropertyChanged += OnTestDealPropertyChanged;
+                    return testDeal;
+                });
+
+        TestDeals = new ManagedObservableCollection<TestDeal>(
+            () => new TestDeal(_logger),
+            testDeals,
+            _logger
+        );
+        TestDeals.PropertyChanged += OnTestDealsPropertyChanged;
+        TestDeals.CollectionChanged += TestDeals_CollectionChanged;
+        TestDeals.FirstOrDefault()?.Select();
+    }
+
+    private void OnTestDealsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<TestDeal>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedTestDeal));
+        }
+    }
+
+    private void OnTestDealPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // This handler is for property changes on individual TestDeal items.
+        // It can be kept for future use or removed if not needed.
     }
 
     private void TestDeals_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -126,17 +163,10 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
         _logger?.LogDebug("TestDeals collection changed.");
     }
 
-    public void SelectTestDeal(ISelectable selectedTestDeal)
-    {
-        if (selectedTestDeal is null) return; 
-        foreach (var deal in TestDeals) deal.Deselect();
-        SelectedTestDeal = TestDeals.FirstOrDefault(c => c.Id == selectedTestDeal.Id);
-        SelectedTestDeal?.Select();
-        _logger?.LogInfo($"TestDeal selected: {SelectedTestDeal?.Id}");
-    }
-
     internal void UpdateCore()
     {
+        if (_isInitializing) return;
+
         if (CoreType == null && Parent?.CoreType != null)
             CoreType = Parent.CoreType.Forms.FirstOrDefault(f => f.Id == Id);
         if (CoreType == null) return;
@@ -146,6 +176,7 @@ public partial class Form : ObservableObject, ISelectable, IBlankMaybe
         CoreType.TestDeals.Clear();
         CoreType.TestDeals.AddRange(TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td));
         Parent?.UpdateCore();
+        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Form core updated.");
     }
 

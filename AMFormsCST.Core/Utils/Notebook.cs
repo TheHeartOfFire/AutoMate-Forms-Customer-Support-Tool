@@ -14,14 +14,16 @@ public class Notebook : INotebook
     public Notebook(ILogService? logger = null)
     {
         _logger = logger;
+        if (IO.Logger is null && logger is not null) IO.ConfigureLogger(logger);
         Notes = [.. IO.LoadNotes()];
         _logger?.LogInfo($"Notebook initialized with {Notes.Count} notes.");
 
         if (Notes.Count == 0)
         {
-            Notes.Add(new Note());
+            Notes.Add(new Note(logger));
             _logger?.LogInfo("No notes found. Added a blank note.");
         }
+        // Always select the first note
         Notes.SelectedItem = Notes.FirstOrDefault();
         _logger?.LogDebug($"Selected note: {Notes.SelectedItem?.Id}");
 
@@ -36,7 +38,7 @@ public class Notebook : INotebook
         Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = Notes.SelectedItem.Forms.SelectedItem.TestDeals.FirstOrDefault();
     }
 
-    public void AddNote(bool select = false) => AddNote(new Note(), select);
+    public void AddNote(bool select = false) => AddNote(new Note(_logger), select);
 
     public void AddNote(INote note, bool select = false)
     {
@@ -74,7 +76,7 @@ public class Notebook : INotebook
     public void Clear()
     {
         Notes.Clear();
-        Notes.SelectedItem = new Note();
+        Notes.SelectedItem = new Note(_logger);
         Notes.Add(Notes.SelectedItem);
         _logger?.LogInfo("Notebook cleared. Added a blank note.");
     }

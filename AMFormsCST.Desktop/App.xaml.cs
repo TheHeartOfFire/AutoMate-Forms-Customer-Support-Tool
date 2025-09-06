@@ -85,6 +85,7 @@ public partial class App : Application
 
                     return new SerilogService(logger);
                 });
+                _ = services.AddTransient<IDebounceService, DebounceService>();
 
                 // App Host
                 _ = services.AddHostedService<ApplicationHostService>();

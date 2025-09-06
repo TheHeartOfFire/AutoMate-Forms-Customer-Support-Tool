@@ -30,6 +30,13 @@ public class AutomateFormsOrgVariables : IOrgVariables
 
     [JsonIgnore]
     public List<ITextTemplateVariable> Variables { get; private set; }
+    [JsonConstructor]
+    public AutomateFormsOrgVariables(IBestPracticeEnforcer? enforcer, INotebook? notebook)
+    {
+        Enforcer = enforcer;
+        Notebook = notebook;
+        Variables = RegisterVariables();
+    }
 
     // Constructor for Dependency Injection
     public AutomateFormsOrgVariables(IBestPracticeEnforcer? enforcer, INotebook? notebook, ILogService? logger = null)

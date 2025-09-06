@@ -31,9 +31,22 @@ public partial class DashboardPage : INavigableView<DashboardViewModel>
     {
         ViewModel = viewModel;
         _logger = logger;
-        DataContext = ViewModel;
 
+        DataContext = ViewModel;
         InitializeComponent();
+
+        //Loaded += (s, e) =>
+        //{
+        //    var numberBox = FindName("CaseNumBox") as Wpf.Ui.Controls.NumberBox;
+        //    numberBox?.SetBinding(
+        //            Wpf.Ui.Controls.NumberBox.TextProperty,
+        //            new Binding("SelectedNote.CaseNumber")
+        //            {
+        //                Mode = BindingMode.TwoWay,
+        //                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        //            }
+        //        );
+        //};
         _logger?.LogInfo("DashboardPage initialized.");
     }
 }

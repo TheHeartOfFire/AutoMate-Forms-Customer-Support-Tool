@@ -1,15 +1,16 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
+public partial class Contact : ManagedObservableCollectionItem
 {
-    private readonly ILogService? _logger;
+    private bool _isInitializing;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -21,22 +22,27 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
     private string _phoneExtension = string.Empty;
     [ObservableProperty]
     private string _phoneExtensionDelimiter = " ";
-    public Guid Id { get; } = Guid.NewGuid();
+    public override bool IsBlank { get { return string.IsNullOrEmpty(Name) &&
+                                 string.IsNullOrEmpty(Email) &&
+                                 string.IsNullOrEmpty(Phone) &&
+                                 string.IsNullOrEmpty(PhoneExtension); } }
+    public override Guid Id { get; } = Guid.NewGuid();
 
     [ObservableProperty]
     private bool _isSelected = false;
     internal IContact? CoreType { get; set; }
     internal NoteModel? Parent { get; set; }
 
-    public Contact(string extensionDelimiter, ILogService? logger = null)
+    public Contact(string extensionDelimiter, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInitializing = true;
         PhoneExtensionDelimiter = extensionDelimiter;
         _logger?.LogInfo("Contact initialized.");
+        _isInitializing = false;
     }
-    public Contact(IContact contact, ILogService? logger = null)
+    public Contact(IContact contact, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInitializing = true;
         CoreType = contact;
         Name = contact.Name ?? string.Empty;
         Email = contact.Email ?? string.Empty;
@@ -44,16 +50,8 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
         PhoneExtension = contact.PhoneExtension ?? string.Empty;
         PhoneExtensionDelimiter = contact.PhoneExtensionDelimiter;
         _logger?.LogInfo("Contact loaded from core type.");
-    }
-    public void Select()
-    {
-        IsSelected = true;
-        _logger?.LogInfo("Contact selected.");
-    }
-    public void Deselect()
-    {
-        IsSelected = false;
-        _logger?.LogInfo("Contact deselected.");
+        _isInitializing = false;
+        UpdateCore();
     }
 
     public string FullPhone
@@ -78,10 +76,6 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
             PhoneExtension = parts[1];
         _logger?.LogInfo($"Phone parsed: {Phone}, Extension: {PhoneExtension}");
     }
-    public bool IsBlank { get { return string.IsNullOrEmpty(Name) &&
-                                 string.IsNullOrEmpty(Email) &&
-                                 string.IsNullOrEmpty(Phone) &&
-                                 string.IsNullOrEmpty(PhoneExtension); } }
     partial void OnNameChanged(string value)
     {
         OnPropertyChanged(nameof(IsBlank));
@@ -153,6 +147,8 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
 
     internal void UpdateCore()
     {
+        if (_isInitializing) return;
+
         if (CoreType == null && Parent?.CoreType != null)
             CoreType = Parent.CoreType.Contacts.FirstOrDefault(c => c.Id == Id);
         if (CoreType == null) return;
@@ -162,6 +158,7 @@ public partial class Contact : ObservableObject, ISelectable, IBlankMaybe
         CoreType.PhoneExtension = PhoneExtension ?? string.Empty;
         CoreType.PhoneExtensionDelimiter = PhoneExtensionDelimiter ?? " ";
         Parent?.UpdateCore();
+        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Contact core updated.");
     }
 

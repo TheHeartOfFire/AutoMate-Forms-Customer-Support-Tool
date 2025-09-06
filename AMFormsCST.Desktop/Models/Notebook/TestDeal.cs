@@ -1,48 +1,41 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System;
+using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
-public partial class TestDeal : ObservableObject, IBlankMaybe, ISelectable
+public partial class TestDeal : ManagedObservableCollectionItem
 {
-    private readonly ILogService? _logger;
+    private bool _isInitializing;
 
     [ObservableProperty]
     private string? _dealNumber = string.Empty;
     [ObservableProperty]
     private string? _purpose = string.Empty;
-    public bool IsBlank { get {  return string.IsNullOrEmpty(DealNumber) && string.IsNullOrEmpty(Purpose); } }
-    public Guid Id { get; } = Guid.NewGuid();
-    [ObservableProperty]
-    private bool _isSelected = false;
+    public override bool IsBlank { get {  return string.IsNullOrEmpty(DealNumber) && string.IsNullOrEmpty(Purpose); } }
+    public override Guid Id { get; } = Guid.NewGuid();
     internal ITestDeal? CoreType { get; set; }
     internal Form? Parent { get; set; }
 
-    public void Select()
+    public TestDeal(ILogService? logger = null) : base(logger)
     {
-        IsSelected = true;
-        _logger?.LogInfo("TestDeal selected.");
-    }
-    public void Deselect()
-    {
-        IsSelected = false;
-        _logger?.LogInfo("TestDeal deselected.");
-    }
-    public TestDeal(ILogService? logger = null)
-    {
-        _logger = logger;
+        _isInitializing = true;
         _logger?.LogInfo("TestDeal initialized.");
+        _isInitializing = false;
     }
-    public TestDeal(ITestDeal testDeal, ILogService? logger = null)
+    public TestDeal(ITestDeal testDeal, ILogService? logger = null) : base(logger)
     {
-        _logger = logger;
+        _isInitializing = true;
         CoreType = testDeal;
         DealNumber = testDeal.DealNumber ?? string.Empty;
         Purpose = testDeal.Purpose ?? string.Empty;
         _logger?.LogInfo("TestDeal loaded from core type.");
+        _isInitializing = false;
+        UpdateCore();
     }
 
     partial void OnDealNumberChanged(string? value)
@@ -71,12 +64,15 @@ public partial class TestDeal : ObservableObject, IBlankMaybe, ISelectable
 
     internal void UpdateCore()
     {
+        if (_isInitializing) return;
+
         if (CoreType == null && Parent?.CoreType != null)
             CoreType = Parent.CoreType.TestDeals.FirstOrDefault(td => td.Id == Id);
         if (CoreType == null) return;
         CoreType.DealNumber = DealNumber ?? string.Empty;
         CoreType.Purpose = Purpose ?? string.Empty;
         Parent?.UpdateCore();
+        Parent?.Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("TestDeal core updated.");
     }
 

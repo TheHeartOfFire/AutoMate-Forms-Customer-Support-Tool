@@ -1,6 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,29 +13,26 @@ using System.Linq;
 
 namespace AMFormsCST.Desktop.Models
 {
-    public partial class Dealer : ObservableObject, ISelectable, IBlankMaybe
+    public partial class Dealer : ManagedObservableCollectionItem
     {
-        private readonly ILogService? _logger;
+        private bool _isInitializing;
 
         [ObservableProperty]
         private string? _name = string.Empty;
         [ObservableProperty]
         private string? _serverCode = string.Empty;
+        [ObservableProperty]
+        private bool _notable;
 
         public ManagedObservableCollection<Company> Companies { get; set; }
 
         internal NoteModel? Parent { get; set; }
         internal IDealer? CoreType { get; set; }
 
-        private Company? _selectedCompany = null;
-        public Company SelectedCompany
-        {
-            get => _selectedCompany;
-            set => SetProperty(ref _selectedCompany, value);
-        }
-        public Guid Id { get; } = Guid.NewGuid();
+        public Company? SelectedCompany => Companies.SelectedItem;
+        public override Guid Id { get; } = Guid.NewGuid();
 
-        public bool IsBlank
+        public override bool IsBlank
         {
             get
             {
@@ -46,45 +44,80 @@ namespace AMFormsCST.Desktop.Models
             }
         }
 
-        [ObservableProperty]
-        private bool _isSelected = false;
-        internal IDealer CoreTypeInstance = new Core.Types.Notebook.Dealer();
-        public void Select()
+        public Dealer(ILogService? logger = null) : base(logger)
         {
-            IsSelected = true;
-            _logger?.LogInfo("Dealer selected.");
-        }
-        public void Deselect()
-        {
-            IsSelected = false;
-            _logger?.LogInfo("Dealer deselected.");
-        }
+            _isInitializing = true;
+            CoreType = new Core.Types.Notebook.Dealer();
 
-        public Dealer(ILogService? logger = null)
-        {
-            _logger = logger;
-            Companies = new(() => new Company(_logger), _logger);
-            Companies.CollectionChanged += Companies_CollectionChanged;
-            foreach (var company in Companies) company.Parent = this;
-            SelectCompany(Companies.FirstOrDefault(x => !x.IsBlank));
+            InitCompanies();
+
+            Companies ??= new ManagedObservableCollection<Company>(
+                () => new Company(_logger),
+                null,
+                _logger
+            );
+
             _logger?.LogInfo("Dealer initialized.");
+            _isInitializing = false;
         }
 
-        public Dealer(IDealer dealer, ILogService? logger = null)
+        public Dealer(IDealer dealer, ILogService? logger = null) : base(logger)
         {
-            _logger = logger;
+            _isInitializing = true;
             CoreType = dealer;
-            Companies = new(() => new Company(_logger), _logger);
-            foreach (var c in dealer.Companies)
-            {
-                var company = new Company(c, _logger) { Parent = this };
-                Companies.Add(company);
-            }
-            Companies.CollectionChanged += Companies_CollectionChanged;
-            SelectCompany(Companies.FirstOrDefault(x => !x.IsBlank));
+
+            InitCompanies();
+
+            Companies ??= new ManagedObservableCollection<Company>(
+                () => new Company(_logger),
+                null,
+                _logger
+            );
+
             ServerCode = dealer.ServerCode;
             Name = dealer.Name;
+            Notable = dealer.Notable;
             _logger?.LogInfo("Dealer loaded from core type.");
+            _isInitializing = false;
+            UpdateCore();
+        }
+
+        private void InitCompanies()
+        {
+            var companies = CoreType?.Companies.ToList()
+                    .Select(coreCompany =>
+                    {
+                        var company = new Company(coreCompany, _logger)
+                        {
+                            CoreType = coreCompany,
+                            Parent = this
+                        };
+                        company.PropertyChanged += OnCompanyPropertyChanged;
+                        return company;
+                    });
+
+            Companies = new ManagedObservableCollection<Company>(
+                () => new Company(_logger),
+                companies,
+                _logger
+            );
+            Companies.PropertyChanged += OnCompaniesPropertyChanged;
+            Companies.CollectionChanged += Companies_CollectionChanged;
+            Companies.FirstOrDefault()?.Select();
+        }
+
+        private void OnCompaniesPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ManagedObservableCollection<Company>.SelectedItem))
+            {
+                OnPropertyChanged(nameof(SelectedCompany));
+            }
+        }
+
+        private void OnCompanyPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // This handler is for property changes on individual Company items.
+            // It can be kept for future use or removed if not needed.
         }
 
         private void Companies_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -93,15 +126,6 @@ namespace AMFormsCST.Desktop.Models
                 foreach (Company c in e.NewItems) c.Parent = this;
             UpdateCore();
             _logger?.LogDebug("Companies collection changed.");
-        }
-
-        public void SelectCompany(ISelectable selectedCompany)
-        {
-            if (selectedCompany is null) return;
-            foreach (var company in Companies) company.Deselect();
-            SelectedCompany = Companies.FirstOrDefault(c => c.Id == selectedCompany.Id);
-            SelectedCompany?.Select();
-            _logger?.LogInfo($"Company selected: {SelectedCompany?.Id}");
         }
 
         partial void OnNameChanged(string? value)
@@ -129,17 +153,36 @@ namespace AMFormsCST.Desktop.Models
             }
         }
 
+        partial void OnNotableChanged(bool value)
+        {
+            UpdateCore();
+            using (LogContext.PushProperty("DealerId", Id))
+            using (LogContext.PushProperty("Notable", value))
+            {
+                _logger?.LogInfo($"Dealer notable changed: {value}");
+            }
+        }
+
         internal void UpdateCore()
         {
+            if (_isInitializing) return;
+
             if (CoreType == null && Parent?.CoreType != null)
                 CoreType = Parent.CoreType.Dealers.FirstOrDefault(d => d.Id == Id);
             if (CoreType == null) return;
             CoreType.Name = Name ?? string.Empty;
             CoreType.ServerCode = ServerCode ?? string.Empty;
+            CoreType.Notable = Notable;
             CoreType.Companies.Clear();
             CoreType.Companies.AddRange(Companies.Select(c => (Core.Types.Notebook.Company)c));
             Parent?.UpdateCore();
+            Parent?.RaiseChildPropertyChanged();
             _logger?.LogDebug("Dealer core updated.");
+        }
+
+        internal void RaiseChildPropertyChanged()
+        {
+            Parent?.RaiseChildPropertyChanged();
         }
 
         public static implicit operator Core.Types.Notebook.Dealer(Dealer dealer)
@@ -149,6 +192,7 @@ namespace AMFormsCST.Desktop.Models
             {
                 Name = dealer.Name ?? string.Empty,
                 ServerCode = dealer.ServerCode ?? string.Empty,
+                Notable = dealer.Notable,
                 Companies = [..dealer.Companies.Select(c => (Core.Types.Notebook.Company)c)]
             };
         }

@@ -9,29 +9,31 @@ using System.Linq;
 
 namespace AMFormsCST.Desktop.Types;
 
-public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPropertyChanged
-    where T : class, IBlankMaybe, INotifyPropertyChanged
+public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPropertyChanged, IManagedObservableCollection 
+    where T : class, IManagedObservableCollectionItem
 {
     private readonly Func<T> _blankFactory;
+    private readonly Action<T>? _postCreationAction;
     private T? _selectedItem;
     private bool _isEnsuringBlank = false;
+    private bool _suppressBlankEnforcement = false;
     private readonly ILogService? _logger;
+    public event EventHandler<GuidEventArgs>? SelectionChanged;
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        PropertyChanged?.Invoke(this, e);
+    }
 
     public T? SelectedItem
     {
         get => _selectedItem;
-        set
-        {
-            if (!Equals(_selectedItem, value))
-            {
-                _selectedItem = value;
-                OnPropertyChanged(new PropertyChangedEventArgs(nameof(SelectedItem)));
-                _logger?.LogInfo($"SelectedItem changed: {value}");
-            }
-        }
     }
 
-    public ManagedObservableCollection(Func<T> blankFactory, ILogService? logger = null)
+    public ManagedObservableCollection(Func<T> blankFactory, IEnumerable<T>? initialItems = null, ILogService? logger = null, Action<T>? postCreationAction = null)
     {
         _logger = logger;
         if (blankFactory == null)
@@ -40,23 +42,52 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
             throw new ArgumentNullException(nameof(blankFactory));
         }
         _blankFactory = blankFactory;
+        _postCreationAction = postCreationAction;
         CollectionChanged += OnCollectionChanged;
         _logger?.LogInfo($"ManagedObservableCollection<{typeof(T)}> initialized.");
+
+        if (initialItems != null)
+        {
+            _suppressBlankEnforcement = true;
+            foreach (var item in initialItems)
+            {
+                base.Add(item);
+            }
+            _suppressBlankEnforcement = false;
+            EnsureSingleBlank();
+            this.FirstOrDefault()?.Select();
+        }
     }
 
     protected override void InsertItem(int index, T item)
     {
         base.InsertItem(index, item);
         item.PropertyChanged += OnItemPropertyChanged;
-        EnsureSingleBlank();
+        item.Selected += OnSelectionChanged;
+        
+            item.OnAddedToCollection(this);
+        if (!_suppressBlankEnforcement)
+            EnsureSingleBlank();
         UpdateSelectionAfterChange();
         _logger?.LogDebug($"Item inserted at {index}: {item}");
+    }
+
+    private void OnSelectionChanged(object? sender, GuidEventArgs e)
+    {
+        _selectedItem = this.FirstOrDefault(i => i.Id == e.Value);
+        OnPropertyChanged(new PropertyChangedEventArgs(nameof(SelectedItem)));
+        SelectionChanged?.Invoke(this, e);
+        _logger?.LogInfo($"SelectedItem changed: {e.Value}");
     }
 
     protected override void RemoveItem(int index)
     {
         var item = this[index];
         item.PropertyChanged -= OnItemPropertyChanged;
+        item.Selected -= OnSelectionChanged;
+
+        item.OnRemovedFromCollection();
+
         base.RemoveItem(index);
         EnsureSingleBlank();
         UpdateSelectionAfterChange(item);
@@ -69,13 +100,14 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
             item.PropertyChanged -= OnItemPropertyChanged;
         base.ClearItems();
         EnsureSingleBlank();
-        SelectedItem = this.FirstOrDefault(x => !x.IsBlank);
+        this.FirstOrDefault()?.Select();
         _logger?.LogInfo("Collection cleared.");
     }
 
     private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        EnsureSingleBlank();
+        if (!_suppressBlankEnforcement)
+            EnsureSingleBlank();
         UpdateSelectionAfterChange();
         _logger?.LogDebug($"Collection changed: {e.Action}");
     }
@@ -87,6 +119,7 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
             EnsureSingleBlank();
     }
 
+
     private void EnsureSingleBlank()
     {
         if (_isEnsuringBlank) return;
@@ -96,10 +129,10 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
             var blankItems = this.Where(x => x.IsBlank).ToList();
             foreach (var extra in blankItems.Skip(1).ToList())
             {
-                _logger?.LogDebug($"Removing extra blank: {(extra is NoteModel nm ? nm.Id : extra)}");
+                _logger?.LogDebug($"Removing extra blank: {(extra is NoteModel nm ? nm.Id : extra)}, CoreID: {(extra is NoteModel nnm ? nnm.CoreType?.Id : extra)}");
                 base.Remove(extra);
             }
-            if (!blankItems.Any())
+            if (blankItems.Count == 0)
             {
                 if (_blankFactory == null)
                 {
@@ -107,19 +140,11 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
                     throw new InvalidOperationException("Blank factory is null.");
                 }
                 var newBlank = _blankFactory();
+                _postCreationAction?.Invoke(newBlank);
                 _logger?.LogDebug("Adding blank item");
                 base.Add(newBlank);
             }
-            else
-            {
-                var blank = blankItems.First();
-                var idx = IndexOf(blank);
-                if (idx != Count - 1)
-                {
-                    _logger?.LogDebug($"Moving blank item from {idx} to {Count - 1}");
-                    base.Move(idx, Count - 1);
-                }
-            }
+            // Do not move the blank item
         }
         catch (Exception ex)
         {
@@ -133,14 +158,13 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
 
     private void UpdateSelectionAfterChange(T? removedItem = null)
     {
-        // If selected item was removed or is blank, select first non-blank item
+        // Only update selection if selected item was removed
         if (removedItem != null && Equals(_selectedItem, removedItem))
-            SelectedItem = this.FirstOrDefault(x => !x.IsBlank);
-        else if (_selectedItem == null || !_selectedItem.IsBlank && !this.Contains(_selectedItem))
-            SelectedItem = this.FirstOrDefault(x => !x.IsBlank);
-        else if (_selectedItem != null && _selectedItem.IsBlank)
-            SelectedItem = this.FirstOrDefault(x => !x.IsBlank);
-
+        {
+            // Select first item if available
+            this.FirstOrDefault()?.Select();
+        }
+        // Do not override selection to first non-blank, just keep current selection if possible
         _logger?.LogDebug("Selection updated after collection change.");
     }
 }

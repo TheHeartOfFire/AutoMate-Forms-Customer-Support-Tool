@@ -21,10 +21,19 @@ public partial class FormNameGeneratorViewModel : ViewModel
         get => _isPdfSelected;
         set
         {
-            if (SetProperty(ref _isPdfSelected, value) && value)
+            if (SetProperty(ref _isPdfSelected, value))
             {
-                Form.AddTag(Form.Tag.Pdf);
-                IsImpactSelected = false;
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Pdf);
+                    Form.RemoveTag(Form.Tag.Impact);
+                    IsImpactSelected = false;
+                }
+                // If IsPdfSelected is set to false, IsImpactSelected must be true to maintain a selection.
+                else if (!IsImpactSelected)
+                {
+                    IsImpactSelected = true;
+                }
             }
         }
     }
@@ -35,10 +44,19 @@ public partial class FormNameGeneratorViewModel : ViewModel
         get => _isImpactSelected;
         set
         {
-            if (SetProperty(ref _isImpactSelected, value) && value)
+            if (SetProperty(ref _isImpactSelected, value))
             {
-                Form.AddTag(Form.Tag.Impact);
-                IsPdfSelected = false;
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Impact);
+                    Form.RemoveTag(Form.Tag.Pdf);
+                    IsPdfSelected = false;
+                }
+                // If IsImpactSelected is set to false, IsPdfSelected must be true to maintain a selection.
+                else if (!IsPdfSelected)
+                {
+                    IsPdfSelected = true;
+                }
             }
         }
     }

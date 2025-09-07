@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
+using System.Xml;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
@@ -62,14 +64,94 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [ObservableProperty]
     private bool _isBusy;
 
-    public bool HasChanged => _supportTool.FormgenUtils.HasChanged || _backupLoaded;
+    public bool HasChanged => _supportTool?.FormgenUtils.HasChanged == true || _backupLoaded;
 
     public bool IsFileLoaded => !string.IsNullOrEmpty(FilePath);
     private bool _backupLoaded = false;
 
-    private readonly ISupportTool _supportTool;
+    private readonly ISupportTool? _supportTool;
     private readonly IDialogService _dialogService;
     private readonly IFileSystem _fileSystem;
+
+    #region Design Time Constructor
+    public FormgenUtilitiesViewModel()
+    {
+        _dialogService = new DesignTimeDialogService();
+        _fileSystem = new DesignTimeFileSystem();
+        IsImageFound = true;
+        ShouldRenameImage = true;
+
+        var xmlDoc = new XmlDocument();
+        string xmlString;
+
+        try
+        {
+            // The resource name is the project's default namespace + the file's path with '.' separators.
+            // Spaces in the path are replaced with underscores.
+            // If this fails, run the app with debug code to list all resource names and find the correct one.
+            var resourceName = "AMFormsCST.Desktop.SampleData.Formgen_Sample_Data.Pdf_Sample.Sample Pdf.formgen";
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+
+            if (stream == null)
+                throw new FileNotFoundException("Design-time resource not found. Verify the file's 'Build Action' is 'Embedded resource' and the resource name is correct.", resourceName);
+
+            using var reader = new StreamReader(stream);
+            xmlString = reader.ReadToEnd();
+            xmlDoc.LoadXml(xmlString);
+        }
+        catch (Exception ex)
+        {
+            // Fallback to a minimal valid XML to prevent the designer from crashing
+            // if the resource can't be found or fails to parse.
+
+            var resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+
+            var fallbackUuid = Guid.NewGuid().ToString();
+            string errorMessage = ex is FileNotFoundException
+                ? "Sample resource file not found. Check Build Action and resource name."
+                : $"Error loading sample: {ex.Message}";
+
+            xmlString = $@"
+<formDef version=""4"" publishedUUID=""{fallbackUuid}"" legacyImport=""false"" totalPages=""1"" defaultPoints=""10"" missingSourceJpeg=""false"" duplex=""false"" maxAccessoryLines=""3"" prePrintedLaserForm=""false"">
+  <pages pageNumber=""1"" defaultPoints=""10"" leftPrinterMargin=""18"" rightPrinterMargin=""18"" topPrinterMargin=""18"" bottomPrinterMargin=""18"">
+    <fields>
+      <entry>
+        <key>1</key>
+        <value uniqueId=""1"" formFieldType=""TEXT"" legacyCol=""0"" legacyLine=""0"" x=""10"" y=""10"" w=""100"" h=""20"" manualSize=""false"" fontPoints=""10"" boldFont=""false"" shrinkFontToFit=""false"" pictureLeft=""10"" pictureRight=""0"" displayPartialField=""false"" startChar=""0"" endChar=""0"" perCharDeltaPts=""0"" alignment=""Left"">
+          <expression>'SampleField'</expression>
+          <sampleData>Sample</sampleData>
+          <formatOption>None</formatOption>
+        </value>
+      </entry>
+    </fields>
+  </pages>
+  <title>{errorMessage}</title>
+  <formPrintType>Pdf</formPrintType>
+  <codeLines order=""0"" type=""PROMPT"" destVariable=""F0"">
+    <promptData type=""InstructionLine"" promptIsExpression=""false"" required=""false"" leftSize=""0"" rightSize=""0"" choicesDelimiter=""0"" allowNegatives=""false"" forceUpperCase=""false"" makeBuyerVars=""false"" includeNoneAsOption=""false"">
+      <promptMessage>Could not load sample file.</promptMessage>
+    </promptData>
+  </codeLines>
+</formDef>";
+            xmlDoc.LoadXml(xmlString);
+        }
+
+        var xmlElement = xmlDoc.DocumentElement!;
+        var sampleFormgen = new DotFormgen(xmlElement);
+
+        // Update VM properties from the loaded sample data
+        FilePath = @"C:\SampleData\Sample Pdf.formgen";
+        FormTitle = sampleFormgen.Title ?? "Sample Form";
+        Uuid = sampleFormgen.Settings.UUID;
+
+        var rootNode = new TreeItemNodeViewModel(sampleFormgen, this, null);
+        TreeViewNodes.Add(rootNode);
+
+        rootNode.IsSelected = true;
+        rootNode.IsExpanded = true;
+    }
+    #endregion
 
     public FormgenUtilitiesViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, ILogService? logger = null)
     {
@@ -99,7 +181,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [RelayCommand]
     private void SaveFormgenFile()
     {
-        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile is null || !HasChanged) return;
+        if (!IsFileLoaded || _supportTool?.FormgenUtils.ParsedFormgenFile is null || !HasChanged) return;
 
         IsBusy = true;
         try
@@ -141,7 +223,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     [RelayCommand]
     private void LoadBackup()
     {
-        if (!IsFileLoaded || _supportTool.FormgenUtils.ParsedFormgenFile?.Settings.UUID is null) return;
+        if (!IsFileLoaded || _supportTool?.FormgenUtils.ParsedFormgenFile?.Settings.UUID is null) return;
 
         var backupDir = _fileSystem.CombinePath(AMFormsCST.Core.IO.BackupPath, _supportTool.FormgenUtils.ParsedFormgenFile.Settings.UUID);
         var filter = "Backup Files (*.bak)|*.bak|All files (*.*)|*.*";
@@ -167,7 +249,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         TreeViewNodes.Clear();
         SelectedNode = null;
         SelectedNodeProperties = null;
-        _supportTool.FormgenUtils.CloseFile();
+        _supportTool?.FormgenUtils.CloseFile();
         _logger?.LogInfo("Formgen file cleared.");
     }
 
@@ -181,7 +263,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
     private void LoadFileContent(string? filePath = null)
     {
-        if (!IsFileLoaded) return;
+        if (!IsFileLoaded || _supportTool is null) return;
 
         IsBusy = true;
         TreeViewNodes.Clear();
@@ -228,6 +310,12 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
     private void UpdateSelectedNodeProperties()
     {
+        if (SelectedNode is null)
+        {
+            SelectedNodeProperties = null;
+            return;
+        }
+
         IFormgenFileProperties? properties = SelectedNode?.Data switch
         {
             DotFormgen formgenFile => new FormProperties(formgenFile, _logger),
@@ -240,7 +328,12 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             _ => null
         };
 
-        if (properties is null) return;
+        if (properties is null)
+        {
+            SelectedNodeProperties = null;
+            _logger?.LogDebug("Selected node has no properties to display.");
+            return;
+        }
 
         var readOnlyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -249,7 +342,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
         var displayProps = new List<DisplayProperty>();
 
-        foreach (var p in properties.GetType().GetProperties().Where(p => p.GetMethod != null))
+        foreach (var p in properties.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null))
         {
             if (p.Name.Equals("Settings") || p.Name.Equals("PromptData")) continue;
 
@@ -259,7 +352,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
         if (properties.Settings != null)
         {
-            foreach (var p in properties.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
+            foreach (var p in properties.Settings.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null))
             {
                 bool isReadOnly = readOnlyNames.Contains(p.Name) || !p.CanWrite;
                 displayProps.Add(new DisplayProperty(properties.Settings, p, isReadOnly, _logger));
@@ -268,15 +361,18 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
         if (properties is CodeLineProperties props && props.PromptData is not null)
         {
-            foreach (var p in props.PromptData.GetType().GetProperties().Where(p => p.GetMethod != null))
+            foreach (var p in props.PromptData.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null))
             {
                 if (p.Name.Equals("Settings")) continue;
                 displayProps.Add(new DisplayProperty(props.PromptData, p, false, _logger));
             }
 
-            foreach (var p in props.PromptData.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
+            if (props.PromptData.Settings != null)
             {
-                displayProps.Add(new DisplayProperty(props.PromptData.Settings, p, false, _logger));
+                foreach (var p in props.PromptData.Settings.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null))
+                {
+                    displayProps.Add(new DisplayProperty(props.PromptData.Settings, p, false, _logger));
+                }
             }
         }
 

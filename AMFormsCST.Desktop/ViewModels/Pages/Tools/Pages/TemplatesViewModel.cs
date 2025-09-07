@@ -2,6 +2,7 @@
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models.Templates;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 using AMFormsCST.Desktop.Views.Dialogs;
@@ -43,6 +44,19 @@ public partial class TemplatesViewModel : ViewModel
         }
         _logger?.LogInfo($"TemplatesViewModel initialized with {_templates.Count} templates.");
     }
+    #region Design-Time Constructor
+    public TemplatesViewModel()
+    {
+        _supportTool = new DesignTimeSupportTool();
+        _fileSystem = new DesignTimeFileSystem();
+        _templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool)));
+
+        if (_templates.Any())
+        {
+            SelectTemplate(_templates.First());
+        }
+    }
+    #endregion
 
     [RelayCommand]
     private void AddTemplate()

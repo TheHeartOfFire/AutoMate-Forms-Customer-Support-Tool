@@ -1,144 +1,150 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Models.FormNameGenerator;
+using AMFormsCST.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
+
 public partial class FormNameGeneratorViewModel : ViewModel
 {
-    private readonly ILogService? _logger;
+    private readonly ISupportTool _supportTool;
 
     [ObservableProperty]
     private Form _form;
-    [ObservableProperty]
+
+    #region Toggle Properties
     private bool _isPdfSelected;
-    partial void OnIsPdfSelectedChanged(bool value)
+    public bool IsPdfSelected
     {
-        if (value)
+        get => _isPdfSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Pdf);
-            _logger?.LogInfo("PDF tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Pdf);
-            _logger?.LogInfo("PDF tag removed.");
+            if (SetProperty(ref _isPdfSelected, value) && value)
+            {
+                Form.AddTag(Form.Tag.Pdf);
+                IsImpactSelected = false;
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isImpactSelected;
-    partial void OnIsImpactSelectedChanged(bool value)
+    public bool IsImpactSelected
     {
-        if (value)
+        get => _isImpactSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Impact);
-            _logger?.LogInfo("Impact tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Impact);
-            _logger?.LogInfo("Impact tag removed.");
+            if (SetProperty(ref _isImpactSelected, value) && value)
+            {
+                Form.AddTag(Form.Tag.Impact);
+                IsPdfSelected = false;
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isSoldSelected;
-    partial void OnIsSoldSelectedChanged(bool value)
+    public bool IsSoldSelected
     {
-        if (value)
+        get => _isSoldSelected;
+        set
         {
-            IsTradeSelected = false;
-            Form.AddTag(Form.Tag.Sold);
-            _logger?.LogInfo("Sold tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Sold);
-            _logger?.LogInfo("Sold tag removed.");
+            if (SetProperty(ref _isSoldSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Sold);
+                    IsTradeSelected = false;
+                }
+                else
+                {
+                    Form.RemoveTag(Form.Tag.Sold);
+                }
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isTradeSelected;
-    partial void OnIsTradeSelectedChanged(bool value)
+    public bool IsTradeSelected
     {
-        if (value)
+        get => _isTradeSelected;
+        set
         {
-            IsSoldSelected = false;
-            Form.AddTag(Form.Tag.Trade);
-            _logger?.LogInfo("Trade tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Trade);
-            _logger?.LogInfo("Trade tag removed.");
+            if (SetProperty(ref _isTradeSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Trade);
+                    IsSoldSelected = false;
+                }
+                else
+                {
+                    Form.RemoveTag(Form.Tag.Trade);
+                }
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isLawSelected;
-    partial void OnIsLawSelectedChanged(bool value)
+    public bool IsLawSelected
     {
-        if (value)
+        get => _isLawSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Law);
-            _logger?.LogInfo("Law tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Law);
-            _logger?.LogInfo("Law tag removed.");
+            if (SetProperty(ref _isLawSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.Law); else Form.RemoveTag(Form.Tag.Law);
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isCustomSelected;
-    partial void OnIsCustomSelectedChanged(bool value)
+    public bool IsCustomSelected
     {
-        if (value)
+        get => _isCustomSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Custom);
-            _logger?.LogInfo("Custom tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Custom);
-            _logger?.LogInfo("Custom tag removed.");
+            if (SetProperty(ref _isCustomSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.Custom); else Form.RemoveTag(Form.Tag.Custom);
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isVehicleMerchandisingSelected;
-    partial void OnIsVehicleMerchandisingSelectedChanged(bool value)
+    public bool IsVehicleMerchandisingSelected
     {
-        if (value)
+        get => _isVehicleMerchandisingSelected;
+        set
         {
-            Form.AddTag(Form.Tag.VehicleMerchandising);
-            _logger?.LogInfo("VehicleMerchandising tag added.");
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.VehicleMerchandising);
-            _logger?.LogInfo("VehicleMerchandising tag removed.");
+            if (SetProperty(ref _isVehicleMerchandisingSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.VehicleMerchandising); else Form.RemoveTag(Form.Tag.VehicleMerchandising);
+            }
         }
     }
+    #endregion
 
-    private readonly ISupportTool _supportTool;
-
-    public FormNameGeneratorViewModel(ISupportTool supportTool, ILogService? logger = null)
+    public FormNameGeneratorViewModel(ISupportTool supportTool)
     {
-        _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
-        _logger = logger;
-        _form = new Form(_supportTool, _logger);
-        _isPdfSelected = true;
-        _logger?.LogInfo("FormNameGeneratorViewModel initialized.");
+        _supportTool = supportTool;
+        _form = new Form(_supportTool);
+        ResetForm();
+    }
+
+    // Design-time constructor
+    public FormNameGeneratorViewModel()
+    {
+        _supportTool = new DesignTimeSupportTool();
+        _form = new Form(_supportTool)
+        {
+            Title = "Retail Installment Contract",
+            Code = "553-TX-eps",
+            RevisionDate = "01/24",
+            State = "TX"
+        };
+        IsPdfSelected = true;
+        IsLawSelected = true;
     }
 
     [RelayCommand]
@@ -146,27 +152,16 @@ public partial class FormNameGeneratorViewModel : ViewModel
     {
         if (!string.IsNullOrEmpty(Form.FileName))
         {
-            try
-            {
-                Clipboard.SetText(Form.FileName);
-                _logger?.LogInfo($"Form file name copied: {Form.FileName}");
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError("Error copying form file name to clipboard.", ex);
-            }
-        }
-        else
-        {
-            _logger?.LogWarning("CopyFileName called but file name is empty.");
+            Clipboard.SetText(Form.FileName);
         }
     }
 
     [RelayCommand]
-    private void ClearForm()
+    private void ClearForm() => ResetForm();
+
+    private void ResetForm()
     {
         Form.Clear();
-
         IsPdfSelected = true;
         IsImpactSelected = false;
         IsSoldSelected = false;
@@ -174,6 +169,5 @@ public partial class FormNameGeneratorViewModel : ViewModel
         IsLawSelected = false;
         IsCustomSelected = false;
         IsVehicleMerchandisingSelected = false;
-        _logger?.LogInfo("Form cleared and UI reset.");
     }
 }

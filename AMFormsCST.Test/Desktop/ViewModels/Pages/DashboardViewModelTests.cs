@@ -496,15 +496,15 @@ Web Browser: 11
         "12459417", "Susan Jones", "Generic Form Issue\r\nA field is not printing correctly on the form.\r\nAlso, another field should be blank.\r\nPlease assist.", "susan.jones@genericauto.com", "5555551212", "Generic Auto Mall", "3", "M450"
 )]
     public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
-string caseText,
-string expectedCaseNumber,
-string expectedContactName,
-string expectedNotes,
-string expectedEmail,
-string expectedPhone,
-string expectedCompanyName,
-string expectedCompanyNumber,
-string expectedServerId)
+                string caseText,
+                string expectedCaseNumber,
+                string expectedContactName,
+                string expectedNotes,
+                string expectedEmail,
+                string expectedPhone,
+                string expectedCompanyName,
+                string expectedCompanyNumber,
+                string expectedServerId)
     {
         // Arrange
         var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);

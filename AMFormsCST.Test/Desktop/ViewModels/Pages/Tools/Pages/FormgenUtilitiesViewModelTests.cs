@@ -108,4 +108,14 @@ public class FormgenUtilitiesViewModelTests
         Assert.Empty(viewModel.TreeViewNodes);
         Assert.Null(viewModel.SelectedNode);
     }
+    [Fact]
+    public void DesignTimeDataTesting()
+    {
+        // Arrange
+        var vm = new FormgenUtilitiesViewModel();
+        // Act
+
+        // Assert
+        Assert.Null(vm);
+    }
 }

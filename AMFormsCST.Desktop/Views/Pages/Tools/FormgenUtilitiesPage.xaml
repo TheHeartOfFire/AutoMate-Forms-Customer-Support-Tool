@@ -12,8 +12,9 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools"
     d:DataContext="{d:DesignInstance Type=viewModels:FormgenUtilitiesViewModel,
-                                     IsDesignTimeCreatable=False}"
-    mc:Ignorable="d" MinWidth="1100" MinHeight="500">
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d" MinWidth="1100" MinHeight="500"
+    Title="FormgenUtilitiesPage">
 
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

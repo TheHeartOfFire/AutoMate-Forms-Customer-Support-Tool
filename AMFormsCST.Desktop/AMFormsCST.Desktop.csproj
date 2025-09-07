@@ -27,6 +27,7 @@
     <None Remove="Assets\amlogo.png" />
     <None Remove="Assets\Solera_Logo_Full.png" />
     <None Remove="Assets\Solera_Logo_Symbol_Only.png" />
+    <None Remove="SampleData\Formgen Sample Data\Pdf Sample\Sample Pdf.formgen" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,16 +38,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SampleData\Formgen Sample Data\Pdf Sample\Sample Pdf.formgen">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Lepo.i18n" Version="2.0.0" />
     <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
+    <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="22.0.15" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="22.0.15" />
     <PackageReference Include="System.ObjectModel" Version="4.3.0" />
     <PackageReference Include="Velopack" Version="0.0.1350-g3ba32af" />
     <PackageReference Include="WPF-UI" Version="4.0.2" />

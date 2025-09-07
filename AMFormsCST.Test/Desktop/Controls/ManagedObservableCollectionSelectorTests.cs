@@ -7,13 +7,13 @@ using Xunit;
 
 namespace AMFormsCST.Test.Desktop.Controls;
 [Collection("STA Tests")]
-public class HorizontalRadioButtonsTests
+public class ManagedObservableCollectionSelectorTests
 {
     [WpfFact]
     public void ItemsSource_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
         var items = new[] { "A", "B", "C" };
 
         // Act
@@ -27,7 +27,7 @@ public class HorizontalRadioButtonsTests
     public void RadioButtonCommand_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
         var commandMock = new Mock<ICommand>();
 
         // Act
@@ -41,7 +41,7 @@ public class HorizontalRadioButtonsTests
     public void CommandParameterPath_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
 
         // Act
         control.CommandParameterPath = "Id";
@@ -54,7 +54,7 @@ public class HorizontalRadioButtonsTests
     public void ContentBindingPath_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
 
         // Act
         control.ContentBindingPath = "Name";
@@ -67,7 +67,7 @@ public class HorizontalRadioButtonsTests
     public void ContentFallbackValue_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
 
         // Act
         control.ContentFallbackValue = "Fallback";
@@ -80,7 +80,7 @@ public class HorizontalRadioButtonsTests
     public void GroupName_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
 
         // Act
         control.GroupName = "Group1";
@@ -93,7 +93,7 @@ public class HorizontalRadioButtonsTests
     public void RefreshTrigger_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
         var trigger = new object();
 
         // Act
@@ -107,7 +107,7 @@ public class HorizontalRadioButtonsTests
     public void DeleteCommand_Property_SetAndGet_Works()
     {
         // Arrange
-        var control = new HorizontalRadioButtons();
+        var control = new ManagedObservableCollectionSelector();
         var commandMock = new Mock<ICommand>();
 
         // Act

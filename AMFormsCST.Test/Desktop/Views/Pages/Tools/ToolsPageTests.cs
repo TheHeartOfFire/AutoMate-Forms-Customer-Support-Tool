@@ -1,14 +1,13 @@
-using AMFormsCST.Desktop.Views.Pages.Tools;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
-using AMFormsCST.Desktop.Services;
-using Moq;
-using System.Windows;
-using Xunit;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 using AMFormsCST.Test.Helpers;
+using Moq;
+using Wpf.Ui;
+using Xunit;
 
 namespace AMFormsCST.Test.Desktop.Views.Pages.Tools;
+
 [Collection("STA Tests")]
 public class ToolsPageTests
 {
@@ -16,14 +15,20 @@ public class ToolsPageTests
     public void Constructor_SetsViewModelAndDataContext()
     {
         // Arrange
-        var vmMock = new Mock<ToolsViewModel>();
-        var navServiceMock = new Mock<INavigationService>();
+        // 1. Mock the dependencies needed by the ToolsViewModel.
+        var mockNavService = new Mock<INavigationService>();
+
+        // 2. Instantiate the ToolsViewModel with its required dependencies.
+        // The ILogService is optional and not needed for this test.
+        var viewModel = new ToolsViewModel();
 
         // Act
-        var page = new ToolsPage(vmMock.Object, navServiceMock.Object);
+        // 3. Create the ToolsPage with the real ViewModel instance.
+        var page = new ToolsPage(viewModel, mockNavService.Object);
 
         // Assert
-        Assert.Equal(vmMock.Object, page.ViewModel);
+        // 4. Verify that the page's ViewModel and DataContext are correctly set.
+        Assert.Equal(viewModel, page.ViewModel);
         Assert.Equal(page, page.DataContext);
     }
 }

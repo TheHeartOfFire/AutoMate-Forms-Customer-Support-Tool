@@ -2,6 +2,7 @@
 using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models;
+using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -55,13 +56,16 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
     }
 
     private readonly ISupportTool _supportTool;
-    public TemplateItemViewModel(TextTemplate template, ISupportTool supportTool)
+    private readonly ILogService? _logger;
+
+    public TemplateItemViewModel(TextTemplate template, ISupportTool supportTool, ILogService? logger = null)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _template = template;
+        _logger = logger;
         _variables = new ObservableCollection<TemplateVariableViewModel>(
             template.GetVariables(_supportTool)
-                    .Select(variable => new TemplateVariableViewModel(variable) { Variable = variable }));
+                    .Select(variable => new TemplateVariableViewModel(variable, _logger) { Variable = variable }));
 
         // Initial subscription for existing variables
         foreach (var variable in Variables)
@@ -69,6 +73,7 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
             variable.PropertyChanged += OnVariablePropertyChanged;
         }
         Variables.CollectionChanged += OnVariablesCollectionChanged;
+        _logger?.LogInfo($"TemplateItemViewModel initialized: Template='{template.Name}'");
     }
 
     public string Output
@@ -79,7 +84,9 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
             var variables = preprocessedTemplate.variables.Select(v => v.variable).ToList();
             var values = Variables.Select(v => v.Value).ToList();
 
-            return TextTemplate.Process(preprocessedTemplate.processedText, variables, values) ?? string.Empty;
+            var result = TextTemplate.Process(preprocessedTemplate.processedText, variables, values) ?? string.Empty;
+            _logger?.LogDebug($"TemplateItemViewModel Output generated for '{Template.Name}': {result}");
+            return result;
         }
     }
 
@@ -94,7 +101,8 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
     {
         if (e.PropertyName == nameof(TemplateVariableViewModel.Value))
         {
-            OnPropertyChanged(nameof(Output)); 
+            OnPropertyChanged(nameof(Output));
+            _logger?.LogDebug($"Variable value changed in TemplateItemViewModel '{Template.Name}'. Output updated.");
         }
     }
 
@@ -116,10 +124,11 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
             }
         }
 
-        OnPropertyChanged(nameof(Output)); 
+        OnPropertyChanged(nameof(Output));
+        _logger?.LogDebug($"Variables collection changed in TemplateItemViewModel '{Template.Name}'. Output updated.");
     }
 
-    private (string processedText, List<(int position, ITextTemplateVariable variable, string alias)> variables)  PreProcessTemplate(string templateText)
+    private (string processedText, List<(int position, ITextTemplateVariable variable, string alias)> variables) PreProcessTemplate(string templateText)
     {
         if (string.IsNullOrEmpty(templateText))
         {
@@ -133,14 +142,13 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
         while (TextTemplate.ContainsVariable(processedText, _supportTool))
         {
             var variable = TextTemplate.GetFirstVariable(processedText, _supportTool);
-            
-            if(variable.variable == null) break;
-            
+
+            if (variable.variable == null) break;
+
             variables.Add((variable.position, variable.variable, variable.alias));
 
             processedText = processedText.Replace(variable.alias, $"{{{counter}}}");
             counter++;
-
         }
 
         return (processedText, variables);
@@ -156,11 +164,9 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
         // Create new TemplateVariableViewModels for the updated template content
         var newVariables = new ObservableCollection<TemplateVariableViewModel>(
             preprocessedTemplate.variables
-                .Select(variable => new TemplateVariableViewModel(variable.variable) { Variable = variable.variable }));
+                .Select(variable => new TemplateVariableViewModel(variable.variable, _logger) { Variable = variable.variable }));
 
         // Update the existing Variables collection.
-        // Instead of directly assigning, use Clear() and AddRange() for better ObservableCollection notification
-        // if you have an AddRange extension, or loop through.
         Variables.Clear();
         foreach (var v in newVariables)
         {
@@ -169,16 +175,19 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
 
         // After updating variables, explicitly notify Output to re-evaluate
         OnPropertyChanged(nameof(Output));
+        _logger?.LogInfo($"TemplateItemViewModel '{Template.Name}' data refreshed.");
     }
 
     public void Select()
     {
         IsSelected = true;
+        _logger?.LogDebug($"TemplateItemViewModel '{Template.Name}' selected.");
     }
 
     public void Deselect()
     {
         IsSelected = false;
+        _logger?.LogDebug($"TemplateItemViewModel '{Template.Name}' deselected.");
     }
 }
 

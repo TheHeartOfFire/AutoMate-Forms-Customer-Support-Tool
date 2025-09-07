@@ -1,26 +1,72 @@
 ﻿using AMFormsCST.Core.Interfaces.UserSettings;
+using AMFormsCST.Core.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types;
-public class Settings(IUserSettings userSettings, IUiSettings uiSettings) : ISettings
+public class Settings : ISettings
 {
-    [JsonIgnore] // This property is for convenience and should not be serialized
-    public List<ISetting> AllSettings
+    private readonly ILogService? _logger;
+
+    [JsonIgnore]
+    public List<ISetting> AllSettings => [UserSettings, UiSettings];
+
+    [JsonInclude]
+    public IUserSettings UserSettings
     {
-        get
+        get => _userSettings;
+        set
         {
-            return [UserSettings, UiSettings];
+            if (value is null)
+            {
+                var ex = new ArgumentNullException(nameof(value), "User settings cannot be null.");
+                _logger?.LogError("Attempted to set UserSettings to null.", ex);
+                throw ex;
+            }
+            if (_userSettings != value)
+            {
+                _userSettings = value;
+                _logger?.LogInfo("UserSettings property set.");
+            }
         }
     }
 
     [JsonInclude]
-    public IUserSettings UserSettings { get; set; } = userSettings ?? throw new ArgumentNullException(nameof(userSettings), "User settings cannot be null.");
+    public IUiSettings UiSettings
+    {
+        get => _uiSettings;
+        set
+        {
+            if (value is null)
+            {
+                var ex = new ArgumentNullException(nameof(value), "UI settings cannot be null.");
+                _logger?.LogError("Attempted to set UiSettings to null.", ex);
+                throw ex;
+            }
+            if (_uiSettings != value)
+            {
+                _uiSettings = value;
+                _logger?.LogInfo("UiSettings property set.");
+            }
+        }
+    }
 
-    [JsonInclude]
-    public IUiSettings UiSettings { get; set; } = uiSettings ?? throw new ArgumentNullException(nameof(uiSettings), "UI settings cannot be null.");
+    private IUserSettings _userSettings;
+    private IUiSettings _uiSettings;
+
+    [JsonConstructor]
+    public Settings(IUserSettings userSettings, IUiSettings uiSettings)
+    {
+        _userSettings = userSettings ?? throw new ArgumentNullException(nameof(userSettings), "User settings cannot be null.");
+        _uiSettings = uiSettings ?? throw new ArgumentNullException(nameof(uiSettings), "UI settings cannot be null.");
+    }
+
+    // Logger-initializing constructor for runtime use only
+    public Settings(IUserSettings userSettings, IUiSettings uiSettings, ILogService? logger)
+        : this(userSettings, uiSettings)
+    {
+        _logger = logger;
+        _logger?.LogInfo("Settings initialized.");
+    }
 }

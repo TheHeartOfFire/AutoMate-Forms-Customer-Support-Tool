@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Desktop.Models;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.Models;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
@@ -24,12 +25,28 @@ namespace AMFormsCST.Desktop.Views.Pages;
 public partial class DashboardPage : INavigableView<DashboardViewModel>
 {
     public DashboardViewModel ViewModel { get; }
-    
-    public DashboardPage(DashboardViewModel viewModel)
+    private readonly ILogService? _logger;
+
+    public DashboardPage(DashboardViewModel viewModel, ILogService? logger = null)
     {
         ViewModel = viewModel;
-        DataContext = ViewModel;
+        _logger = logger;
 
+        DataContext = ViewModel;
         InitializeComponent();
+
+        //Loaded += (s, e) =>
+        //{
+        //    var numberBox = FindName("CaseNumBox") as Wpf.Ui.Controls.NumberBox;
+        //    numberBox?.SetBinding(
+        //            Wpf.Ui.Controls.NumberBox.TextProperty,
+        //            new Binding("SelectedNote.CaseNumber")
+        //            {
+        //                Mode = BindingMode.TwoWay,
+        //                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        //            }
+        //        );
+        //};
+        _logger?.LogInfo("DashboardPage initialized.");
     }
 }

@@ -1,4 +1,6 @@
 using AMFormsCST.Desktop.Models;
+using System;
+using System.Linq;
 using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 using Assert = Xunit.Assert;
 
@@ -9,7 +11,7 @@ public class NoteModelConversionTests
     private const string TestExtSeparator = "x";
 
     [Fact]
-    public void ImplicitConversion_CorrectlyMapsAllProperties()
+    public void ImplicitConversion_CorrectlyMapsAllPropertiesAndCollections()
     {
         // Arrange
         var noteModel = new NoteModel(TestExtSeparator)
@@ -18,44 +20,70 @@ public class NoteModelConversionTests
             Notes = "This is a test note.",
         };
 
-        // Populate the selected dealer and its company
-        var dealer = noteModel.SelectedDealer!;
-        dealer.ServerCode = "SVR1";
-        dealer.Name = "Test Dealership";
-        dealer.Companies[0].CompanyCode = "C1";
-        dealer.Companies[0].Name = "Company One"; // Make it non-blank to add a new one
-        dealer.Companies.Add(new Company { CompanyCode = "C2", Name = "Company Two" });
+        // Populate a dealer and its company
+        var dealer = new Dealer
+        {
+            ServerCode = "SVR1",
+            Name = "Test Dealership"
+        };
+        var company = new Company { CompanyCode = "C1", Name = "Company One" };
+        dealer.Companies.Add(company);
+        noteModel.Dealers.Add(dealer);
 
-        // Populate the selected contact
-        var contact = noteModel.SelectedContact!;
-        contact.Name = "John Doe";
-        contact.Email = "john.doe@example.com";
-        contact.Phone = "555-1234";
-        contact.PhoneExtension = "101";
+        // Populate a contact
+        var contact = new Contact(TestExtSeparator)
+        {
+            Name = "John Doe",
+            Email = "john.doe@example.com",
+            Phone = "555-1234",
+            PhoneExtension = "101"
+        };
+        noteModel.Contacts.Add(contact);
 
-        // Populate the selected form and its deal
-        var form = noteModel.SelectedForm!;
-        form.Name = "MyForm.frp";
-        form.SelectedTestDeal!.DealNumber = "DEAL99";
+        // Populate a form and its deal
+        var form = new Form { Name = "MyForm.frp" };
+        var testDeal = new TestDeal { DealNumber = "DEAL99" };
+        form.TestDeals.Add(testDeal);
+        noteModel.Forms.Add(form);
 
         // Act
-        // Perform the implicit conversion
         CoreNote coreNote = noteModel;
 
         // Assert
         Assert.NotNull(coreNote);
-        Assert.Equal(noteModel.Id, coreNote.Id);
         Assert.Equal("CS12345", coreNote.CaseText);
         Assert.Equal("This is a test note.", coreNote.NotesText);
-        Assert.Equal("SVR1", coreNote.ServerId);
-        Assert.Equal("Test Dealership", coreNote.Dealership);
-        Assert.Equal("C1, C2", coreNote.Companies); // Note the expected comma separation
-        Assert.Equal("John Doe", coreNote.ContactName);
-        Assert.Equal("john.doe@example.com", coreNote.Email);
-        Assert.Equal("555-1234", coreNote.Phone);
-        Assert.Equal("101", coreNote.PhoneExt);
-        Assert.Equal("MyForm.frp", coreNote.FormsText);
-        Assert.Equal("DEAL99", coreNote.DealText);
+
+        // Assert Dealer and Company (expecting 2 items: 1 blank, 1 with data)
+        Assert.Equal(2, coreNote.Dealers.Count);
+        var coreDealer = coreNote.Dealers.FirstOrDefault(d => !string.IsNullOrEmpty(d.Name));
+        Assert.NotNull(coreDealer);
+        Assert.Equal("SVR1", coreDealer.ServerCode);
+        Assert.Equal("Test Dealership", coreDealer.Name);
+        Assert.Equal(2, coreDealer.Companies.Count);
+        var coreCompany = coreDealer.Companies.FirstOrDefault(c => !string.IsNullOrEmpty(c.Name));
+        Assert.NotNull(coreCompany);
+        Assert.Equal("C1", coreCompany.CompanyCode);
+        Assert.Equal("Company One", coreCompany.Name);
+
+        // Assert Contact (expecting 2 items: 1 blank, 1 with data)
+        Assert.Equal(2, coreNote.Contacts.Count);
+        var coreContact = coreNote.Contacts.FirstOrDefault(c => !string.IsNullOrEmpty(c.Name));
+        Assert.NotNull(coreContact);
+        Assert.Equal("John Doe", coreContact.Name);
+        Assert.Equal("john.doe@example.com", coreContact.Email);
+        Assert.Equal("555-1234", coreContact.Phone);
+        Assert.Equal("101", coreContact.PhoneExtension);
+
+        // Assert Form and TestDeal (expecting 2 items: 1 blank, 1 with data)
+        Assert.Equal(2, coreNote.Forms.Count);
+        var coreForm = coreNote.Forms.FirstOrDefault(f => !string.IsNullOrEmpty(f.Name));
+        Assert.NotNull(coreForm);
+        Assert.Equal("MyForm.frp", coreForm.Name);
+        Assert.Equal(2, coreForm.TestDeals.Count);
+        var coreTestDeal = coreForm.TestDeals.FirstOrDefault(td => !string.IsNullOrEmpty(td.DealNumber));
+        Assert.NotNull(coreTestDeal);
+        Assert.Equal("DEAL99", coreTestDeal.DealNumber);
     }
 
     [Fact]
@@ -69,16 +97,20 @@ public class NoteModelConversionTests
 
         // Assert
         Assert.NotNull(coreNote);
-        // Verify it's a new object with default (null/empty) values
         Assert.NotEqual(Guid.Empty, coreNote.Id);
-        Assert.Null(coreNote.CaseText);
+        Assert.Equal(string.Empty, coreNote.CaseText);
+        Assert.Empty(coreNote.Dealers);
+        Assert.Empty(coreNote.Contacts);
+        Assert.Empty(coreNote.Forms);
     }
 
     [Fact]
-    public void ImplicitConversion_WithBlankNoteModel_MapsEmptyAndNullValues()
+    public void ImplicitConversion_WithBlankNoteModel_MapsToCoreNoteWithBlankItems()
     {
         // Arrange
-        var noteModel = new NoteModel(TestExtSeparator); // A completely blank note
+        // A new NoteModel is blank by default, but contains blank child items in its collections.
+        // The conversion should include these blank children.
+        var noteModel = new NoteModel(TestExtSeparator);
 
         // Act
         CoreNote coreNote = noteModel;
@@ -86,15 +118,16 @@ public class NoteModelConversionTests
         // Assert
         Assert.NotNull(coreNote);
         Assert.Equal(string.Empty, coreNote.CaseText);
-        Assert.Null(coreNote.NotesText);
-        Assert.Equal(string.Empty, coreNote.ServerId);
-        Assert.Equal(string.Empty, coreNote.Dealership);
-        Assert.Equal(string.Empty, coreNote.Companies); // Should be empty string, not null
-        Assert.Equal(string.Empty, coreNote.ContactName);
-        Assert.Equal(string.Empty, coreNote.Email);
-        Assert.Equal(string.Empty, coreNote.Phone);
-        Assert.Equal(string.Empty, coreNote.PhoneExt);
-        Assert.Equal(string.Empty, coreNote.FormsText);
-        Assert.Equal(string.Empty, coreNote.DealText);
+        Assert.Equal(string.Empty, coreNote.NotesText);
+
+        // Assert that each collection contains exactly one item, which is the blank one.
+        Assert.Single(coreNote.Dealers);
+        Assert.True(string.IsNullOrEmpty(coreNote.Dealers.First().Name));
+
+        Assert.Single(coreNote.Contacts);
+        Assert.True(string.IsNullOrEmpty(coreNote.Contacts.First().Name));
+
+        Assert.Single(coreNote.Forms);
+        Assert.True(string.IsNullOrEmpty(coreNote.Forms.First().Name));
     }
 }

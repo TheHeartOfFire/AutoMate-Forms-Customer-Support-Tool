@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Interfaces
 {
-    interface IBlankMaybe
+    public interface IBlankMaybe
     {
         public bool IsBlank { get; }
     }

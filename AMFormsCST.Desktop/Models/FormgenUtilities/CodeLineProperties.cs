@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 public partial class CodeLineProperties : ObservableObject, IFormgenFileProperties
 {
     private readonly CodeLine _coreCodeLine;
+    private readonly ILogService? _logger;
 
     /// <summary>
     /// The settings associated with the CodeLine (e.g., Order, Type, Variable).
@@ -31,21 +33,29 @@ public partial class CodeLineProperties : ObservableObject, IFormgenFileProperti
     public string? Expression
     {
         get => _coreCodeLine.Expression;
-        set => SetProperty(_coreCodeLine.Expression, value, _coreCodeLine, (c, v) => c.Expression = v);
+        set
+        {
+            SetProperty(_coreCodeLine.Expression, value, _coreCodeLine, (c, v) => c.Expression = v);
+            _logger?.LogInfo($"CodeLine Expression changed: {value}");
+        }
     }
 
-    public CodeLineProperties(CodeLine codeLine)
+    public CodeLineProperties(CodeLine codeLine, ILogService? logger = null)
     {
         _coreCodeLine = codeLine;
+        _logger = logger;
 
         if (codeLine.Settings is not null)
         {
             Settings = new CodeLineSettings(codeLine.Settings);
+            _logger?.LogInfo($"CodeLineProperties Settings initialized: Order={codeLine.Settings.Order}, Type={codeLine.Settings.Type}, Variable={codeLine.Settings.Variable}");
         }
         if (codeLine.PromptData is not null)
         {
             PromptData = new PromptDataProperties(codeLine.PromptData);
+            _logger?.LogInfo("CodeLineProperties PromptData initialized.");
         }
+        _logger?.LogInfo("CodeLineProperties initialized.");
     }
 
     /// <summary>

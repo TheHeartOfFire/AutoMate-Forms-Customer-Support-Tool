@@ -20,6 +20,7 @@ namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 
 public partial class FormgenUtilitiesViewModel : ViewModel
 {
+    private readonly ILogService? _logger;
 
     [ObservableProperty]
     private ObservableCollection<TreeItemNodeViewModel> _treeViewNodes = [];
@@ -30,11 +31,10 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         get => _selectedNode;
         set
         {
-            // This setter is now primarily driven by the OnIsSelectedChanged callback
-            // in the TreeItemNodeViewModel. We just need to update the property.
             if (SetProperty(ref _selectedNode, value))
             {
                 UpdateSelectedNodeProperties();
+                _logger?.LogInfo($"Selected node changed: {value?.Header}");
             }
         }
     }
@@ -71,14 +71,15 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     private readonly IDialogService _dialogService;
     private readonly IFileSystem _fileSystem;
 
-    public FormgenUtilitiesViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem)
+    public FormgenUtilitiesViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, ILogService? logger = null)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        _logger = logger;
         _supportTool.FormgenUtils.FormgenFileChanged += (s, e) => OnPropertyChanged(nameof(HasChanged));
+        _logger?.LogInfo("FormgenUtilitiesViewModel initialized.");
     }
-
 
     [RelayCommand]
     private void OpenFormgenFile()
@@ -90,6 +91,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         {
             FilePath = selectedFile;
             _backupLoaded = false;
+            _logger?.LogInfo($"Formgen file opened: {selectedFile}");
             LoadFileContent();
         }
     }
@@ -108,7 +110,6 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             _supportTool.FormgenUtils.ParsedFormgenFile.Title = FormTitle;
             _supportTool.FormgenUtils.ParsedFormgenFile.Settings.UUID = Uuid;
 
-            // Save changes to the current file path.
             _supportTool.FormgenUtils.SaveFile(FilePath!);
 
             if (titleHasChanged)
@@ -119,10 +120,12 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             }
 
             _dialogService.ShowMessageBox("File saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            _logger?.LogInfo($"Formgen file saved: {FilePath}");
         }
         catch (Exception ex)
         {
             _dialogService.ShowMessageBox($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            _logger?.LogError("Failed to save Formgen file.", ex);
         }
         finally
         {
@@ -148,6 +151,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         {
             _supportTool.FormgenUtils.LoadBackup(selectedFile);
             _backupLoaded = true;
+            _logger?.LogInfo($"Backup loaded: {selectedFile}");
             LoadFileContent(selectedFile);
         }
     }
@@ -164,6 +168,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         SelectedNode = null;
         SelectedNodeProperties = null;
         _supportTool.FormgenUtils.CloseFile();
+        _logger?.LogInfo("Formgen file cleared.");
     }
 
     [RelayCommand]
@@ -171,6 +176,7 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     {
         if (!IsFileLoaded) return;
         Uuid = Guid.NewGuid().ToString();
+        _logger?.LogInfo($"UUID regenerated: {Uuid}");
     }
 
     private void LoadFileContent(string? filePath = null)
@@ -190,7 +196,6 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             FormTitle = fileData.Title ?? _fileSystem.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
             Uuid = fileData.Settings.UUID;
 
-            // Check for associated image file
             var fileDir = _fileSystem.GetDirectoryName(FilePath);
             var fileNameNoExt = _fileSystem.GetFileNameWithoutExtension(FilePath);
             var pdfPath = _fileSystem.CombinePath(fileDir!, fileNameNoExt + ".pdf");
@@ -199,20 +204,21 @@ public partial class FormgenUtilitiesViewModel : ViewModel
             IsImageFound = fileData.FormType == Format.Pdf ? _fileSystem.FileExists(pdfPath) : _fileSystem.FileExists(jpgPath);
             ShouldRenameImage = IsImageFound ?? false;
 
-            var rootNode = new TreeItemNodeViewModel(fileData, this);
+            var rootNode = new TreeItemNodeViewModel(fileData, this, _logger);
             TreeViewNodes.Add(rootNode);
 
-            // Select the root node by default
             if (TreeViewNodes.Count > 0)
             {
                 rootNode.IsSelected = true;
-                rootNode.IsExpanded = true; // Expand the root node by default
+                rootNode.IsExpanded = true;
             }
+            _logger?.LogInfo($"Formgen file content loaded: {path}");
         }
         catch (Exception ex)
         {
             _dialogService.ShowMessageBox($"Failed to load file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            FilePath = null; // Reset filepath on failure
+            FilePath = null;
+            _logger?.LogError("Failed to load Formgen file content.", ex);
         }
         finally
         {
@@ -224,60 +230,57 @@ public partial class FormgenUtilitiesViewModel : ViewModel
     {
         IFormgenFileProperties? properties = SelectedNode?.Data switch
         {
-            DotFormgen formgenFile => new FormProperties(formgenFile),
-            PageGroup pageGroup => new PageGroupProperties(pageGroup),
-            CodeLineCollection codeLineCollection => new CodeLineCollectionProperties(codeLineCollection),
-            CodeLineGroup codeLineGroup => new CodeLineGroupProperties(codeLineGroup),
-            FormPage page => new PageProperties(page),
-            FormField field => new FieldProperties(field),
-            CodeLine codeLine => new CodeLineProperties(codeLine),
+            DotFormgen formgenFile => new FormProperties(formgenFile, _logger),
+            PageGroup pageGroup => new PageGroupProperties(pageGroup, _logger),
+            CodeLineCollection codeLineCollection => new CodeLineCollectionProperties(codeLineCollection, _logger),
+            CodeLineGroup codeLineGroup => new CodeLineGroupProperties(codeLineGroup, _logger),
+            FormPage page => new PageProperties(page, _logger),
+            FormField field => new FieldProperties(field, _logger),
+            CodeLine codeLine => new CodeLineProperties(codeLine, _logger),
             _ => null
         };
 
         if (properties is null) return;
 
-        // List of property names to be marked as read-only
         var readOnlyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "ID", "UUID", "PublishedUUID", "TotalPages", "PageNumber", "Type", "Title" // Add more as needed
+            "ID", "UUID", "PublishedUUID", "TotalPages", "PageNumber", "Type", "Title"
         };
 
         var displayProps = new List<DisplayProperty>();
 
-        // Main properties
         foreach (var p in properties.GetType().GetProperties().Where(p => p.GetMethod != null))
         {
             if (p.Name.Equals("Settings") || p.Name.Equals("PromptData")) continue;
 
             bool isReadOnly = readOnlyNames.Contains(p.Name) || !p.CanWrite;
-            displayProps.Add(new DisplayProperty(properties, p, isReadOnly));
+            displayProps.Add(new DisplayProperty(properties, p, isReadOnly, _logger));
         }
 
-        // Settings properties
         if (properties.Settings != null)
         {
             foreach (var p in properties.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
             {
                 bool isReadOnly = readOnlyNames.Contains(p.Name) || !p.CanWrite;
-                displayProps.Add(new DisplayProperty(properties.Settings, p, isReadOnly));
+                displayProps.Add(new DisplayProperty(properties.Settings, p, isReadOnly, _logger));
             }
         }
 
-        // Pattern matching with a local variable for CodeLineProperties
         if (properties is CodeLineProperties props && props.PromptData is not null)
         {
             foreach (var p in props.PromptData.GetType().GetProperties().Where(p => p.GetMethod != null))
             {
                 if (p.Name.Equals("Settings")) continue;
-                displayProps.Add(new DisplayProperty(props.PromptData, p));
+                displayProps.Add(new DisplayProperty(props.PromptData, p, false, _logger));
             }
 
             foreach (var p in props.PromptData.Settings.GetType().GetProperties().Where(p => p.GetMethod != null))
             {
-                displayProps.Add(new DisplayProperty(props.PromptData.Settings, p));
+                displayProps.Add(new DisplayProperty(props.PromptData.Settings, p, false, _logger));
             }
         }
 
         SelectedNodeProperties = new ObservableCollection<DisplayProperty>(displayProps);
+        _logger?.LogDebug("Selected node properties updated.");
     }
 }

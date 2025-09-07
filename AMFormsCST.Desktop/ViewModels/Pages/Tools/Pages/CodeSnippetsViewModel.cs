@@ -18,6 +18,8 @@ using System.Windows;
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class CodeSnippetsViewModel : ViewModel
 {
+    private readonly ILogService? _logger;
+
     [ObservableProperty]
     public ObservableCollection<CodeSnippetItemViewModel> _codeSnippets = [];
 
@@ -26,8 +28,10 @@ public partial class CodeSnippetsViewModel : ViewModel
     private CodeSnippetItemViewModel? _selectedCodeSnippet;
 
     private ICodeBlocks _codeBlocks;
-    public CodeSnippetsViewModel(ISupportTool supportTool)
+
+    public CodeSnippetsViewModel(ISupportTool supportTool, ILogService? logger = null)
     {
+        _logger = logger;
         _codeBlocks = supportTool.CodeBlocks ?? throw new ArgumentNullException(nameof(_codeBlocks));
 
         CodeSnippets = new ObservableCollection<CodeSnippetItemViewModel>(
@@ -40,11 +44,15 @@ public partial class CodeSnippetsViewModel : ViewModel
         {
             SelectedCodeSnippet = CodeSnippets.First();
             SelectedCodeSnippet.IsSelected = true;
+            _logger?.LogInfo($"CodeSnippetsViewModel initialized with {CodeSnippets.Count} snippets. Selected: {SelectedCodeSnippet.Name}");
+        }
+        else
+        {
+            _logger?.LogInfo("CodeSnippetsViewModel initialized with no snippets.");
         }
     }
 
     #region Design Time Constructor
-    // I'm not happy about it, so i don't want to look at it
     /// <summary>
     /// Parameterless constructor for design-time data.
     /// Do not use in production code.
@@ -82,7 +90,7 @@ public partial class CodeSnippetsViewModel : ViewModel
 
         SelectedCodeSnippet = item;
         SelectedCodeSnippet.IsSelected = true;
-
+        _logger?.LogInfo($"Code snippet selected: {item.Name}");
     }
 
     [RelayCommand]
@@ -90,15 +98,17 @@ public partial class CodeSnippetsViewModel : ViewModel
     {
         if (SelectedCodeSnippet is null || string.IsNullOrEmpty(SelectedCodeSnippet.Output))
         {
+            _logger?.LogWarning("CopyOutput called but no snippet is selected or output is empty.");
             return;
         }
         try
         {
             Clipboard.SetText(SelectedCodeSnippet.Output);
+            _logger?.LogInfo($"Copied output for snippet: {SelectedCodeSnippet.Name}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error copying output: {ex.Message}");
+            _logger?.LogError("Error copying output to clipboard.", ex);
         }
     }
 }

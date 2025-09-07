@@ -31,6 +31,12 @@ using System.Windows.Threading;
 using Velopack;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
+using Serilog;
+using Serilog.Sinks.SystemConsole;
+using AMFormsCST.Core.Services;
+using Serilog.Enrichers;
+using Serilog.Formatting.Json;
+using Serilog.Formatting.Compact; // Your SerilogService implementation
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -65,6 +71,21 @@ public partial class App : Application
             .ConfigureServices((_1, services) =>
             {
                 _ = services.AddNavigationViewPageProvider();
+                services.AddSingleton<ILogService>(sp =>
+                {
+                    var logger = new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .WriteTo.Console()
+                        .WriteTo.File(
+                        path: "logs\\app.log", 
+                        formatter: new CompactJsonFormatter(), 
+                        rollingInterval: RollingInterval.Day)
+                        .Enrich.FromLogContext()
+                        .CreateLogger();
+
+                    return new SerilogService(logger);
+                });
+                _ = services.AddTransient<IDebounceService, DebounceService>();
 
                 // App Host
                 _ = services.AddHostedService<ApplicationHostService>();
@@ -91,6 +112,7 @@ public partial class App : Application
                     "AMFormsCST.Desktop.ViewModels",
                     GalleryAssembly.Assembly
                 );
+
 
                 _ = services.AddTransient<IDialogService, DialogService>();
                 _ = services.AddSingleton<IFileSystem, FileSystem>();

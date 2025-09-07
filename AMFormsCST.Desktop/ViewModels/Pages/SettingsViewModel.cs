@@ -18,6 +18,7 @@ public partial class SettingsViewModel : ViewModel
 {
     private readonly IUpdateManagerService _updateManagerService;
     private readonly ISupportTool _supportTool;
+    private readonly ILogService? _logger;
     private bool _isInitialized = false;
 
     [ObservableProperty]
@@ -40,10 +41,12 @@ public partial class SettingsViewModel : ViewModel
     [ObservableProperty]
     private string _extSeparator = string.Empty;
 
-    public SettingsViewModel(IUpdateManagerService updateManagerService, ISupportTool supportTool)
+    public SettingsViewModel(IUpdateManagerService updateManagerService, ISupportTool supportTool, ILogService? logger = null)
     {
         _updateManagerService = updateManagerService;
         _supportTool = supportTool;
+        _logger = logger;
+        _logger?.LogInfo("SettingsViewModel initialized.");
 
         // Subscribe to property changes on this ViewModel
         PropertyChanged += OnSettingsViewModelPropertyChanged;
@@ -51,15 +54,15 @@ public partial class SettingsViewModel : ViewModel
             InitializeViewModel();
     }
 
-
     public void OnNavigatedTo()
     {
+        _logger?.LogInfo("SettingsPage navigated to.");
     }
-
 
     private void InitializeViewModel()
     {
         AppVersion = $"Version {GetAppVersion()}";
+        _logger?.LogDebug($"AppVersion set: {AppVersion}");
 
         // Load settings from the core service
         var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
@@ -78,53 +81,83 @@ public partial class SettingsViewModel : ViewModel
         ExtSeparator = userSettings.ExtSeparator;
 
         _isInitialized = true;
+        _logger?.LogInfo("SettingsViewModel initialized and settings loaded.");
     }
 
     private void OnSettingsViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // This method now handles saving settings in real-time.
-        switch (e.PropertyName)
+        try
         {
-            case nameof(CurrentTheme):
-                var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
-                if (themeSetting != null && themeSetting.Theme != CurrentTheme)
-                {
-                    themeSetting.Theme = CurrentTheme;
-                    ApplicationThemeManager.Apply(CurrentTheme);
-                }
-                break;
+            switch (e.PropertyName)
+            {
+                case nameof(CurrentTheme):
+                    var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
+                    if (themeSetting != null && themeSetting.Theme != CurrentTheme)
+                    {
+                        themeSetting.Theme = CurrentTheme;
+                        ApplicationThemeManager.Apply(CurrentTheme);
+                        _logger?.LogInfo($"Theme changed: {CurrentTheme}");
+                    }
+                    break;
 
-            case nameof(AlwaysOnTop):
-                var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
-                if (aotSetting != null) aotSetting.IsEnabled = AlwaysOnTop;
-                break;
+                case nameof(AlwaysOnTop):
+                    var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
+                    if (aotSetting != null)
+                    {
+                        aotSetting.IsEnabled = AlwaysOnTop;
+                        _logger?.LogInfo($"AlwaysOnTop changed: {AlwaysOnTop}");
+                    }
+                    break;
 
-            case nameof(SelectNewTemplate):
-                var templateSetting = _supportTool.Settings.UiSettings.Settings.OfType<NewTemplateSetting>().FirstOrDefault();
-                if (templateSetting != null) templateSetting.SelectNewTemplate = SelectNewTemplate;
-                break;
+                case nameof(SelectNewTemplate):
+                    var templateSetting = _supportTool.Settings.UiSettings.Settings.OfType<NewTemplateSetting>().FirstOrDefault();
+                    if (templateSetting != null)
+                    {
+                        templateSetting.SelectNewTemplate = SelectNewTemplate;
+                        _logger?.LogInfo($"SelectNewTemplate changed: {SelectNewTemplate}");
+                    }
+                    break;
 
-            case nameof(CapitalizeFormCode):
-                var formCodeSetting = _supportTool.Settings.UiSettings.Settings.OfType<CapitalizeFormCodeSetting>().FirstOrDefault();
-                if (formCodeSetting != null) formCodeSetting.CapitalizeFormCode = CapitalizeFormCode;
-                break;
+                case nameof(CapitalizeFormCode):
+                    var formCodeSetting = _supportTool.Settings.UiSettings.Settings.OfType<CapitalizeFormCodeSetting>().FirstOrDefault();
+                    if (formCodeSetting != null)
+                    {
+                        formCodeSetting.CapitalizeFormCode = CapitalizeFormCode;
+                        _logger?.LogInfo($"CapitalizeFormCode changed: {CapitalizeFormCode}");
+                    }
+                    break;
 
-            case nameof(ExtSeparator):
-                _supportTool.Settings.UserSettings.ExtSeparator = ExtSeparator;
-                break;
+                case nameof(ExtSeparator):
+                    _supportTool.Settings.UserSettings.ExtSeparator = ExtSeparator;
+                    _logger?.LogInfo($"ExtSeparator changed: {ExtSeparator}");
+                    break;
+            }
+
+            // Save settings if the view model is initialized
+            if (_isInitialized)
+            {
+                _supportTool.SaveAllSettings();
+                _logger?.LogInfo("Settings saved after property change.");
+            }
         }
-
-        // Save settings if the view model is initialized
-        if (_isInitialized)
+        catch (Exception ex)
         {
-            _supportTool.SaveAllSettings();
+            _logger?.LogError("Error in OnSettingsViewModelPropertyChanged.", ex);
         }
     }
 
     [RelayCommand]
     private async Task CheckForUpdates()
     {
-        await _updateManagerService.CheckForUpdatesAsync();
+        try
+        {
+            await _updateManagerService.CheckForUpdatesAsync();
+            _logger?.LogInfo("CheckForUpdates command executed.");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error during CheckForUpdates command.", ex);
+        }
     }
 
     private static string GetAppVersion()

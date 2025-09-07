@@ -37,7 +37,7 @@ public class FormgenUtilitiesPageTests
         var navServiceMock = new Mock<INavigationService>();
 
         // Act
-        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object, dialogServiceMock.Object);
+        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object);
 
         // Assert
         Assert.Equal(vm, page.ViewModel);
@@ -60,7 +60,7 @@ public class FormgenUtilitiesPageTests
             fileSystemMock.Object
         );
         var navServiceMock = new Mock<INavigationService>();
-        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object, dialogServiceMock.Object);
+        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object);
 
         var navigationViewMock = new Mock<Wpf.Ui.Controls.NavigationView>();
         navServiceMock.Setup(s => s.GetNavigationControl()).Returns(navigationViewMock.Object);
@@ -101,7 +101,7 @@ public class FormgenUtilitiesPageTests
             fileSystemMock.Object
         );
         var navServiceMock = new Mock<INavigationService>();
-        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object, dialogServiceMock.Object);
+        var page = new FormgenUtilitiesPage(vm, navServiceMock.Object);
 
         var parentScrollViewer = new ScrollViewer();
         // Simulate FindParent returning a ScrollViewer

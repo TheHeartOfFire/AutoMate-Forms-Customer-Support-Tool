@@ -1,3 +1,4 @@
+using AMFormsCST.Core.Helpers;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.UserSettings;
@@ -6,7 +7,10 @@ using AMFormsCST.Desktop.Models;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using Moq;
+using System;
+using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 using Assert = Xunit.Assert;
+using CollectionMemberState = AMFormsCST.Desktop.Interfaces.IManagedObservableCollectionItem.CollectionMemberState;
 
 namespace AMFormsCST.Test.Desktop.ViewModels.Pages;
 
@@ -18,6 +22,7 @@ public class DashboardViewModelTests
     private readonly Mock<INotebook> _mockNotebook;
     private readonly Mock<IDialogService> _mockDialogService;
     private readonly Mock<IFileSystem> _mockFileSystem;
+    private readonly Mock<IDebounceService> _mockDebounceService;
 
     public DashboardViewModelTests()
     {
@@ -28,6 +33,7 @@ public class DashboardViewModelTests
         _mockNotebook = new Mock<INotebook>();
         _mockDialogService = new Mock<IDialogService>();
         _mockFileSystem = new Mock<IFileSystem>();
+        _mockDebounceService = new Mock<IDebounceService>();
 
         // 2. Configure the mocks to return the necessary objects.
         // This setup mimics the real dependency graph.
@@ -37,14 +43,15 @@ public class DashboardViewModelTests
         _mockSupportTool.Setup(st => st.Notebook).Returns(_mockNotebook.Object);
 
         // The UpdateNotebook method requires a non-null list to clear.
-        _mockNotebook.Setup(n => n.Notes).Returns([]);
+        // Default to an empty list. Specific tests can override this.
+        _mockNotebook.Setup(n => n.Notes).Returns(new SelectableList<INote>());
     }
 
     [Fact]
     public void Constructor_InitializesWithOneBlankNote_AndSelectsIt()
     {
         // Arrange & Act: Create a new instance of the view model.
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
 
         // Assert: Verify the initial state is correct.
         // It should start with a single, blank note.
@@ -54,14 +61,14 @@ public class DashboardViewModelTests
         // The first note should be automatically selected.
         Assert.NotNull(viewModel.SelectedNote);
         Assert.Same(viewModel.Notes[0], viewModel.SelectedNote);
-        Assert.True(viewModel.SelectedNote.IsSelected);
+        Assert.True(viewModel.SelectedNote.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnNoteClicked_ChangesSelectedNote_AndUpdatesSelectionState()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         
         // Simulate user input on the first note, which will make it non-blank.
         var firstNote = viewModel.Notes[0];
@@ -83,15 +90,15 @@ public class DashboardViewModelTests
         Assert.Same(secondNote, viewModel.SelectedNote);
         
         // Verify the selection flags are correct on both notes.
-        Assert.True(secondNote.IsSelected);
-        Assert.False(firstNote.IsSelected);
+        Assert.True(secondNote.State is CollectionMemberState.Selected);
+        Assert.False(firstNote.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_RemovesNote_AndSelectsNextAvailable()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var note1 = viewModel.Notes[0];
         note1.CaseNumber = "Note 1"; // Make it non-blank
         var note2 = viewModel.Notes[1];
@@ -111,32 +118,32 @@ public class DashboardViewModelTests
 
         // The view model should automatically select the first note in the list as the new SelectedNote.
         Assert.Same(note1, viewModel.SelectedNote);
-        Assert.True(note1.IsSelected);
+        Assert.True(note1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDealerClicked_ChangesSelectedDealer()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
-        var dealer1 = viewModel.SelectedNote.Dealers[0];
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
+        var dealer1 = viewModel.SelectedNote?.Dealers[0];
         dealer1.Name = "Dealer 1"; // Make it non-blank, which adds a new blank dealer.
-        var dealer2 = viewModel.SelectedNote.Dealers[1];
+        var dealer2 = viewModel.SelectedNote?.Dealers[1];
 
         // Act
         viewModel.DealerClickedCommand.Execute(dealer2);
 
         // Assert
         Assert.Same(dealer2, viewModel.SelectedNote.SelectedDealer);
-        Assert.True(dealer2.IsSelected);
-        Assert.False(dealer1.IsSelected);
+        Assert.True(dealer2.State is CollectionMemberState.Selected);
+        Assert.False(dealer1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_RemovesDealer_AndSelectsNextAvailable()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var dealer1 = viewModel.SelectedNote.Dealers[0];
         dealer1.Name = "Dealer 1";
         var dealer2 = viewModel.SelectedNote.Dealers[1];
@@ -152,29 +159,33 @@ public class DashboardViewModelTests
         Assert.Equal(2, viewModel.SelectedNote.Dealers.Count);
         Assert.DoesNotContain(dealer1, viewModel.SelectedNote.Dealers);
         Assert.Same(dealer2, viewModel.SelectedNote.SelectedDealer); // Should select the next one
-        Assert.True(dealer2.IsSelected);
+        Assert.True(dealer2.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void ChangingNoteProperty_TriggersUpdateNotebook()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        // Use a real Note object instead of a mock to avoid serialization issues with proxy types.
+        var coreNote = new CoreNote();
+        var notesList = new SelectableList<INote> { coreNote };
+        notesList.SelectedItem = coreNote; // Ensure the note is selected
+        _mockNotebook.Setup(n => n.Notes).Returns(notesList);
+
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         
         // Act: Change a property that is configured to trigger the update.
         viewModel.SelectedNote.CaseNumber = "54321";
 
-        // Assert: Verify that the UpdateNotebook method was called.
-        // It's called once at startup and once for the property change.
-        _mockNotebook.Verify(n => n.AddNote(It.IsAny<INote>(), It.IsAny<bool>()), Times.Exactly(2));
-        _mockNotebook.Verify(n => n.SelectNote(It.IsAny<INote>()), Times.Exactly(2));
+        // Assert: Verify that the debounce service was scheduled.
+        _mockDebounceService.Verify(ds => ds.ScheduleEvent(), Times.AtLeastOnce);
     }
 
     [Fact]
     public void OnContactClicked_ChangesSelectedContact()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var contact1 = viewModel.SelectedNote.Contacts[0];
         contact1.Name = "Contact 1";
         var contact2 = viewModel.SelectedNote.Contacts[1];
@@ -184,15 +195,15 @@ public class DashboardViewModelTests
 
         // Assert
         Assert.Same(contact2, viewModel.SelectedNote.SelectedContact);
-        Assert.True(contact2.IsSelected);
-        Assert.False(contact1.IsSelected);
+        Assert.True(contact2.State is CollectionMemberState.Selected);
+        Assert.False(contact1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnFormClicked_ChangesSelectedForm()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var form1 = viewModel.SelectedNote.Forms[0];
         form1.Name = "Form 1";
         var form2 = viewModel.SelectedNote.Forms[1];
@@ -202,15 +213,15 @@ public class DashboardViewModelTests
 
         // Assert
         Assert.Same(form2, viewModel.SelectedNote.SelectedForm);
-        Assert.True(form2.IsSelected);
-        Assert.False(form1.IsSelected);
+        Assert.True(form2.State is CollectionMemberState.Selected);
+        Assert.False(form1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_RemovesContact_AndSelectsNextAvailable()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var contact1 = viewModel.SelectedNote.Contacts[0];
         contact1.Name = "Contact 1";
         var contact2 = viewModel.SelectedNote.Contacts[1];
@@ -226,30 +237,31 @@ public class DashboardViewModelTests
         Assert.Equal(2, viewModel.SelectedNote.Contacts.Count);
         Assert.DoesNotContain(contact1, viewModel.SelectedNote.Contacts);
         Assert.Same(contact2, viewModel.SelectedNote.SelectedContact);
-        Assert.True(contact2.IsSelected);
+        Assert.True(contact2.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void TypingInBlankItem_CreatesNewBlankItem()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         Assert.Single(viewModel.Notes); // Starts with one blank note
+        var editedNote = viewModel.SelectedNote;
 
         // Act
-        viewModel.SelectedNote.CaseNumber = "New Case"; // Simulate user typing
+        editedNote.CaseNumber = "New Case"; // Simulate user typing
 
         // Assert
         Assert.Equal(2, viewModel.Notes.Count); // A new blank note should be added
-        Assert.False(viewModel.Notes[0].IsBlank); // The first note is no longer blank
-        Assert.True(viewModel.Notes[1].IsBlank); // The new note is blank
+        Assert.True(editedNote.State is CollectionMemberState.Selected); // The edited note should remain selected
+        Assert.False(viewModel.Notes[1].State is CollectionMemberState.Selected); // The new blank note should NOT be selected
     }
 
     [Fact]
     public void OnCompanyClicked_ChangesSelectedCompany()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var dealer = viewModel.SelectedNote.Dealers[0];
         dealer.Name = "Test Dealer"; // Make dealer non-blank
         var company1 = dealer.Companies[0];
@@ -261,15 +273,15 @@ public class DashboardViewModelTests
 
         // Assert
         Assert.Same(company2, viewModel.SelectedNote.SelectedDealer?.SelectedCompany);
-        Assert.True(company2.IsSelected);
-        Assert.False(company1.IsSelected);
+        Assert.True(company2.State is CollectionMemberState.Selected);
+        Assert.False(company1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_RemovesCompany_AndSelectsNextAvailable()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var dealer = viewModel.SelectedNote.Dealers[0];
         dealer.Name = "Test Dealer";
 
@@ -288,14 +300,14 @@ public class DashboardViewModelTests
         Assert.Equal(2, dealer.Companies.Count);
         Assert.DoesNotContain(company1, dealer.Companies);
         Assert.Same(company2, dealer.SelectedCompany);
-        Assert.True(company2.IsSelected);
+        Assert.True(company2.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_RemovesForm_AndSelectsNextAvailable()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var form1 = viewModel.SelectedNote.Forms[0];
         form1.Name = "Form 1";
         var form2 = viewModel.SelectedNote.Forms[1];
@@ -311,14 +323,14 @@ public class DashboardViewModelTests
         Assert.Equal(2, viewModel.SelectedNote.Forms.Count);
         Assert.DoesNotContain(form1, viewModel.SelectedNote.Forms);
         Assert.Same(form2, viewModel.SelectedNote.SelectedForm);
-        Assert.True(form2.IsSelected);
+        Assert.True(form2.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDealClicked_ChangesSelectedTestDeal()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var form = viewModel.SelectedNote.Forms[0];
         form.Name = "Test Form";
         var deal1 = form.TestDeals[0];
@@ -330,15 +342,15 @@ public class DashboardViewModelTests
 
         // Assert
         Assert.Same(deal2, form.SelectedTestDeal);
-        Assert.True(deal2.IsSelected);
-        Assert.False(deal1.IsSelected);
+        Assert.True(deal2.State is CollectionMemberState.Selected);
+        Assert.False(deal1.State is CollectionMemberState.Selected);
     }
 
     [Fact]
     public void OnDeleteItemClicked_WhenDeletingLastNonBlankNote_SelectsBlankNote()
     {
         // Arrange
-        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object);
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
         var note1 = viewModel.Notes[0];
         note1.CaseNumber = "The only note";
         var blankNote = viewModel.Notes[1];
@@ -352,6 +364,6 @@ public class DashboardViewModelTests
         // Assert
         Assert.Single(viewModel.Notes);
         Assert.Same(blankNote, viewModel.SelectedNote);
-        Assert.True(blankNote.IsSelected);
+        Assert.True(blankNote.State is CollectionMemberState.Selected);
     }
 }

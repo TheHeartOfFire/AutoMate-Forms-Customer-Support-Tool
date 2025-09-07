@@ -1,5 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
+using AMFormsCST.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,12 @@ namespace AMFormsCST.Core.Utils;
 public class FormgenUtils : IFormgenUtils
 {
     private readonly IFileSystem _fileSystem;
+    private readonly ILogService? _logger;
     private string? _filePath;
 
     public string? FileName => _filePath is null ? null : _fileSystem.GetFileName(_filePath);
     public DotFormgen? ParsedFormgenFile { get; set; }
-    public FormgenUtilsProperties Properties { get; } = new();
+    public FormgenUtilsProperties Properties { get; }
 
     public bool HasChanged => !(_backupCopy is null || ParsedFormgenFile is null || _backupCopy.Equals(ParsedFormgenFile));
     public event EventHandler? FormgenFileChanged;
@@ -23,41 +25,66 @@ public class FormgenUtils : IFormgenUtils
 
     private DotFormgen? _backupCopy;
 
-    public FormgenUtils(IFileSystem fileSystem, FormgenUtilsProperties properties)
+    public FormgenUtils(IFileSystem fileSystem, FormgenUtilsProperties properties, ILogService? logger = null)
     {
         _fileSystem = fileSystem;
         Properties = properties ?? throw new ArgumentNullException(nameof(properties));
+        _logger = logger;
+        _logger?.LogInfo("FormgenUtils initialized.");
     }
 
     public void OpenFile(string filePath)
     {
-        if (!filePath.Contains("FormgenBackup"))
-            _filePath = filePath;
+        try
+        {
+            if (!filePath.Contains("FormgenBackup"))
+                _filePath = filePath;
 
-        var xmlContent = _fileSystem.ReadAllText(filePath);
-        var xmlDoc = new XmlDocument();
-        xmlDoc.LoadXml(xmlContent);
-        if (xmlDoc.DocumentElement is null) throw new XmlException("The XML file is empty or missing a root element.");
-        ParsedFormgenFile = new DotFormgen(xmlDoc.DocumentElement);
-        _backupCopy = ParsedFormgenFile.Clone(); // Create a backup copy of the original file
+            var xmlContent = _fileSystem.ReadAllText(filePath);
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xmlContent);
+            if (xmlDoc.DocumentElement is null) throw new XmlException("The XML file is empty or missing a root element.");
+            ParsedFormgenFile = new DotFormgen(xmlDoc.DocumentElement);
+            _backupCopy = ParsedFormgenFile.Clone(); // Create a backup copy of the original file
 
-        ParsedFormgenFile.PropertyChanged += (s, e) => OnFormgenFileChanged();
+            ParsedFormgenFile.PropertyChanged += (s, e) => OnFormgenFileChanged();
 
+            _logger?.LogInfo($"Opened Formgen file: {filePath}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed to open Formgen file: {filePath}", ex);
+            throw;
+        }
     }
 
     public void SaveFile(string filePath, DotFormgen? fileToSave = null)
     {
-        var file = fileToSave is null ? ParsedFormgenFile : fileToSave;
+        try
+        {
+            var file = fileToSave is null ? ParsedFormgenFile : fileToSave;
 
-        if (file is null) return;
+            if (file is null)
+            {
+                _logger?.LogWarning($"SaveFile called but file is null: {filePath}");
+                return;
+            }
 
-        var xmlContent = file.GenerateXML();
-        _fileSystem.WriteAllText(filePath, xmlContent);
+            var xmlContent = file.GenerateXML();
+            _fileSystem.WriteAllText(filePath, xmlContent);
 
-        if (fileToSave is not null) return;
+            _logger?.LogInfo($"Saved Formgen file: {filePath}");
 
-        CreateBackup();
-        _backupCopy = ParsedFormgenFile;
+            if (fileToSave is not null) return;
+
+            CreateBackup();
+            _backupCopy = ParsedFormgenFile;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed to save Formgen file: {filePath}", ex);
+            throw;
+        }
     }
 
     public void CloseFile()
@@ -66,38 +93,51 @@ public class FormgenUtils : IFormgenUtils
         ParsedFormgenFile = null;
         _filePath = null;
         _backupCopy = null;
+        _logger?.LogInfo("Closed Formgen file.");
     }
 
     public void RenameFile(string newName, bool renameImage)
     {
-        if (string.IsNullOrEmpty(_filePath) || ParsedFormgenFile is null)
+        try
         {
-            return;
-        }
-
-        var directory = _fileSystem.GetDirectoryName(_filePath);
-        if (string.IsNullOrEmpty(directory))
-        {
-            return;
-        }
-
-        var originalFileNameWithoutExt = _fileSystem.GetFileNameWithoutExtension(_filePath);
-        var newFormgenPath = _fileSystem.CombinePath(directory, newName + ".formgen");
-
-        // Rename the .formgen file
-        _fileSystem.MoveFile(_filePath, newFormgenPath);
-        _filePath = newFormgenPath;
-
-        if (renameImage)
-        {
-            var imageExtension = ParsedFormgenFile.FormType == Format.Pdf ? ".pdf" : ".jpg";
-            var originalImagePath = _fileSystem.CombinePath(directory, originalFileNameWithoutExt + imageExtension);
-            var newImagePath = _fileSystem.CombinePath(directory, newName + imageExtension);
-
-            if (_fileSystem.FileExists(originalImagePath))
+            if (string.IsNullOrEmpty(_filePath) || ParsedFormgenFile is null)
             {
-                _fileSystem.MoveFile(originalImagePath, newImagePath);
+                _logger?.LogWarning("RenameFile called but file path or ParsedFormgenFile is null.");
+                return;
             }
+
+            var directory = _fileSystem.GetDirectoryName(_filePath);
+            if (string.IsNullOrEmpty(directory))
+            {
+                _logger?.LogWarning("RenameFile called but directory is null.");
+                return;
+            }
+
+            var originalFileNameWithoutExt = _fileSystem.GetFileNameWithoutExtension(_filePath);
+            var newFormgenPath = _fileSystem.CombinePath(directory, newName + ".formgen");
+
+            // Rename the .formgen file
+            _fileSystem.MoveFile(_filePath, newFormgenPath);
+            _logger?.LogInfo($"Renamed Formgen file from {_filePath} to {newFormgenPath}");
+            _filePath = newFormgenPath;
+
+            if (renameImage)
+            {
+                var imageExtension = ParsedFormgenFile.FormType == Format.Pdf ? ".pdf" : ".jpg";
+                var originalImagePath = _fileSystem.CombinePath(directory, originalFileNameWithoutExt + imageExtension);
+                var newImagePath = _fileSystem.CombinePath(directory, newName + imageExtension);
+
+                if (_fileSystem.FileExists(originalImagePath))
+                {
+                    _fileSystem.MoveFile(originalImagePath, newImagePath);
+                    _logger?.LogInfo($"Renamed image file from {originalImagePath} to {newImagePath}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Failed to rename Formgen file or image.", ex);
+            throw;
         }
     }
 
@@ -106,16 +146,21 @@ public class FormgenUtils : IFormgenUtils
         if (ParsedFormgenFile is null) return;
         ParsedFormgenFile.Settings.UUID = Guid.NewGuid().ToString();
         OnFormgenFileChanged();
+        _logger?.LogInfo("Regenerated UUID for Formgen file.");
     }
 
     public CodeLine[] GetCodeLines(CodeLineSettings.CodeType type)
     {
-        return ParsedFormgenFile?.CodeLines.Where(cl => cl.Settings?.Type == type).ToArray() ?? [];
+        var result = ParsedFormgenFile?.CodeLines.Where(cl => cl.Settings?.Type == type).ToArray() ?? [];
+        _logger?.LogDebug($"GetCodeLines called for type {type}. Returned {result.Length} lines.");
+        return result;
     }
 
     public CodeLine[] GetPrompts()
     {
-        return GetCodeLines(CodeLineSettings.CodeType.PROMPT);
+        var result = GetCodeLines(CodeLineSettings.CodeType.PROMPT);
+        _logger?.LogDebug($"GetPrompts called. Returned {result.Length} prompts.");
+        return result;
     }
 
     public void EditPrompts(CodeLine[] prompts)
@@ -135,6 +180,7 @@ public class FormgenUtils : IFormgenUtils
                     originalPrompt.PromptData.Choices = editedPrompt.PromptData.Choices;
                     originalPrompt.PromptData.Message = editedPrompt.PromptData.Message;
                 }
+                _logger?.LogInfo($"Edited prompt: {editedPrompt.Settings.Variable}");
             }
         }
     }
@@ -143,6 +189,7 @@ public class FormgenUtils : IFormgenUtils
     {
         if (ParsedFormgenFile is null || selected is null || selected.Length == 0)
         {
+            _logger?.LogWarning("ClonePrompt called but no prompts selected or ParsedFormgenFile is null.");
             return;
         }
 
@@ -155,6 +202,7 @@ public class FormgenUtils : IFormgenUtils
             string? newName = $"Copy of {promptToClone.Settings?.Variable}";
             var newPrompt = new CodeLine(promptToClone, newName, maxIndex);
             ParsedFormgenFile.CodeLines.Add(newPrompt);
+            _logger?.LogInfo($"Cloned prompt: {promptToClone.Settings?.Variable} as {newName}");
         }
 
         // Re-sort all codelines to maintain order by type and then by index
@@ -168,71 +216,103 @@ public class FormgenUtils : IFormgenUtils
     {
         if (ParsedFormgenFile is null) return;
 
-        // Open the source file to get its prompts
-        var sourceXmlContent = _fileSystem.ReadAllText(fromFilePath);
-        var sourceDoc = new XmlDocument();
-        sourceDoc.LoadXml(sourceXmlContent);
-        if (sourceDoc.DocumentElement is null) return; // Can't copy from an empty file
-        var sourceFormgen = new DotFormgen(sourceDoc.DocumentElement);
-        var sourcePrompts = sourceFormgen.CodeLines.Where(cl => cl.Settings?.Type == CodeLineSettings.CodeType.PROMPT);
-
-        // Get existing prompts in the target file
-        var targetPrompts = GetPrompts().ToList();
-        int maxIndex = targetPrompts.Any() ? targetPrompts.Max(p => p.Settings?.Order ?? 0) : 0;
-        var targetPromptNames = new HashSet<string?>(targetPrompts.Select(p => p.Settings?.Variable));
-
-        foreach (var sourcePrompt in sourcePrompts)
+        try
         {
-            // Only add if a prompt with the same variable name doesn't already exist
-            if (sourcePrompt.Settings?.Variable is not null && !targetPromptNames.Contains(sourcePrompt.Settings.Variable))
+            // Open the source file to get its prompts
+            var sourceXmlContent = _fileSystem.ReadAllText(fromFilePath);
+            var sourceDoc = new XmlDocument();
+            sourceDoc.LoadXml(sourceXmlContent);
+            if (sourceDoc.DocumentElement is null) return; // Can't copy from an empty file
+            var sourceFormgen = new DotFormgen(sourceDoc.DocumentElement);
+            var sourcePrompts = sourceFormgen.CodeLines.Where(cl => cl.Settings?.Type == CodeLineSettings.CodeType.PROMPT);
+
+            // Get existing prompts in the target file
+            var targetPrompts = GetPrompts().ToList();
+            int maxIndex = targetPrompts.Any() ? targetPrompts.Max(p => p.Settings?.Order ?? 0) : 0;
+            var targetPromptNames = new HashSet<string?>(targetPrompts.Select(p => p.Settings?.Variable));
+
+            foreach (var sourcePrompt in sourcePrompts)
             {
-                maxIndex++;
-                var newPrompt = new CodeLine(sourcePrompt, sourcePrompt.Settings.Variable, maxIndex);
-                ParsedFormgenFile.CodeLines.Add(newPrompt);
-                targetPromptNames.Add(newPrompt.Settings?.Variable);
+                // Only add if a prompt with the same variable name doesn't already exist
+                if (sourcePrompt.Settings?.Variable is not null && !targetPromptNames.Contains(sourcePrompt.Settings.Variable))
+                {
+                    maxIndex++;
+                    var newPrompt = new CodeLine(sourcePrompt, sourcePrompt.Settings.Variable, maxIndex);
+                    ParsedFormgenFile.CodeLines.Add(newPrompt);
+                    targetPromptNames.Add(newPrompt.Settings?.Variable);
+                    _logger?.LogInfo($"Copied prompt: {sourcePrompt.Settings.Variable}");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed to copy prompts from {fromFilePath}", ex);
+            throw;
         }
     }
 
     public void CreateBackup()
     {
-        if (string.IsNullOrEmpty(_filePath) || _backupCopy is null) return;
-
-        var backupDir = _fileSystem.CombinePath(IO.BackupPath, $"{_fileSystem.GetFileNameWithoutExtension(_filePath)}_{_backupCopy.Settings.UUID}");
-        _fileSystem.CreateDirectory(backupDir);
-
-        // Enforce retention policy
-        var retentionQty = Properties.BackupRetentionQty;
-        if (retentionQty > 0)
+        try
         {
-            var existingBackups = _fileSystem.GetFiles(backupDir)
-                                             .OrderByDescending(f => _fileSystem.GetLastWriteTime(f))
-                                             .ToList();
+            if (string.IsNullOrEmpty(_filePath) || _backupCopy is null) return;
 
-            if (existingBackups.Count >= retentionQty)
+            var backupDir = _fileSystem.CombinePath(IO.BackupPath, $"{_fileSystem.GetFileNameWithoutExtension(_filePath)}_{_backupCopy.Settings.UUID}");
+            _fileSystem.CreateDirectory(backupDir);
+
+            // Enforce retention policy
+            var retentionQty = Properties.BackupRetentionQty;
+            if (retentionQty > 0)
             {
-                var backupsToDelete = existingBackups.Skip((int)retentionQty - 1);
-                foreach (var oldBackup in backupsToDelete)
+                var existingBackups = _fileSystem.GetFiles(backupDir)
+                                                 .OrderByDescending(f => _fileSystem.GetLastWriteTime(f))
+                                                 .ToList();
+
+                if (existingBackups.Count >= retentionQty)
                 {
-                    _fileSystem.DeleteFile(oldBackup);
+                    var backupsToDelete = existingBackups.Skip((int)retentionQty - 1);
+                    foreach (var oldBackup in backupsToDelete)
+                    {
+                        _fileSystem.DeleteFile(oldBackup);
+                        _logger?.LogInfo($"Deleted old backup: {oldBackup}");
+                    }
                 }
             }
+
+            // Create new backup
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            var backupFileName = $"{{{timestamp}}}.bak";
+            var backupPath = _fileSystem.CombinePath(backupDir, backupFileName);
+
+            SaveFile(backupPath, _backupCopy);
+            _logger?.LogInfo($"Created backup: {backupPath}");
         }
-
-        // Create new backup
-        var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        var backupFileName = $"{{{timestamp}}}.bak";
-        var backupPath = _fileSystem.CombinePath(backupDir, backupFileName);
-
-        SaveFile(backupPath, _backupCopy);
+        catch (Exception ex)
+        {
+            _logger?.LogError("Failed to create backup.", ex);
+            throw;
+        }
     }
 
     public void LoadBackup(string backupPath)
     {
-        if (_fileSystem.FileExists(backupPath))
+        try
         {
-            OpenFile(backupPath);
-            OnFormgenFileChanged();
+            if (_fileSystem.FileExists(backupPath))
+            {
+                OpenFile(backupPath);
+                OnFormgenFileChanged();
+                _logger?.LogInfo($"Loaded backup: {backupPath}");
+            }
+            else
+            {
+                _logger?.LogWarning($"Backup file does not exist: {backupPath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed to load backup: {backupPath}", ex);
+            throw;
         }
     }
 }

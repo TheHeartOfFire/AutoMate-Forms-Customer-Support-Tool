@@ -34,7 +34,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(ISupportTool supportTool, ILogService? logger = null)
     {
         _supportTool = supportTool;
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger;
         _logger?.LogInfo("MainWindowViewModel initialized.");
 
         // Initialize and subscribe to setting changes

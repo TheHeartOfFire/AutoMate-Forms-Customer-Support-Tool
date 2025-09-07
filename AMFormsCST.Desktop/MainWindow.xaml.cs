@@ -24,7 +24,6 @@ namespace AMFormsCST.Desktop;
 public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Set up persistent notes. Regularly save current notes to file to be retrieved upon crash or between sessions.
     // TODO: Notes Importing(from clipboard, eventually from headless browser)
     // TODO: Docs
     // TODO: Readme

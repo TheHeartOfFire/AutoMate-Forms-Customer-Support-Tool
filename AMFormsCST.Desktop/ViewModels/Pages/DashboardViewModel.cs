@@ -144,7 +144,7 @@ public partial class DashboardViewModel : ViewModel
     private void SelectedNote_Forms_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(ManagedObservableCollection<Models.Form>.SelectedItem)) return;
-        
+
         if (_lastSelectedForm != null)
         {
             _lastSelectedForm.TestDeals.PropertyChanged -= SelectedForm_TestDeals_PropertyChanged;
@@ -371,6 +371,8 @@ public partial class DashboardViewModel : ViewModel
         }
     }
 
+
+
     [RelayCommand]
     private void OpenFormgenUtilsDialog()
     {
@@ -440,14 +442,158 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void LoadCase()
     {
-        //var dialog = new Dialogs.NewTemplateDialog();
-        //dialog.ShowDialog();
+        var note = ParseCaseText(Clipboard.GetText());
+        ApplyParsedNote(note);
+        Notes.LastOrDefault(n => n.IsBlank == false)?.Select();
+
         _logger?.LogInfo("LoadCase command executed.");
     }
 
-    //public void TriggerRadioButtonRefresh()
+    public NoteModel ParseCaseText(string caseText)
+    {
+        var note = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);
+        var textLines = caseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        try
+        {
+            var lines = textLines.ToList();
+
+            string GetValueAfter(string key)
+            {
+                var index = lines.FindIndex(l => l.Trim().Equals(key, StringComparison.OrdinalIgnoreCase));
+                return index != -1 && index + 1 < lines.Count ? lines[index + 1].Trim() : string.Empty;
+            }
+
+            string GetValueFromKeyValue(string key, List<string> section)
+            {
+                var line = section.FirstOrDefault(l => l.Trim().StartsWith(key, StringComparison.OrdinalIgnoreCase));
+                return line?.Split(':').Skip(1).FirstOrDefault()?.Trim() ?? string.Empty;
+            }
+
+            var submittedValuesIdx = lines.FindIndex(l => l.Trim().Equals("Submitted Values:", StringComparison.OrdinalIgnoreCase));
+            var serverValuesIdx = lines.FindIndex(l => l.Trim().Equals("Server-Provided Values:", StringComparison.OrdinalIgnoreCase));
+            var descriptionIdx = lines.FindIndex(l => l.Trim().Equals("Description", StringComparison.OrdinalIgnoreCase));
+            var separatorIdx = lines.FindIndex(l => l.Trim().Equals("====================", StringComparison.OrdinalIgnoreCase));
+
+            var submittedValues = submittedValuesIdx != -1
+                ? lines.Skip(submittedValuesIdx + 1).Take(serverValuesIdx != -1 ? serverValuesIdx - submittedValuesIdx - 1 : lines.Count).ToList()
+                : [];
+
+            var serverValues = serverValuesIdx != -1
+                ? lines.Skip(serverValuesIdx + 1).ToList()
+                : [];
+
+            note.CaseNumber = GetValueAfter("Case Number");
+            var subject = GetValueAfter("Subject");
+            var description = descriptionIdx != -1 && separatorIdx != -1
+                ? string.Join(Environment.NewLine, lines.Skip(descriptionIdx + 1).Take(separatorIdx - descriptionIdx - 1)).Trim()
+                : string.Empty;
+
+            note.Notes = $"{subject}{Environment.NewLine}{description}".Trim();
+
+            var contact = note.Contacts[0];
+            contact.Name = GetValueAfter("Contact Name");
+            contact.Email = GetValueFromKeyValue("Email:", submittedValues);
+            contact.Phone = GetValueFromKeyValue("Phone:", submittedValues);
+
+            var dealer = note.Dealers[0];
+            dealer.Name = GetValueFromKeyValue("Company Name:", submittedValues);
+            dealer.ServerCode = GetValueFromKeyValue("Server ID:", serverValues);
+
+            var company = dealer.Companies[0];
+            company.Name = GetValueFromKeyValue("Company Name:", submittedValues);
+            company.CompanyCode = GetValueFromKeyValue("Company Number:", submittedValues);
+
+            _logger?.LogInfo("Case text parsed into NoteModel.");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error parsing case text.", ex);
+            ExceptionDispatchInfo.Capture(ex).Throw();
+        }
+        return note;
+    }
+
+    private void ApplyParsedNote(NoteModel newNote)
+    {
+        var recipient = Notes.LastOrDefault(n => n.IsBlank);
+        if (recipient is null) return;
+
+        recipient.CaseNumber = newNote.CaseNumber;
+        recipient.Notes = newNote.Notes;
+
+        var recipientContact = recipient.Contacts.FirstOrDefault(c => c.IsBlank);
+        var sourceContact = newNote.Contacts.FirstOrDefault();
+        if (recipientContact is not null && sourceContact is not null)
+        {
+            recipientContact.Name = sourceContact.Name;
+            recipientContact.Email = sourceContact.Email;
+            recipientContact.Phone = sourceContact.Phone;
+        }
+
+        var recipientDealer = recipient.Dealers.FirstOrDefault(d => d.IsBlank);
+        var sourceDealer = newNote.Dealers.FirstOrDefault();
+        if (recipientDealer is not null && sourceDealer is not null)
+        {
+            recipientDealer.Name = sourceDealer.Name;
+            recipientDealer.ServerCode = sourceDealer.ServerCode;
+
+            var recipientCompany = recipientDealer.Companies.FirstOrDefault(c => c.IsBlank);
+            var sourceCompany = sourceDealer.Companies.FirstOrDefault();
+            if (recipientCompany is not null && sourceCompany is not null)
+            {
+                recipientCompany.Name = sourceCompany.Name;
+                recipientCompany.CompanyCode = sourceCompany.CompanyCode;
+            }
+        }
+    }
+
+    //private void btnLoad_Click(object sender, RoutedEventArgs e)
     //{
-    //    UiRefreshCounter++;
-    //    _logger?.LogDebug("RadioButton refresh triggered.");
+    //    var text = Clipboard.GetText();
+
+    //    if (string.IsNullOrEmpty(text)) return;
+
+    //    var lines = text.Split('\n');
+
+    //    if (!lines[0].Equals("Case Number\r")) return;
+
+    //    var newNote = LoadSFNotes(lines);
+
+    //    NotesList.Add(newNote);
+    //    tcTabs.Items.Add(newNote.TabItem);
+    //    tcTabs.SelectedItem = newNote.TabItem;
+    //    ToggleClose();
+
+    //    Clipboard.Clear();
+    //}
+
+    //private NotesInfo LoadSFNotes(string[] notes)
+    //{
+    //    var submittedIdx = Array.IndexOf(notes, "Submitted Values:\r");
+    //    var serverIdx = Array.IndexOf(notes, "Server-Provided Values:\r");
+    //    string[]? submittedValues = null;
+    //    string[]? serverValues = null;
+
+    //    if (submittedIdx > 0)
+    //        submittedValues = notes[submittedIdx..];
+
+    //    if (submittedIdx > 0 && serverIdx > 0)
+    //        submittedValues = notes[submittedIdx..serverIdx];
+
+    //    if (serverIdx > 0)
+    //        serverValues = notes[serverIdx..];
+
+    //    NotesInfo newNote = new(NotesList[0].TabItem.Clone())
+    //    {
+    //        CaseText = notes.Length >= 1 ? notes[1].Trim() : string.Empty,
+    //        ContactName = notes.Length >= 10 ? notes[10].Trim() : string.Empty,
+    //        Email = submittedValues is not null && submittedValues.Length >= 3 ? submittedValues[3][7..].Trim() : string.Empty,
+    //        Phone = submittedValues is not null && submittedValues.Length >= 4 ? submittedValues[4][6..].Trim() : string.Empty,
+    //        Companies = submittedValues is not null && submittedValues.Length >= 5 ? submittedValues[5][15..].Trim() : string.Empty,
+    //        Dealership = submittedValues is not null && submittedValues.Length >= 6 ? submittedValues[6][13..].Trim() : string.Empty,
+    //        ServerId = serverValues is not null && serverValues.Length >= 2 ? serverValues[2][10..].Trim() : string.Empty
+    //    };
+
+    //    return newNote;
     //}
 }

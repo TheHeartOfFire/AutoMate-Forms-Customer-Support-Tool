@@ -69,7 +69,7 @@ public class DashboardViewModelTests
     {
         // Arrange
         var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
-        
+
         // Simulate user input on the first note, which will make it non-blank.
         var firstNote = viewModel.Notes[0];
         firstNote.CaseNumber = "12345";
@@ -78,7 +78,7 @@ public class DashboardViewModelTests
         // We now have two notes to test the selection logic with.
         Assert.Equal(2, viewModel.Notes.Count);
         var secondNote = viewModel.Notes[1];
-        
+
         // Pre-condition check: ensure the first note is still selected after adding a new one.
         Assert.Same(firstNote, viewModel.SelectedNote);
 
@@ -88,7 +88,7 @@ public class DashboardViewModelTests
         // Assert
         // The SelectedNote should now be the second note.
         Assert.Same(secondNote, viewModel.SelectedNote);
-        
+
         // Verify the selection flags are correct on both notes.
         Assert.True(secondNote.State is CollectionMemberState.Selected);
         Assert.False(firstNote.State is CollectionMemberState.Selected);
@@ -148,7 +148,7 @@ public class DashboardViewModelTests
         dealer1.Name = "Dealer 1";
         var dealer2 = viewModel.SelectedNote.Dealers[1];
         dealer2.Name = "Dealer 2";
-        
+
         viewModel.DealerClickedCommand.Execute(dealer1); // Select the first dealer
         Assert.Equal(3, viewModel.SelectedNote.Dealers.Count); // dealer1, dealer2, blank
 
@@ -173,7 +173,7 @@ public class DashboardViewModelTests
         _mockNotebook.Setup(n => n.Notes).Returns(notesList);
 
         var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
-        
+
         // Act: Change a property that is configured to trigger the update.
         viewModel.SelectedNote.CaseNumber = "54321";
 
@@ -226,7 +226,7 @@ public class DashboardViewModelTests
         contact1.Name = "Contact 1";
         var contact2 = viewModel.SelectedNote.Contacts[1];
         contact2.Name = "Contact 2";
-        
+
         viewModel.ContactClickedCommand.Execute(contact1);
         Assert.Equal(3, viewModel.SelectedNote.Contacts.Count);
 
@@ -289,7 +289,7 @@ public class DashboardViewModelTests
         company1.Name = "Company 1";
         var company2 = dealer.Companies[1];
         company2.Name = "Company 2";
-        
+
         viewModel.CompanyClickedCommand.Execute(company1);
         Assert.Equal(3, dealer.Companies.Count);
 
@@ -312,7 +312,7 @@ public class DashboardViewModelTests
         form1.Name = "Form 1";
         var form2 = viewModel.SelectedNote.Forms[1];
         form2.Name = "Form 2";
-        
+
         viewModel.FormClickedCommand.Execute(form1);
         Assert.Equal(3, viewModel.SelectedNote.Forms.Count);
 
@@ -365,5 +365,172 @@ public class DashboardViewModelTests
         Assert.Single(viewModel.Notes);
         Assert.Same(blankNote, viewModel.SelectedNote);
         Assert.True(blankNote.State is CollectionMemberState.Selected);
+    }
+
+    [Theory]
+    [InlineData(
+        @"
+Case Number
+12453488
+Case Owner
+Support Agent
+Support Agent
+Status
+New
+Priority
+Standard
+Contact Name
+Jane Doe
+Subject
+Request for new forms
+Description
+Please add the attached forms for our dealership.
+
+====================
+
+Submitted Values:
+Name: Jane Doe
+Title: Office Manager
+Email: jane.doe@exampledealership.com
+Phone: 5551234567
+Company Number: 4
+Company Name: Example Dealership
+
+Server-Provided Values:
+HAC: HW8F760K
+Server ID: G030
+Username: jdoe
+Name: Jane Doe
+Email: jane.doe@exampledealership.com
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12453488", "Jane Doe", "Request for new forms\r\nPlease add the attached forms for our dealership.", "jane.doe@exampledealership.com", "5551234567", "Example Dealership", "4", "G030"
+)]
+    [InlineData(
+    @"
+Case Number
+12455241
+Case Owner
+Support Agent
+Status
+In Progress
+Priority
+Standard
+Contact Name
+John Smith
+Subject
+Title Application Request
+Description
+Please add the state title application.
+
+====================
+
+Submitted Values:
+Name: JOHN A. SMITH
+Title: manager
+Email: john.smith@anotherauto.com
+Phone: 5559876543
+Company Number: 1
+Company Name: Another Auto Group
+
+Server-Provided Values:
+HAC: HDQ521V1
+Server ID: T751
+Username: jsmith
+Name: JOHN A. SMITH
+Email: john.smith@anotherauto.com
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12455241", "John Smith", "Title Application Request\r\nPlease add the state title application.", "john.smith@anotherauto.com", "5559876543", "Another Auto Group", "1", "T751"
+)]
+    [InlineData(
+    @"
+Case Number
+12459417
+Case Owner
+Support Agent
+Support Agent
+Status
+In Progress
+Priority
+Standard
+Contact Name
+Susan Jones
+Subject
+Generic Form Issue
+Description
+A field is not printing correctly on the form.
+Also, another field should be blank.
+Please assist.
+
+====================
+
+Submitted Values:
+Name: Susan Jones
+Title: Business Manager
+Email: susan.jones@genericauto.com
+Phone: 5555551212
+Company Number: 3
+Company Name: Generic Auto Mall
+
+Server-Provided Values:
+HAC: HR1GTF01
+Server ID: M450
+Username: sjones
+Name: Susan Jones
+Email: S.JONES@GENERICMAIL.COM
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12459417", "Susan Jones", "Generic Form Issue\r\nA field is not printing correctly on the form.\r\nAlso, another field should be blank.\r\nPlease assist.", "susan.jones@genericauto.com", "5555551212", "Generic Auto Mall", "3", "M450"
+)]
+    public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
+string caseText,
+string expectedCaseNumber,
+string expectedContactName,
+string expectedNotes,
+string expectedEmail,
+string expectedPhone,
+string expectedCompanyName,
+string expectedCompanyNumber,
+string expectedServerId)
+    {
+        // Arrange
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
+
+        // Act
+        var note = viewModel.ParseCaseText(caseText);
+
+        // Assert
+        Assert.NotNull(note);
+        Assert.Equal(expectedCaseNumber, note.CaseNumber);
+        Assert.Equal(expectedNotes, note.Notes);
+
+        Assert.Equal(2, note.Dealers.Count);
+        var dealer = note.Dealers[0];
+        Assert.Equal(expectedCompanyName, dealer.Name);
+        Assert.Equal(expectedServerId, dealer.ServerCode);
+
+        Assert.Equal(2, dealer.Companies.Count);
+        var company = dealer.Companies[0];
+        Assert.Equal(expectedCompanyNumber, company.CompanyCode);
+        Assert.Equal(expectedCompanyName, company.Name);
+
+        Assert.Equal(2, note.Contacts.Count);
+        var contact = note.Contacts[0];
+        Assert.Equal(expectedContactName, contact.Name);
+        Assert.Equal(expectedEmail, contact.Email);
+        Assert.Equal(expectedPhone, contact.Phone);
     }
 }

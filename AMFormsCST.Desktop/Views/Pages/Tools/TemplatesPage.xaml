@@ -12,7 +12,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="TemplatesPage"
       d:DataContext="{d:DesignInstance viewModels:TemplatesViewModel, 
-                                       IsDesignTimeCreatable=False}">
+                                       IsDesignTimeCreatable=True}">
 
     <Grid>
         <Grid.ColumnDefinitions>

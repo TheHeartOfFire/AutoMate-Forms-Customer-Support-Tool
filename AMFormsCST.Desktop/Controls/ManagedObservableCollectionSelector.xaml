@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AMFormsCST.Desktop.Controls.HorizontalRadioButtons"    
+﻿<UserControl x:Class="AMFormsCST.Desktop.Controls.ManagedObservableCollectionSelector"    
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"    
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"    
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"     
@@ -28,7 +28,7 @@
                                      Command="{Binding RadioButtonCommand, ElementName=RadioButtonControl}"
                                      Margin="0,0,5,10"    
                                      MinWidth="10"    
-                                     GroupName="{Binding GroupName, RelativeSource={RelativeSource AncestorType=local:HorizontalRadioButtons}}"
+                                     GroupName="{Binding GroupName, RelativeSource={RelativeSource AncestorType=local:ManagedObservableCollectionSelector}}"
                                      HorizontalContentAlignment="Stretch">
 
                             <RadioButton.CommandParameter>
@@ -79,7 +79,7 @@
                                                         </ControlTemplate>
                                                     </Setter.Value>
                                                 </Setter>
-                                                
+
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
                                                         <DataTrigger.EnterActions>

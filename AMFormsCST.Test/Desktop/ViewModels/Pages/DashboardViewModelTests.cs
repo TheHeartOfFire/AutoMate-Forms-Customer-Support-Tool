@@ -373,127 +373,127 @@ public class DashboardViewModelTests
 Case Number
 12453488
 Case Owner
-Dakota Jordan
-Dakota Jordan
+Support Agent
+Support Agent
 Status
 New
 Priority
 Standard
 Contact Name
-Danielle Johnson
+Jane Doe
 Subject
-new forms
+Request for new forms
 Description
-Please add the attached forms.
+Please add the attached forms for our dealership.
 
 ====================
 
 Submitted Values:
-Name: Danielle Johnson
+Name: Jane Doe
 Title: Office Manager
-Email: daniellejohnson@wagnercadillac.com
-Phone: 9035611212
+Email: jane.doe@exampledealership.com
+Phone: 5551234567
 Company Number: 4
-Company Name: Wagner Cadillac
+Company Name: Example Dealership
 
 Server-Provided Values:
 HAC: HW8F760K
 Server ID: G030
-Username: danij
-Name: Danielle Johnson
-Email: daniellejohnson@wagnercadillac.com
+Username: jdoe
+Name: Jane Doe
+Email: jane.doe@exampledealership.com
 
 Versions:
 AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12453488", "Danielle Johnson", "new forms\r\nPlease add the attached forms.", "daniellejohnson@wagnercadillac.com", "9035611212", "Wagner Cadillac", "4", "G030"
+        "12453488", "Jane Doe", "Request for new forms\r\nPlease add the attached forms for our dealership.", "jane.doe@exampledealership.com", "5551234567", "Example Dealership", "4", "G030"
 )]
     [InlineData(
     @"
 Case Number
 12455241
 Case Owner
-Dakota Jordan
+Support Agent
 Status
 In Progress
 Priority
 Standard
 Contact Name
-Rachel Gause
+John Smith
 Subject
-title app
+Title Application Request
 Description
-please add michigan title app
+Please add the state title application.
 
 ====================
 
 Submitted Values:
-Name: RACHEL A. GAUSE
+Name: JOHN A. SMITH
 Title: manager
-Email: rachel@carolinaautodirect.com
-Phone: 9802812984
+Email: john.smith@anotherauto.com
+Phone: 5559876543
 Company Number: 1
-Company Name: Carolina Auto Direct
+Company Name: Another Auto Group
 
 Server-Provided Values:
 HAC: HDQ521V1
 Server ID: T751
-Username: rachelg
-Name: RACHEL A. GAUSE
-Email: rachel@carolinaautodirect.com
+Username: jsmith
+Name: JOHN A. SMITH
+Email: john.smith@anotherauto.com
 
 Versions:
 AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12455241", "Rachel Gause", "title app\r\nplease add michigan title app", "rachel@carolinaautodirect.com", "9802812984", "Carolina Auto Direct", "1", "T751"
+        "12455241", "John Smith", "Title Application Request\r\nPlease add the state title application.", "john.smith@anotherauto.com", "5559876543", "Another Auto Group", "1", "T751"
 )]
     [InlineData(
     @"
 Case Number
 12459417
 Case Owner
-Dakota Jordan
-Dakota Jordan
+Support Agent
+Support Agent
 Status
 In Progress
 Priority
 Standard
 Contact Name
-Dorothy Davis
+Susan Jones
 Subject
-SC 5047 Form
+Generic Form Issue
 Description
-The Seller/Transferor's Name is not printing on line properly in Part A.
-Also, in Part C, the Person excercising power of attorney line should be blank.
+A field is not printing correctly on the form.
+Also, another field should be blank.
 Please assist.
 
 ====================
 
 Submitted Values:
-Name: Dorothy Davis
+Name: Susan Jones
 Title: Business Manager
-Email: danielled@mrchevrolet.com
-Phone: 8432088832
+Email: susan.jones@genericauto.com
+Phone: 5555551212
 Company Number: 3
-Company Name: Mike Reichenbach Chevrolet
+Company Name: Generic Auto Mall
 
 Server-Provided Values:
 HAC: HR1GTF01
 Server ID: M450
-Username: danielle
-Name: Dorothy Davis
-Email: DDDAVIS812@GMAIL.COM
+Username: sjones
+Name: Susan Jones
+Email: S.JONES@GENERICMAIL.COM
 
 Versions:
 AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12459417", "Dorothy Davis", "SC 5047 Form\r\nThe Seller/Transferor's Name is not printing on line properly in Part A.\r\nAlso, in Part C, the Person excercising power of attorney line should be blank.\r\nPlease assist.", "danielled@mrchevrolet.com", "8432088832", "Mike Reichenbach Chevrolet", "3", "M450"
+        "12459417", "Susan Jones", "Generic Form Issue\r\nA field is not printing correctly on the form.\r\nAlso, another field should be blank.\r\nPlease assist.", "susan.jones@genericauto.com", "5555551212", "Generic Auto Mall", "3", "M450"
 )]
     public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
 string caseText,

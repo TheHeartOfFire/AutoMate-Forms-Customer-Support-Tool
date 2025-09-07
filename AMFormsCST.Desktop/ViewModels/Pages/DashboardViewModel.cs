@@ -144,7 +144,7 @@ public partial class DashboardViewModel : ViewModel
     private void SelectedNote_Forms_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(ManagedObservableCollection<Models.Form>.SelectedItem)) return;
-        
+
         if (_lastSelectedForm != null)
         {
             _lastSelectedForm.TestDeals.PropertyChanged -= SelectedForm_TestDeals_PropertyChanged;
@@ -516,4 +516,125 @@ public partial class DashboardViewModel : ViewModel
     //    return newNote;
     //}
 
+    /* no mistakes in parsing from depricated setup
+     * Case Number
+    12453488
+    Case Owner
+    Dakota Jordan
+    Dakota Jordan
+    Status
+    New
+    Priority
+    Standard
+    Contact Name
+    Danielle Johnson
+    Subject
+    new forms
+    Description
+    Please add the attached forms.
+
+    ====================
+
+    Submitted Values:
+    Name: Danielle Johnson
+    Title: Office Manager
+    Email: daniellejohnson@wagnercadillac.com
+    Phone: 9035611212
+    Company Number: 4
+    Company Name: Wagner Cadillac
+
+    Server-Provided Values:
+    HAC: HW8F760K
+    Server ID: G030
+    Username: danij
+    Name: Danielle Johnson
+    Email: daniellejohnson@wagnercadillac.com
+
+    Versions:
+    AMPS: 3.06.0386
+    Tomcat: 3.6.389a
+    Web Browser: 11
+
+    // Name = 'Subject'
+
+        Case Number
+    12455241
+    Case Owner
+    Dakota Jordan
+    Status
+    In Progress
+    Priority
+    Standard
+    Contact Name
+    Rachel Gause
+    Subject
+    title app
+    Description
+    please add michigan title app
+
+    ====================
+
+    Submitted Values:
+    Name: RACHEL A. GAUSE
+    Title: manager
+    Email: rachel@carolinaautodirect.com
+    Phone: 9802812984
+    Company Number: 1
+    Company Name: Carolina Auto Direct
+
+    Server-Provided Values:
+    HAC: HDQ521V1
+    Server ID: T751
+    Username: rachelg
+    Name: RACHEL A. GAUSE
+    Email: rachel@carolinaautodirect.com
+
+    Versions:
+    AMPS: 3.06.0386
+    Tomcat: 3.6.389a
+    Web Browser: 11
+
+    no mistakes in parsing from depricated setup
+     
+
+    Case Number
+12459417
+Case Owner
+Dakota Jordan
+Dakota Jordan
+Status
+In Progress
+Priority
+Standard
+Contact Name
+Dorothy Davis
+Subject
+SC 5047 Form
+Description
+The Seller/Transferor's Name is not printing on line properly in Part A.
+Also, in Part C, the Person excercising power of attorney line should be blank.
+Please assist.
+
+====================
+
+Submitted Values:
+Name: Dorothy Davis
+Title: Business Manager
+Email: danielled@mrchevrolet.com
+Phone: 8432088832
+Company Number: 3
+Company Name: Mike Reichenbach Chevrolet
+
+Server-Provided Values:
+HAC: HR1GTF01
+Server ID: M450
+Username: danielle
+Name: Dorothy Davis
+Email: DDDAVIS812@GMAIL.COM
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+    */
 }

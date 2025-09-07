@@ -69,7 +69,7 @@ public class DashboardViewModelTests
     {
         // Arrange
         var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
-        
+
         // Simulate user input on the first note, which will make it non-blank.
         var firstNote = viewModel.Notes[0];
         firstNote.CaseNumber = "12345";
@@ -78,7 +78,7 @@ public class DashboardViewModelTests
         // We now have two notes to test the selection logic with.
         Assert.Equal(2, viewModel.Notes.Count);
         var secondNote = viewModel.Notes[1];
-        
+
         // Pre-condition check: ensure the first note is still selected after adding a new one.
         Assert.Same(firstNote, viewModel.SelectedNote);
 
@@ -88,7 +88,7 @@ public class DashboardViewModelTests
         // Assert
         // The SelectedNote should now be the second note.
         Assert.Same(secondNote, viewModel.SelectedNote);
-        
+
         // Verify the selection flags are correct on both notes.
         Assert.True(secondNote.State is CollectionMemberState.Selected);
         Assert.False(firstNote.State is CollectionMemberState.Selected);
@@ -148,7 +148,7 @@ public class DashboardViewModelTests
         dealer1.Name = "Dealer 1";
         var dealer2 = viewModel.SelectedNote.Dealers[1];
         dealer2.Name = "Dealer 2";
-        
+
         viewModel.DealerClickedCommand.Execute(dealer1); // Select the first dealer
         Assert.Equal(3, viewModel.SelectedNote.Dealers.Count); // dealer1, dealer2, blank
 
@@ -173,7 +173,7 @@ public class DashboardViewModelTests
         _mockNotebook.Setup(n => n.Notes).Returns(notesList);
 
         var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
-        
+
         // Act: Change a property that is configured to trigger the update.
         viewModel.SelectedNote.CaseNumber = "54321";
 
@@ -226,7 +226,7 @@ public class DashboardViewModelTests
         contact1.Name = "Contact 1";
         var contact2 = viewModel.SelectedNote.Contacts[1];
         contact2.Name = "Contact 2";
-        
+
         viewModel.ContactClickedCommand.Execute(contact1);
         Assert.Equal(3, viewModel.SelectedNote.Contacts.Count);
 
@@ -289,7 +289,7 @@ public class DashboardViewModelTests
         company1.Name = "Company 1";
         var company2 = dealer.Companies[1];
         company2.Name = "Company 2";
-        
+
         viewModel.CompanyClickedCommand.Execute(company1);
         Assert.Equal(3, dealer.Companies.Count);
 
@@ -312,7 +312,7 @@ public class DashboardViewModelTests
         form1.Name = "Form 1";
         var form2 = viewModel.SelectedNote.Forms[1];
         form2.Name = "Form 2";
-        
+
         viewModel.FormClickedCommand.Execute(form1);
         Assert.Equal(3, viewModel.SelectedNote.Forms.Count);
 
@@ -366,4 +366,170 @@ public class DashboardViewModelTests
         Assert.Same(blankNote, viewModel.SelectedNote);
         Assert.True(blankNote.State is CollectionMemberState.Selected);
     }
+
+    [Theory]
+    [InlineData(
+        @"
+Case Number
+12453488
+Case Owner
+Dakota Jordan
+Dakota Jordan
+Status
+New
+Priority
+Standard
+Contact Name
+Danielle Johnson
+Subject
+new forms
+Description
+Please add the attached forms.
+
+====================
+
+Submitted Values:
+Name: Danielle Johnson
+Title: Office Manager
+Email: daniellejohnson@wagnercadillac.com
+Phone: 9035611212
+Company Number: 4
+Company Name: Wagner Cadillac
+
+Server-Provided Values:
+HAC: HW8F760K
+Server ID: G030
+Username: danij
+Name: Danielle Johnson
+Email: daniellejohnson@wagnercadillac.com
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12453488", "Danielle Johnson", "new forms\r\nPlease add the attached forms.", "daniellejohnson@wagnercadillac.com", "9035611212", "Wagner Cadillac", "4", "G030"
+)]
+[InlineData(
+    @"
+Case Number
+12455241
+Case Owner
+Dakota Jordan
+Status
+In Progress
+Priority
+Standard
+Contact Name
+Rachel Gause
+Subject
+title app
+Description
+please add michigan title app
+
+====================
+
+Submitted Values:
+Name: RACHEL A. GAUSE
+Title: manager
+Email: rachel@carolinaautodirect.com
+Phone: 9802812984
+Company Number: 1
+Company Name: Carolina Auto Direct
+
+Server-Provided Values:
+HAC: HDQ521V1
+Server ID: T751
+Username: rachelg
+Name: RACHEL A. GAUSE
+Email: rachel@carolinaautodirect.com
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12455241", "Rachel Gause", "title app\r\nplease add michigan title app", "rachel@carolinaautodirect.com", "9802812984", "Carolina Auto Direct", "1", "T751"
+)]
+[InlineData(
+    @"
+Case Number
+12459417
+Case Owner
+Dakota Jordan
+Dakota Jordan
+Status
+In Progress
+Priority
+Standard
+Contact Name
+Dorothy Davis
+Subject
+SC 5047 Form
+Description
+The Seller/Transferor's Name is not printing on line properly in Part A.
+Also, in Part C, the Person excercising power of attorney line should be blank.
+Please assist.
+
+====================
+
+Submitted Values:
+Name: Dorothy Davis
+Title: Business Manager
+Email: danielled@mrchevrolet.com
+Phone: 8432088832
+Company Number: 3
+Company Name: Mike Reichenbach Chevrolet
+
+Server-Provided Values:
+HAC: HR1GTF01
+Server ID: M450
+Username: danielle
+Name: Dorothy Davis
+Email: DDDAVIS812@GMAIL.COM
+
+Versions:
+AMPS: 3.06.0386
+Tomcat: 3.6.389a
+Web Browser: 11
+",
+        "12459417", "Dorothy Davis", "SC 5047 Form\r\nThe Seller/Transferor's Name is not printing on line properly in Part A.\r\nAlso, in Part C, the Person excercising power of attorney line should be blank.\r\nPlease assist.", "danielled@mrchevrolet.com", "8432088832", "Mike Reichenbach Chevrolet", "3", "M450"
+)]
+public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
+string caseText,
+string expectedCaseNumber,
+string expectedContactName,
+string expectedNotes,
+string expectedEmail,
+string expectedPhone,
+string expectedCompanyName,
+string expectedCompanyNumber,
+string expectedServerId)
+{
+    // Arrange
+    var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
+
+    // Act
+    var note = viewModel.ParseCaseText(caseText);
+
+    // Assert
+    Assert.NotNull(note);
+    Assert.Equal(expectedCaseNumber, note.CaseNumber);
+    Assert.Equal(expectedNotes, note.Notes);
+
+    Assert.Single(note.Dealers);
+    var dealer = note.Dealers[0];
+    Assert.Equal(expectedCompanyName, dealer.Name);
+    Assert.Equal(expectedServerId, dealer.ServerCode);
+
+    Assert.Single(dealer.Companies);
+    var company = dealer.Companies[0];
+    Assert.Equal(expectedCompanyNumber, company.CompanyCode);
+    Assert.Equal(expectedCompanyName, company.Name);
+
+    Assert.Single(note.Contacts);
+    var contact = note.Contacts[0];
+    Assert.Equal(expectedContactName, contact.Name);
+    Assert.Equal(expectedEmail, contact.Email);
+    Assert.Equal(expectedPhone, contact.Phone);
 }

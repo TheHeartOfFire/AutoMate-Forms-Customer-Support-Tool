@@ -442,12 +442,78 @@ public partial class DashboardViewModel : ViewModel
     {
         //var dialog = new Dialogs.NewTemplateDialog();
         //dialog.ShowDialog();
+        var note = ParseCaseText(Clipboard.GetText());
+        Notes.Add(note);
+        note.Select();
+
         _logger?.LogInfo("LoadCase command executed.");
     }
 
-    //public void TriggerRadioButtonRefresh()
+    public NoteModel ParseCaseText(string caseText)
+    {
+        var note = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);
+        var textLines = caseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        try
+        {
+            note.ParseCaseText(caseText);
+            _logger?.LogInfo("Case text parsed into NoteModel.");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error parsing case text.", ex);
+            ExceptionDispatchInfo.Capture(ex).Throw();
+        }
+        return note;
+    }
+
+    //private void btnLoad_Click(object sender, RoutedEventArgs e)
     //{
-    //    UiRefreshCounter++;
-    //    _logger?.LogDebug("RadioButton refresh triggered.");
+    //    var text = Clipboard.GetText();
+
+    //    if (string.IsNullOrEmpty(text)) return;
+
+    //    var lines = text.Split('\n');
+
+    //    if (!lines[0].Equals("Case Number\r")) return;
+
+    //    var newNote = LoadSFNotes(lines);
+
+    //    NotesList.Add(newNote);
+    //    tcTabs.Items.Add(newNote.TabItem);
+    //    tcTabs.SelectedItem = newNote.TabItem;
+    //    ToggleClose();
+
+    //    Clipboard.Clear();
     //}
+
+    //private NotesInfo LoadSFNotes(string[] notes)
+    //{
+    //    var submittedIdx = Array.IndexOf(notes, "Submitted Values:\r");
+    //    var serverIdx = Array.IndexOf(notes, "Server-Provided Values:\r");
+    //    string[]? submittedValues = null;
+    //    string[]? serverValues = null;
+
+    //    if (submittedIdx > 0)
+    //        submittedValues = notes[submittedIdx..];
+
+    //    if (submittedIdx > 0 && serverIdx > 0)
+    //        submittedValues = notes[submittedIdx..serverIdx];
+
+    //    if (serverIdx > 0)
+    //        serverValues = notes[serverIdx..];
+
+    //    NotesInfo newNote = new(NotesList[0].TabItem.Clone())
+    //    {
+    //        CaseText = notes.Length >= 1 ? notes[1].Trim() : string.Empty,
+    //        ContactName = notes.Length >= 10 ? notes[10].Trim() : string.Empty,
+    //        Email = submittedValues is not null && submittedValues.Length >= 3 ? submittedValues[3][7..].Trim() : string.Empty,
+    //        Phone = submittedValues is not null && submittedValues.Length >= 4 ? submittedValues[4][6..].Trim() : string.Empty,
+    //        Companies = submittedValues is not null && submittedValues.Length >= 5 ? submittedValues[5][15..].Trim() : string.Empty,
+    //        Dealership = submittedValues is not null && submittedValues.Length >= 6 ? submittedValues[6][13..].Trim() : string.Empty,
+    //        ServerId = serverValues is not null && serverValues.Length >= 2 ? serverValues[2][10..].Trim() : string.Empty
+    //    };
+
+    //    return newNote;
+    //}
+
 }

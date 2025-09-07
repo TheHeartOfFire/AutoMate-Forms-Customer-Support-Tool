@@ -24,8 +24,6 @@ namespace AMFormsCST.Desktop;
 public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Design time data
-    // TODO: Tool Tips
     // TODO: Readme
     // TODO: Remove unnecessary comments and usings
     // TODO: Finish Velopack installation and publish v2.0

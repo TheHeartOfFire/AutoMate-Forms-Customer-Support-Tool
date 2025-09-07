@@ -371,6 +371,8 @@ public partial class DashboardViewModel : ViewModel
         }
     }
 
+
+
     [RelayCommand]
     private void OpenFormgenUtilsDialog()
     {
@@ -440,11 +442,9 @@ public partial class DashboardViewModel : ViewModel
     [RelayCommand]
     private void LoadCase()
     {
-        //var dialog = new Dialogs.NewTemplateDialog();
-        //dialog.ShowDialog();
         var note = ParseCaseText(Clipboard.GetText());
-        Notes.Add(note);
-        note.Select();
+        ApplyParsedNote(note);
+        Notes.LastOrDefault(n => n.IsBlank == false)?.Select();
 
         _logger?.LogInfo("LoadCase command executed.");
     }
@@ -455,7 +455,54 @@ public partial class DashboardViewModel : ViewModel
         var textLines = caseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
         try
         {
-            note.ParseCaseText(caseText);
+            var lines = textLines.ToList();
+
+            string GetValueAfter(string key)
+            {
+                var index = lines.FindIndex(l => l.Trim().Equals(key, StringComparison.OrdinalIgnoreCase));
+                return index != -1 && index + 1 < lines.Count ? lines[index + 1].Trim() : string.Empty;
+            }
+
+            string GetValueFromKeyValue(string key, List<string> section)
+            {
+                var line = section.FirstOrDefault(l => l.Trim().StartsWith(key, StringComparison.OrdinalIgnoreCase));
+                return line?.Split(':').Skip(1).FirstOrDefault()?.Trim() ?? string.Empty;
+            }
+
+            var submittedValuesIdx = lines.FindIndex(l => l.Trim().Equals("Submitted Values:", StringComparison.OrdinalIgnoreCase));
+            var serverValuesIdx = lines.FindIndex(l => l.Trim().Equals("Server-Provided Values:", StringComparison.OrdinalIgnoreCase));
+            var descriptionIdx = lines.FindIndex(l => l.Trim().Equals("Description", StringComparison.OrdinalIgnoreCase));
+            var separatorIdx = lines.FindIndex(l => l.Trim().Equals("====================", StringComparison.OrdinalIgnoreCase));
+
+            var submittedValues = submittedValuesIdx != -1
+                ? lines.Skip(submittedValuesIdx + 1).Take(serverValuesIdx != -1 ? serverValuesIdx - submittedValuesIdx - 1 : lines.Count).ToList()
+                : [];
+
+            var serverValues = serverValuesIdx != -1
+                ? lines.Skip(serverValuesIdx + 1).ToList()
+                : [];
+
+            note.CaseNumber = GetValueAfter("Case Number");
+            var subject = GetValueAfter("Subject");
+            var description = descriptionIdx != -1 && separatorIdx != -1
+                ? string.Join(Environment.NewLine, lines.Skip(descriptionIdx + 1).Take(separatorIdx - descriptionIdx - 1)).Trim()
+                : string.Empty;
+
+            note.Notes = $"{subject}{Environment.NewLine}{description}".Trim();
+
+            var contact = note.Contacts[0];
+            contact.Name = GetValueAfter("Contact Name");
+            contact.Email = GetValueFromKeyValue("Email:", submittedValues);
+            contact.Phone = GetValueFromKeyValue("Phone:", submittedValues);
+
+            var dealer = note.Dealers[0];
+            dealer.Name = GetValueFromKeyValue("Company Name:", submittedValues);
+            dealer.ServerCode = GetValueFromKeyValue("Server ID:", serverValues);
+
+            var company = dealer.Companies[0];
+            company.Name = GetValueFromKeyValue("Company Name:", submittedValues);
+            company.CompanyCode = GetValueFromKeyValue("Company Number:", submittedValues);
+
             _logger?.LogInfo("Case text parsed into NoteModel.");
         }
         catch (Exception ex)
@@ -464,6 +511,40 @@ public partial class DashboardViewModel : ViewModel
             ExceptionDispatchInfo.Capture(ex).Throw();
         }
         return note;
+    }
+
+    private void ApplyParsedNote(NoteModel newNote)
+    {
+        var recipient = Notes.LastOrDefault(n => n.IsBlank);
+        if (recipient is null) return;
+
+        recipient.CaseNumber = newNote.CaseNumber;
+        recipient.Notes = newNote.Notes;
+
+        var recipientContact = recipient.Contacts.FirstOrDefault(c => c.IsBlank);
+        var sourceContact = newNote.Contacts.FirstOrDefault();
+        if (recipientContact is not null && sourceContact is not null)
+        {
+            recipientContact.Name = sourceContact.Name;
+            recipientContact.Email = sourceContact.Email;
+            recipientContact.Phone = sourceContact.Phone;
+        }
+
+        var recipientDealer = recipient.Dealers.FirstOrDefault(d => d.IsBlank);
+        var sourceDealer = newNote.Dealers.FirstOrDefault();
+        if (recipientDealer is not null && sourceDealer is not null)
+        {
+            recipientDealer.Name = sourceDealer.Name;
+            recipientDealer.ServerCode = sourceDealer.ServerCode;
+
+            var recipientCompany = recipientDealer.Companies.FirstOrDefault(c => c.IsBlank);
+            var sourceCompany = sourceDealer.Companies.FirstOrDefault();
+            if (recipientCompany is not null && sourceCompany is not null)
+            {
+                recipientCompany.Name = sourceCompany.Name;
+                recipientCompany.CompanyCode = sourceCompany.CompanyCode;
+            }
+        }
     }
 
     //private void btnLoad_Click(object sender, RoutedEventArgs e)
@@ -515,126 +596,4 @@ public partial class DashboardViewModel : ViewModel
 
     //    return newNote;
     //}
-
-    /* no mistakes in parsing from depricated setup
-     * Case Number
-    12453488
-    Case Owner
-    Dakota Jordan
-    Dakota Jordan
-    Status
-    New
-    Priority
-    Standard
-    Contact Name
-    Danielle Johnson
-    Subject
-    new forms
-    Description
-    Please add the attached forms.
-
-    ====================
-
-    Submitted Values:
-    Name: Danielle Johnson
-    Title: Office Manager
-    Email: daniellejohnson@wagnercadillac.com
-    Phone: 9035611212
-    Company Number: 4
-    Company Name: Wagner Cadillac
-
-    Server-Provided Values:
-    HAC: HW8F760K
-    Server ID: G030
-    Username: danij
-    Name: Danielle Johnson
-    Email: daniellejohnson@wagnercadillac.com
-
-    Versions:
-    AMPS: 3.06.0386
-    Tomcat: 3.6.389a
-    Web Browser: 11
-
-    // Name = 'Subject'
-
-        Case Number
-    12455241
-    Case Owner
-    Dakota Jordan
-    Status
-    In Progress
-    Priority
-    Standard
-    Contact Name
-    Rachel Gause
-    Subject
-    title app
-    Description
-    please add michigan title app
-
-    ====================
-
-    Submitted Values:
-    Name: RACHEL A. GAUSE
-    Title: manager
-    Email: rachel@carolinaautodirect.com
-    Phone: 9802812984
-    Company Number: 1
-    Company Name: Carolina Auto Direct
-
-    Server-Provided Values:
-    HAC: HDQ521V1
-    Server ID: T751
-    Username: rachelg
-    Name: RACHEL A. GAUSE
-    Email: rachel@carolinaautodirect.com
-
-    Versions:
-    AMPS: 3.06.0386
-    Tomcat: 3.6.389a
-    Web Browser: 11
-
-    no mistakes in parsing from depricated setup
-     
-
-    Case Number
-12459417
-Case Owner
-Dakota Jordan
-Dakota Jordan
-Status
-In Progress
-Priority
-Standard
-Contact Name
-Dorothy Davis
-Subject
-SC 5047 Form
-Description
-The Seller/Transferor's Name is not printing on line properly in Part A.
-Also, in Part C, the Person excercising power of attorney line should be blank.
-Please assist.
-
-====================
-
-Submitted Values:
-Name: Dorothy Davis
-Title: Business Manager
-Email: danielled@mrchevrolet.com
-Phone: 8432088832
-Company Number: 3
-Company Name: Mike Reichenbach Chevrolet
-
-Server-Provided Values:
-HAC: HR1GTF01
-Server ID: M450
-Username: danielle
-Name: Dorothy Davis
-Email: DDDAVIS812@GMAIL.COM
-
-Versions:
-AMPS: 3.06.0386
-Tomcat: 3.6.389a
-Web Browser: 11
-    */
 }

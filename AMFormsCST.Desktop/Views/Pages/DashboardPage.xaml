@@ -46,7 +46,7 @@
             <ui:Button Margin="0,0,5,0" Command="{Binding OpenFormgenUtilsDialogCommand}">
                 <ui:SymbolIcon Symbol="DocumentTextToolbox24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
             </ui:Button>
-            <ui:Button Margin="0,0,5,0" Command="{Binding LoadCaseCommand}" IsEnabled="False">
+            <ui:Button Margin="0,0,5,0" Command="{Binding LoadCaseCommand}">
                     <ui:SymbolIcon Symbol="ArrowDownload24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
                 </ui:Button>
             </WrapPanel>

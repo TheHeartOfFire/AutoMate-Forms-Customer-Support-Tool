@@ -410,7 +410,7 @@ Web Browser: 11
 ",
         "12453488", "Danielle Johnson", "new forms\r\nPlease add the attached forms.", "daniellejohnson@wagnercadillac.com", "9035611212", "Wagner Cadillac", "4", "G030"
 )]
-[InlineData(
+    [InlineData(
     @"
 Case Number
 12455241
@@ -451,7 +451,7 @@ Web Browser: 11
 ",
         "12455241", "Rachel Gause", "title app\r\nplease add michigan title app", "rachel@carolinaautodirect.com", "9802812984", "Carolina Auto Direct", "1", "T751"
 )]
-[InlineData(
+    [InlineData(
     @"
 Case Number
 12459417
@@ -495,7 +495,7 @@ Web Browser: 11
 ",
         "12459417", "Dorothy Davis", "SC 5047 Form\r\nThe Seller/Transferor's Name is not printing on line properly in Part A.\r\nAlso, in Part C, the Person excercising power of attorney line should be blank.\r\nPlease assist.", "danielled@mrchevrolet.com", "8432088832", "Mike Reichenbach Chevrolet", "3", "M450"
 )]
-public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
+    public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
 string caseText,
 string expectedCaseNumber,
 string expectedContactName,
@@ -505,31 +505,32 @@ string expectedPhone,
 string expectedCompanyName,
 string expectedCompanyNumber,
 string expectedServerId)
-{
-    // Arrange
-    var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
+    {
+        // Arrange
+        var viewModel = new DashboardViewModel(_mockSupportTool.Object, _mockDialogService.Object, _mockFileSystem.Object, _mockDebounceService.Object);
 
-    // Act
-    var note = viewModel.ParseCaseText(caseText);
+        // Act
+        var note = viewModel.ParseCaseText(caseText);
 
-    // Assert
-    Assert.NotNull(note);
-    Assert.Equal(expectedCaseNumber, note.CaseNumber);
-    Assert.Equal(expectedNotes, note.Notes);
+        // Assert
+        Assert.NotNull(note);
+        Assert.Equal(expectedCaseNumber, note.CaseNumber);
+        Assert.Equal(expectedNotes, note.Notes);
 
-    Assert.Single(note.Dealers);
-    var dealer = note.Dealers[0];
-    Assert.Equal(expectedCompanyName, dealer.Name);
-    Assert.Equal(expectedServerId, dealer.ServerCode);
+        Assert.Equal(2, note.Dealers.Count);
+        var dealer = note.Dealers[0];
+        Assert.Equal(expectedCompanyName, dealer.Name);
+        Assert.Equal(expectedServerId, dealer.ServerCode);
 
-    Assert.Single(dealer.Companies);
-    var company = dealer.Companies[0];
-    Assert.Equal(expectedCompanyNumber, company.CompanyCode);
-    Assert.Equal(expectedCompanyName, company.Name);
+        Assert.Equal(2, dealer.Companies.Count);
+        var company = dealer.Companies[0];
+        Assert.Equal(expectedCompanyNumber, company.CompanyCode);
+        Assert.Equal(expectedCompanyName, company.Name);
 
-    Assert.Single(note.Contacts);
-    var contact = note.Contacts[0];
-    Assert.Equal(expectedContactName, contact.Name);
-    Assert.Equal(expectedEmail, contact.Email);
-    Assert.Equal(expectedPhone, contact.Phone);
+        Assert.Equal(2, note.Contacts.Count);
+        var contact = note.Contacts[0];
+        Assert.Equal(expectedContactName, contact.Name);
+        Assert.Equal(expectedEmail, contact.Email);
+        Assert.Equal(expectedPhone, contact.Phone);
+    }
 }

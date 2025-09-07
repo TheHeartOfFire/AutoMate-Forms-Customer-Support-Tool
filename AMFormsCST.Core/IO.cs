@@ -30,8 +30,9 @@ public static class IO
     // Add logger property
     public static ILogService? Logger { get; private set; }
 
-    public static void ConfigureLogger(ILogService logger)
+    public static void ConfigureLogger(ILogService? logger = null)
     {
+        if (logger == null) return;
         Logger = logger;
         Logger?.LogInfo("IO logger configured.");
     }

@@ -9,6 +9,9 @@ using AMFormsCST.Core.Interfaces.CodeBlocks;
 using AMFormsCST.Core.Types.CodeBlocks;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Test.Helpers;
+using System.Collections.Generic;
+using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Helpers;
 
 namespace AMFormsCST.Test.Desktop.Views.Pages;
 [Collection("STA Tests")]
@@ -33,17 +36,25 @@ public class DashboardPageTests
         var settingsMock = new Mock<ISettings>();
         settingsMock.SetupGet(s => s.UserSettings).Returns(userSettingsMock.Object);
 
+        var notebookMock = new Mock<INotebook>();
+        notebookMock.Setup(n => n.Notes).Returns(new SelectableList<INote>());
+
         var supportToolMock = new Mock<ISupportTool>();
         supportToolMock.SetupGet(st => st.CodeBlocks).Returns(codeBlocksMock.Object);
         supportToolMock.SetupGet(st => st.Settings).Returns(settingsMock.Object);
+        supportToolMock.SetupGet(st => st.Notebook).Returns(notebookMock.Object);
 
         var dialogServiceMock = new Mock<IDialogService>();
         var fileSystemMock = new Mock<IFileSystem>();
+        var debounceServiceMock = new Mock<IDebounceService>();
+        var logServiceMock = new Mock<ILogService>(); // Mock the ILogService
 
         var vm = new DashboardViewModel(
             supportToolMock.Object,
             dialogServiceMock.Object,
-            fileSystemMock.Object
+            fileSystemMock.Object,
+            debounceServiceMock.Object,
+            logServiceMock.Object // Pass the mocked logger
         );
 
         // Act

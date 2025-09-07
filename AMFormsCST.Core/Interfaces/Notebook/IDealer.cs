@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Interfaces.Notebook; 
 [JsonDerivedType(typeof(Dealer), typeDiscriminator: "dealer")]
-public interface IDealer : INotable<IDealer>
+public interface IDealer : INotebookItem<IDealer>
 {
     string Name { get; set; }
     string ServerCode { get; set; }

@@ -14,7 +14,7 @@ namespace AMFormsCST.Desktop.ViewModels;
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly ISupportTool _supportTool;
-    private readonly ILogService _logger;
+    private readonly ILogService? _logger;
 
     [ObservableProperty]
     private string _applicationTitle = "Case Management Tool";
@@ -31,11 +31,11 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<object> _navigationFooter = [];
 
-    public MainWindowViewModel(ISupportTool supportTool, ILogService logger)
+    public MainWindowViewModel(ISupportTool supportTool, ILogService? logger = null)
     {
         _supportTool = supportTool;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _logger.LogInfo("MainWindowViewModel initialized.");
+        _logger?.LogInfo("MainWindowViewModel initialized.");
 
         // Initialize and subscribe to setting changes
         var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
@@ -43,7 +43,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             IsWindowTopmost = aotSetting.IsEnabled;
             aotSetting.PropertyChanged += OnUiSettingsChanged;
-            _logger.LogDebug($"AlwaysOnTopSetting initialized: {IsWindowTopmost}");
+            _logger?.LogDebug($"AlwaysOnTopSetting initialized: {IsWindowTopmost}");
         }
 
         var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
@@ -51,7 +51,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
             themeSetting.PropertyChanged += OnUiSettingsChanged;
-            _logger.LogDebug($"ThemeSetting initialized: {IsLightTheme}");
+            _logger?.LogDebug($"ThemeSetting initialized: {IsLightTheme}");
         }
     }
 
@@ -62,17 +62,17 @@ public partial class MainWindowViewModel : ObservableObject
             if (e.PropertyName == nameof(AlwaysOnTopSetting.IsEnabled) && sender is AlwaysOnTopSetting aotSetting)
             {
                 IsWindowTopmost = aotSetting.IsEnabled;
-                _logger.LogInfo($"AlwaysOnTopSetting changed: {IsWindowTopmost}");
+                _logger?.LogInfo($"AlwaysOnTopSetting changed: {IsWindowTopmost}");
             }
             else if (e.PropertyName == nameof(ThemeSetting.Theme) && sender is ThemeSetting themeSetting)
             {
                 IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
-                _logger.LogInfo($"ThemeSetting changed: {IsLightTheme}");
+                _logger?.LogInfo($"ThemeSetting changed: {IsLightTheme}");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error in OnUiSettingsChanged.", ex);
+            _logger?.LogError("Error in OnUiSettingsChanged.", ex);
         }
     }
 
@@ -85,12 +85,12 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 aotSetting.IsEnabled = value;
                 _supportTool.SaveAllSettings();
-                _logger.LogInfo($"IsWindowTopmost changed: {value}");
+                _logger?.LogInfo($"IsWindowTopmost changed: {value}");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error in OnIsWindowTopmostChanged.", ex);
+            _logger?.LogError("Error in OnIsWindowTopmostChanged.", ex);
         }
     }
 
@@ -107,13 +107,13 @@ public partial class MainWindowViewModel : ObservableObject
                     themeSetting.Theme = newTheme;
                     ApplicationThemeManager.Apply(newTheme);
                     _supportTool.SaveAllSettings();
-                    _logger.LogInfo($"IsLightTheme changed: {value}");
+                    _logger?.LogInfo($"IsLightTheme changed: {value}");
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error in OnIsLightThemeChanged.", ex);
+            _logger?.LogError("Error in OnIsLightThemeChanged.", ex);
         }
     }
 }

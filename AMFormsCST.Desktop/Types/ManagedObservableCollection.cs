@@ -116,7 +116,9 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
     {
         _logger?.LogDebug($"PropertyChanged: {e.PropertyName} on {(sender is NoteModel nm ? nm.Id : sender)}");
         if (e.PropertyName == nameof(IBlankMaybe.IsBlank))
+        {
             EnsureSingleBlank();
+        }
     }
 
 
@@ -127,12 +129,18 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
         {
             _isEnsuringBlank = true;
             var blankItems = this.Where(x => x.IsBlank).ToList();
-            foreach (var extra in blankItems.Skip(1).ToList())
+
+            // Remove any extra blank items
+            foreach (var extra in blankItems.Skip(1))
             {
-                _logger?.LogDebug($"Removing extra blank: {(extra is NoteModel nm ? nm.Id : extra)}, CoreID: {(extra is NoteModel nnm ? nnm.CoreType?.Id : extra)}");
+                _logger?.LogDebug($"Removing extra blank: {extra}");
                 base.Remove(extra);
             }
-            if (blankItems.Count == 0)
+
+            var singleBlank = this.FirstOrDefault(x => x.IsBlank);
+
+            // If no blank item exists, create and add one to the end
+            if (singleBlank == null)
             {
                 if (_blankFactory == null)
                 {
@@ -141,10 +149,15 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
                 }
                 var newBlank = _blankFactory();
                 _postCreationAction?.Invoke(newBlank);
-                _logger?.LogDebug("Adding blank item");
+                _logger?.LogDebug("Adding new blank item to the end.");
                 base.Add(newBlank);
             }
-            // Do not move the blank item
+            // If a blank item exists but it's not the last one, move it to the end
+            else if (this.LastOrDefault() != singleBlank)
+            {
+                _logger?.LogDebug($"Moving blank item to the end: {singleBlank}");
+                base.Move(base.IndexOf(singleBlank), base.Count - 1);
+            }
         }
         catch (Exception ex)
         {

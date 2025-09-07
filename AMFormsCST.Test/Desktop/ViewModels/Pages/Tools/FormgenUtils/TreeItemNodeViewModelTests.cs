@@ -13,7 +13,7 @@ namespace AMFormsCST.Test.Desktop.ViewModels.Pages.Tools.FormgenUtils;
 
 public class TreeItemNodeViewModelTests
 {
-    private readonly Mock<FormgenUtilitiesViewModel> _mockParentViewModel;
+    private readonly FormgenUtilitiesViewModel _parentViewModel;
 
     public TreeItemNodeViewModelTests()
     {
@@ -26,11 +26,11 @@ public class TreeItemNodeViewModelTests
         var mockFormgenUtils = new Mock<IFormgenUtils>();
         mockSupportTool.SetupGet(s => s.FormgenUtils).Returns(mockFormgenUtils.Object);
 
-        _mockParentViewModel = new Mock<FormgenUtilitiesViewModel>(
+        // Instantiate the ViewModel directly instead of mocking it.
+        _parentViewModel = new FormgenUtilitiesViewModel(
             mockSupportTool.Object,
             mockDialogService.Object,
             mockFileSystem.Object);
-        _mockParentViewModel.SetupProperty(vm => vm.SelectedNode);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class TreeItemNodeViewModelTests
         var formgenFile = new DotFormgen { Title = "My Test Form" };
 
         // Act
-        var node = new TreeItemNodeViewModel(formgenFile, _mockParentViewModel.Object);
+        var node = new TreeItemNodeViewModel(formgenFile, _parentViewModel);
 
         // Assert
         Assert.Equal("My Test Form", node.Header);
@@ -54,7 +54,7 @@ public class TreeItemNodeViewModelTests
         var pageGroup = new PageGroup(pages);
 
         // Act
-        var node = new TreeItemNodeViewModel(pageGroup, _mockParentViewModel.Object);
+        var node = new TreeItemNodeViewModel(pageGroup, _parentViewModel);
 
         // Assert
         Assert.Equal("Pages", node.Header);
@@ -70,7 +70,7 @@ public class TreeItemNodeViewModelTests
         var codeLineCollection = new CodeLineCollection(codeLines);
 
         // Act
-        var node = new TreeItemNodeViewModel(codeLineCollection, _mockParentViewModel.Object);
+        var node = new TreeItemNodeViewModel(codeLineCollection, _parentViewModel);
 
         // Assert
         Assert.Equal("Code Lines", node.Header);
@@ -86,7 +86,7 @@ public class TreeItemNodeViewModelTests
         var field = new FormField { Expression = "Test Form Field" };
 
         // Act
-        var node = new TreeItemNodeViewModel(field, _mockParentViewModel.Object);
+        var node = new TreeItemNodeViewModel(field, _parentViewModel);
 
         // Assert
         Assert.Equal("Test Form Field", node.Header);
@@ -98,12 +98,12 @@ public class TreeItemNodeViewModelTests
     {
         // Arrange
         var formgenFile = new DotFormgen();
-        var node = new TreeItemNodeViewModel(formgenFile, _mockParentViewModel.Object);
+        var node = new TreeItemNodeViewModel(formgenFile, _parentViewModel);
 
         // Act
         node.IsSelected = true;
 
         // Assert
-        Assert.Equal(node, _mockParentViewModel.Object.SelectedNode);
+        Assert.Equal(node, _parentViewModel.SelectedNode);
     }
 }

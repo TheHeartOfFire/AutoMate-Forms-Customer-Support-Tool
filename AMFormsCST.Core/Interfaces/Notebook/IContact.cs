@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
 [JsonDerivedType(typeof(Contact), typeDiscriminator: "contact")]
-public interface IContact : INotable<IContact>
+public interface IContact : INotebookItem<IContact>
 {
     string Name { get; set; }
     string Email { get; set; } 

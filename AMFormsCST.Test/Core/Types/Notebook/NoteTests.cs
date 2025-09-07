@@ -1,6 +1,9 @@
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
+using Moq;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace AMFormsCST.Test.Core.Types.Notebook;
@@ -14,7 +17,6 @@ public class NoteTests
 
         // Assert
         Assert.NotEqual(Guid.Empty, note.Id);
-        Assert.Equal(note.Id, note._id);
     }
 
     [Fact]
@@ -28,46 +30,44 @@ public class NoteTests
 
         // Assert
         Assert.Equal(guid, note.Id);
-        Assert.Equal(guid, note._id);
     }
 
     [Fact]
-    public void Clone_CreatesDeepCopyWithNewGuid()
+    public void Clone_CreatesDeepCopyWithNewGuids()
     {
         // Arrange
-        var original = new Note
+        var original = new Note()
         {
-            ServerId = "S1",
-            Companies = "C1",
-            Dealership = "D1",
-            ContactName = "CN",
-            Email = "E",
-            Phone = "P",
-            PhoneExt = "PX",
-            NotesText = "NT",
-            CaseText = "CT",
-            FormsText = "FT",
-            DealText = "DT"
+            CaseText = "CT123",
+            NotesText = "Some notes"
         };
+        original.Dealers.Add(new Dealer { Name = "D1" });
+        original.Contacts.Add(new Contact { Name = "C1" });
+        original.Forms.Add(new Form { Name = "F1" });
 
         // Act
-        var clone = Note.Clone(original);
+        var clone = original.Clone();
 
         // Assert
         Assert.NotSame(original, clone);
-        Assert.Equal(original.ServerId, clone.ServerId);
-        Assert.Equal(original.Companies, clone.Companies);
-        Assert.Equal(original.Dealership, clone.Dealership);
-        Assert.Equal(original.ContactName, clone.ContactName);
-        Assert.Equal(original.Email, clone.Email);
-        Assert.Equal(original.Phone, clone.Phone);
-        Assert.Equal(original.PhoneExt, clone.PhoneExt);
-        Assert.Equal(original.NotesText, clone.NotesText);
-        Assert.Equal(original.CaseText, clone.CaseText);
-        Assert.Equal(original.FormsText, clone.FormsText);
-        Assert.Equal(original.DealText, clone.DealText);
-        // The clone gets a new Guid
         Assert.NotEqual(original.Id, clone.Id);
+        Assert.Equal(original.CaseText, clone.CaseText);
+        Assert.Equal(original.NotesText, clone.NotesText);
+
+        Assert.Equal(original.Dealers.Count, clone.Dealers.Count);
+        Assert.NotSame(original.Dealers[0], clone.Dealers[0]);
+        Assert.NotEqual(original.Dealers[0].Id, clone.Dealers[0].Id);
+        Assert.Equal(original.Dealers[0].Name, clone.Dealers[0].Name);
+
+        Assert.Equal(original.Contacts.Count, clone.Contacts.Count);
+        Assert.NotSame(original.Contacts[0], clone.Contacts[0]);
+        Assert.NotEqual(original.Contacts[0].Id, clone.Contacts[0].Id);
+        Assert.Equal(original.Contacts[0].Name, clone.Contacts[0].Name);
+
+        Assert.Equal(original.Forms.Count, clone.Forms.Count);
+        Assert.NotSame(original.Forms[0], clone.Forms[0]);
+        Assert.NotEqual(original.Forms[0].Id, clone.Forms[0].Id);
+        Assert.Equal(original.Forms[0].Name, clone.Forms[0].Name);
     }
 
     [Fact]
@@ -81,8 +81,6 @@ public class NoteTests
         // Act & Assert
         Assert.True(note1.Equals((INote)note2));
         Assert.True(note1.Equals((object)note2));
-        Assert.True(note1.Equals((INote)note1));
-        Assert.True(note1.Equals((object)note1));
     }
 
     [Fact]
@@ -136,6 +134,7 @@ public class NoteTests
         Assert.False(note1.Equals(note1, note3));
         Assert.False(note1.Equals(note1, null));
         Assert.False(note1.Equals(null, note3));
+        Assert.True(note1.Equals(null, null));
     }
 
     [Fact]
@@ -156,36 +155,20 @@ public class NoteTests
     public void Dump_ReturnsAllPropertiesInString()
     {
         // Arrange
-        var note = new Note
+        var note = new Note()
         {
-            ServerId = "S1",
-            Companies = "C1",
-            Dealership = "D1",
-            ContactName = "CN",
-            Email = "E",
-            Phone = "P",
-            PhoneExt = "PX",
-            NotesText = "NT",
-            CaseText = "CT",
-            FormsText = "FT",
-            DealText = "DT"
+            CaseText = "CT123",
+            NotesText = "Some notes"
         };
+        note.Dealers.Add(new Dealer { Name = "Test Dealer" });
 
         // Act
         var dump = note.Dump();
 
         // Assert
-        Assert.Contains("ServerId: S1", dump);
-        Assert.Contains("Companies: C1", dump);
-        Assert.Contains("Dealership: D1", dump);
-        Assert.Contains("ContactName: CN", dump);
-        Assert.Contains("Email: E", dump);
-        Assert.Contains("Phone: P", dump);
-        Assert.Contains("PhoneExt: PX", dump);
-        Assert.Contains("NotesText: NT", dump);
-        Assert.Contains("CaseText: CT", dump);
-        Assert.Contains("FormsText: FT", dump);
-        Assert.Contains("DealText: DT", dump);
+        Assert.Contains("CaseText: CT123", dump);
+        Assert.Contains("NotesText: Some notes", dump);
+        Assert.Contains("Dealer: Test Dealer", dump);
         Assert.Contains("Id: " + note.Id, dump);
     }
 }

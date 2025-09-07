@@ -18,7 +18,7 @@ public class SupportTool : ISupportTool
     private readonly Properties _properties;
 
     // Add logging service property
-    public ILogService Logger { get; }
+    public ILogService? Logger { get; }
 
     // Add ILogService to constructor
     public SupportTool(
@@ -27,10 +27,10 @@ public class SupportTool : ISupportTool
         ISettings defaultSettings,
         ITemplateRepository templateRepository,
         INotebook notebook,
-        ILogService logger)
+        ILogService? logger = null)
     {
-        Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        Logger.LogInfo("Initializing SupportTool.");
+        Logger = logger;
+        Logger?.LogInfo("Initializing SupportTool.");
 
         IO.ConfigureLogger(logger);
 
@@ -46,14 +46,14 @@ public class SupportTool : ISupportTool
         Settings = IO.LoadSettings() ?? defaultSettings;
         Settings.UserSettings.Organization.InstantiateVariables(Enforcer, Notebook);
 
-        Logger.LogInfo("SupportTool initialized successfully.");
+        Logger?.LogInfo("SupportTool initialized successfully.");
     }
 
     public void SaveAllSettings()
     {
-        Logger.LogInfo("Saving all settings.");
+        Logger?.LogInfo("Saving all settings.");
         IO.SaveSettings(Settings);
         IO.SaveConfig(_properties);
-        Logger.LogInfo("Settings saved.");
+        Logger?.LogInfo("Settings saved.");
     }
 }

@@ -26,9 +26,11 @@ public class SupportToolTests
         var mockUiSettings = new Mock<IUiSettings>();
         var mockSettings = new Mock<ISettings>();
         var mockNotebook = new Mock<INotebook>();
+        var mockProperties = new Mock<Properties>();
 
         mockUserSettings.SetupGet(u => u.Organization).Returns(mockOrgVars.Object);
         mockSettings.SetupGet(s => s.UserSettings).Returns(mockUserSettings.Object);
+        mockSettings.SetupGet(s => s.UiSettings).Returns(mockUiSettings.Object);
         mockSettings.SetupGet(s => s.UiSettings).Returns(mockUiSettings.Object);
 
         // Make sure InstantiateVariables can be called
@@ -45,7 +47,8 @@ public class SupportToolTests
             mockFileSystem.Object,
             mockFormNameBestPractice.Object,
             mockSettings.Object,
-            mockTemplateRepo.Object
+            mockTemplateRepo.Object,
+            mockNotebook.Object
         );
 
         // Assert

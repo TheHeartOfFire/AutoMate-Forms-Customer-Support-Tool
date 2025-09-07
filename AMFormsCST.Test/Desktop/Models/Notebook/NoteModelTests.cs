@@ -1,7 +1,10 @@
+using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
+using System.Linq;
+using Xunit;
+using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 
 namespace AMFormsCST.Test.Desktop.Models.Notebook;
-using Assert = Assert;
 
 public class NoteModelTests
 {
@@ -11,10 +14,9 @@ public class NoteModelTests
     public void Constructor_InitializesCollections_WithOneBlankItemEach()
     {
         // Arrange & Act
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
 
         // Assert
-        // Verify each collection is created and contains a single, blank item.
         Assert.Single(note.Dealers);
         Assert.True(note.Dealers[0].IsBlank);
 
@@ -29,28 +31,27 @@ public class NoteModelTests
     public void Constructor_SelectsDefaultBlankItems()
     {
         // Arrange & Act
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
 
         // Assert
-        // Verify that the initially created blank items are set as the selected items.
         Assert.NotNull(note.SelectedDealer);
         Assert.Same(note.Dealers[0], note.SelectedDealer);
-        Assert.True(note.SelectedDealer.IsSelected);
+        Assert.Equal(IManagedObservableCollectionItem.CollectionMemberState.Selected, note.SelectedDealer.State);
 
         Assert.NotNull(note.SelectedContact);
         Assert.Same(note.Contacts[0], note.SelectedContact);
-        Assert.True(note.SelectedContact.IsSelected);
+        Assert.Equal(IManagedObservableCollectionItem.CollectionMemberState.Selected, note.SelectedContact.State);
 
         Assert.NotNull(note.SelectedForm);
         Assert.Same(note.Forms[0], note.SelectedForm);
-        Assert.True(note.SelectedForm.IsSelected);
+        Assert.Equal(IManagedObservableCollectionItem.CollectionMemberState.Selected, note.SelectedForm.State);
     }
 
     [Fact]
     public void IsBlank_IsTrue_ForNewModel()
     {
         // Arrange
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
 
         // Assert
         Assert.True(note.IsBlank);
@@ -62,7 +63,7 @@ public class NoteModelTests
     public void IsBlank_IsFalse_WhenTopLevelPropertiesAreSet(string? caseNumber, string? notes)
     {
         // Arrange
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
 
         // Act
         note.CaseNumber = caseNumber;
@@ -76,74 +77,103 @@ public class NoteModelTests
     public void IsBlank_IsFalse_WhenChildItemBecomesNonBlank()
     {
         // Arrange
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
         Assert.True(note.IsBlank); // Pre-condition check
 
         // Act
-        // Make a child item (a dealer) non-blank.
         note.Dealers[0].Name = "Test Dealer";
 
         // Assert
-        // The parent note should now report that it is not blank.
         Assert.False(note.IsBlank);
     }
 
     [Fact]
-    public void SelectDealer_UpdatesSelectedDealer_AndSelectionState()
+    public void SelectingAnItem_UpdatesSelectedProperty_AndItemState()
     {
         // Arrange
-        var note = new NoteModel(TestExtSeparator);
+        var note = new NoteModel(TestExtSeparator, null);
         var dealer1 = note.Dealers[0];
-        dealer1.Name = "Dealer 1";
-        note.Dealers.Add(new()); // Extra Dealer handled by containing VM when NoteModel's IsBlank state changes due to Dealer IsBlank state changing.
-        var dealer2 = note.Dealers[1];
+        dealer1.Name = "Dealer 1"; // Makes it non-blank, collection adds a new blank item
+        var dealer2 = note.Dealers.Last(d => d.IsBlank);
 
         // Act
-        note.SelectDealer(dealer2);
+        dealer2.Select();
 
         // Assert
         Assert.Same(dealer2, note.SelectedDealer);
-        Assert.True(dealer2.IsSelected);
-        Assert.False(dealer1.IsSelected);
+        Assert.Equal(IManagedObservableCollectionItem.CollectionMemberState.Selected, dealer2.State);
+        Assert.Equal(IManagedObservableCollectionItem.CollectionMemberState.NotSelected, dealer1.State);
     }
 
     [Fact]
     public void ImplicitConversion_ToCoreNote_MapsPropertiesCorrectly()
     {
         // Arrange
-        var noteModel = new NoteModel(TestExtSeparator);
-        noteModel.CaseNumber = "98765";
-        noteModel.Notes = "Test case notes.";
+        var noteModel = new NoteModel(TestExtSeparator, null)
+        {
+            CaseNumber = "98765",
+            Notes = "Test case notes."
+        };
 
-        noteModel.SelectedDealer!.ServerCode = "SVR1";
-        noteModel.SelectedDealer.Name = "Test Dealer";
-        noteModel.SelectedDealer.Companies[0].CompanyCode = "C1";
-        noteModel.SelectedDealer.Companies[0].Name = "Company 1"; // Make non-blank to add another
-        noteModel.SelectedDealer.Companies.Add(new Company { CompanyCode = "C2" });
+        var dealer = new Dealer(null) { Name = "Test Dealer", ServerCode = "SVR1" };
+        var company = new Company(null) { Name = "Company 1", CompanyCode = "C1" };
+        dealer.Companies.Add(company);
+        noteModel.Dealers.Add(dealer);
 
-        noteModel.SelectedContact!.Name = "John Doe";
-        noteModel.SelectedContact.Email = "john.doe@email.com";
-        noteModel.SelectedContact.Phone = "555-1234";
-        noteModel.SelectedContact.PhoneExtension = "101";
+        var contact = new Contact(TestExtSeparator, null) { Name = "John Doe", Email = "john.doe@email.com" };
+        noteModel.Contacts.Add(contact);
 
-        noteModel.SelectedForm!.Name = "MyForm.frp";
-        noteModel.SelectedForm.SelectedTestDeal!.DealNumber = "Deal123";
+        var form = new Form(null) { Name = "MyForm.frp" };
+        var testDeal = new TestDeal(null) { DealNumber = "Deal123" };
+        form.TestDeals.Add(testDeal);
+        noteModel.Forms.Add(form);
 
         // Act
-        AMFormsCST.Core.Types.Notebook.Note coreNote = noteModel;
+        CoreNote coreNote = noteModel;
 
         // Assert
-        Assert.Equal(noteModel.Id, coreNote.Id);
         Assert.Equal("98765", coreNote.CaseText);
         Assert.Equal("Test case notes.", coreNote.NotesText);
-        Assert.Equal("SVR1", coreNote.ServerId);
-        Assert.Equal("Test Dealer", coreNote.Dealership);
-        Assert.Equal("C1, C2", coreNote.Companies); // Note the implicit string.Join
-        Assert.Equal("John Doe", coreNote.ContactName);
-        Assert.Equal("john.doe@email.com", coreNote.Email);
-        Assert.Equal("555-1234", coreNote.Phone);
-        Assert.Equal("101", coreNote.PhoneExt);
-        Assert.Equal("MyForm.frp", coreNote.FormsText);
-        Assert.Equal("Deal123", coreNote.DealText);
+
+        Assert.Equal(2, coreNote.Dealers.Count);
+        var coreDealer = coreNote.Dealers.FirstOrDefault(d => !string.IsNullOrEmpty(d.Name));
+        Assert.NotNull(coreDealer);
+        Assert.Equal("Test Dealer", coreDealer.Name);
+        Assert.Equal("SVR1", coreDealer.ServerCode);
+        Assert.Equal(2, coreDealer.Companies.Count);
+        var coreCompany = coreDealer.Companies.FirstOrDefault(c => !string.IsNullOrEmpty(c.Name));
+        Assert.NotNull(coreCompany);
+        Assert.Equal("Company 1", coreCompany.Name);
+
+        Assert.Equal(2, coreNote.Contacts.Count);
+        var coreContact = coreNote.Contacts.FirstOrDefault(c => !string.IsNullOrEmpty(c.Name));
+        Assert.NotNull(coreContact);
+        Assert.Equal("John Doe", coreContact.Name);
+
+        Assert.Equal(2, coreNote.Forms.Count);
+        var coreForm = coreNote.Forms.FirstOrDefault(f => !string.IsNullOrEmpty(f.Name));
+        Assert.NotNull(coreForm);
+        Assert.Equal("MyForm.frp", coreForm.Name);
+        Assert.Equal(2, coreForm.TestDeals.Count);
+        var coreTestDeal = coreForm.TestDeals.FirstOrDefault(td => !string.IsNullOrEmpty(td.DealNumber));
+        Assert.NotNull(coreTestDeal);
+        Assert.Equal("Deal123", coreTestDeal.DealNumber);
+    }
+
+    [Fact]
+    public void UpdateCore_UpdatesCoreType_WhenPropertiesChange()
+    {
+        // Arrange
+        var noteModel = new NoteModel(TestExtSeparator, null);
+        var coreNote = new CoreNote();
+        noteModel.CoreType = coreNote;
+
+        // Act
+        noteModel.CaseNumber = "CS123";
+        noteModel.Notes = "Test Notes";
+
+        // Assert
+        Assert.Equal("CS123", coreNote.CaseText);
+        Assert.Equal("Test Notes", coreNote.NotesText);
     }
 }

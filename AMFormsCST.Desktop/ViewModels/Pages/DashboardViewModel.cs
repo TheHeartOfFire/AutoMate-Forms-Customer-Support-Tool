@@ -24,7 +24,7 @@ namespace AMFormsCST.Desktop.ViewModels.Pages;
 
 public partial class DashboardViewModel : ViewModel
 {
-    private readonly ILogService _logger;
+    private readonly ILogService? _logger;
     private readonly IDebounceService _debounceService;
 
     private ManagedObservableCollection<NoteModel> _notes = new(() => new NoteModel(""));
@@ -45,13 +45,13 @@ public partial class DashboardViewModel : ViewModel
     private NoteModel? _lastSelectedNote;
     private Models.Form? _lastSelectedForm;
 
-    public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, ILogService logger, IDebounceService debounceService)
+    public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, IDebounceService debounceService, ILogService? logger = null)
     {
         _supportTool = supportTool ?? throw new ArgumentNullException(nameof(supportTool));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _fileSystem = fileSystem;
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _logger.LogInfo("DashboardViewModel initialized.");
+        _logger = logger;
+        _logger?.LogInfo("DashboardViewModel initialized.");
         _debounceService = debounceService;
         _debounceService.DebouncedElapsed += AutosaveTimerElapsed;
 

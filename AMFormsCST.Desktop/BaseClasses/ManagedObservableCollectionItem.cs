@@ -73,7 +73,7 @@ namespace AMFormsCST.Desktop.BaseClasses
                 throw new InvalidOperationException("Item is not a member of a collection.");
             }
 
-            if (guid != Id && State is CollectionMemberState.NotSelected)
+            if (guid != Id)
             {
                 State = CollectionMemberState.NotSelected;
                 _logger?.LogDebug($"Item {Id} deselected (guid: {guid}).");

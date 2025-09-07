@@ -18,14 +18,15 @@ public class AutomateFormsOrgVariables : IOrgVariables
     public INotebook? Notebook { get; internal set; }
 
     public Dictionary<string, string> LooseVariables { get; set; } =
-        new()
+        new ()
         {
-            { "AMMailingAddress", string.Empty },
-            { "AMStreetAddress", string.Empty },
-            { "AMCityStateZip", string.Empty },
-            { "AMCity", string.Empty },
-            { "AMState", string.Empty },
-            { "AMZip", string.Empty },
+            { "AMMailingName", "Attn: A/M Forms (Sue)" },
+            { "AMStreetAddress", "131 Griffis Rd" },
+            { "AMCity", "Gloversville" },
+            { "AMState", "NY" },
+            { "AMZip", "12078" },
+            { "AMCityStateZip", "Gloversville, NY 12078" },
+            { "AMMailingAddress", "Attn: A/M Forms (Sue)\n 131 Griffis Rd\n Gloversville, NY 12078" },
         };
 
     [JsonIgnore]
@@ -167,12 +168,11 @@ public class AutomateFormsOrgVariables : IOrgVariables
              aliases: [],
              getValue: () =>
              {
-
-                 if (!string.IsNullOrEmpty(selectedContact?.Name) && selectedContact?.Name.Contains(' ') == true)
-                     return selectedContact?.Name.Split(' ').FirstOrDefault() ?? string.Empty;
-
-                 return string.Empty;
-             }
+                var contactName = Notebook?.Notes.SelectedItem?.Contacts.SelectedItem?.Name;
+                if (string.IsNullOrEmpty(contactName)) return string.Empty;
+                var spaceIndex = contactName.IndexOf(' ');
+                return spaceIndex > -1 ? contactName[..spaceIndex] : contactName;
+            }
             ),
             new TextTemplateVariable(
              properName: "AMMail:FullAddress",
@@ -180,7 +180,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address",
              aliases: ["all", "full", "mailingaddress", "mailto"],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMMailingAddress", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:Name",
@@ -188,7 +188,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Name",
              aliases: [],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMMailingName", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:Street",
@@ -196,7 +196,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Street Address",
              aliases: ["street", "line1"],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMStreetAddress", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:City",
@@ -204,7 +204,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - City",
              aliases: [],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMCity", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:State",
@@ -212,7 +212,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - State",
              aliases: [],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMState", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:ZipCode",
@@ -220,7 +220,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Zip Code",
              aliases: ["postalcode", "zip"],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMZip", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "AMMail:CityStateZip",
@@ -228,7 +228,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - City, State Zip",
              aliases: ["csz", "line2"],
-             getValue: () => string.Empty //TODO: Pull Mailing Address from persistent data
+             getValue: () => LooseVariables.TryGetValue("AMCityStateZip", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
              properName: "FormNameGenerator:FormName",

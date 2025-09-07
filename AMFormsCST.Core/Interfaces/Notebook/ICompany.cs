@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
 [JsonDerivedType(typeof(Company), typeDiscriminator: "company")]
-public interface ICompany : INotable<ICompany>
+public interface ICompany : INotebookItem<ICompany>
 {
     string Name { get; set; }
     string CompanyCode { get; set; }

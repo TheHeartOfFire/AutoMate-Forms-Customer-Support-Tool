@@ -72,6 +72,7 @@ public class Note : INote
 
     public bool Equals(INote? x, INote? y)
     {
+        if (x is null && y is null) return true;
         if (x is null || y is null) return false;
         return x.Id == y.Id;
     }

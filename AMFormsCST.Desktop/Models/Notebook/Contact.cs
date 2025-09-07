@@ -27,9 +27,6 @@ public partial class Contact : ManagedObservableCollectionItem
                                  string.IsNullOrEmpty(Phone) &&
                                  string.IsNullOrEmpty(PhoneExtension); } }
     public override Guid Id { get; } = Guid.NewGuid();
-
-    [ObservableProperty]
-    private bool _isSelected = false;
     internal IContact? CoreType { get; set; }
     internal NoteModel? Parent { get; set; }
 

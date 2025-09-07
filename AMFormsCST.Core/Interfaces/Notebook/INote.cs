@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
 [JsonDerivedType(typeof(Note), typeDiscriminator: "note")]
-public interface INote : INotable<INote>
+public interface INote : INotebookItem<INote>
 {
     string CaseText { get; set; }
     string NotesText { get; set; }

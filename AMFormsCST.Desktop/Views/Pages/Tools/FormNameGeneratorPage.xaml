@@ -9,7 +9,7 @@
       xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="FormNameGeneratorPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type viewModels:FormNameGeneratorViewModel}}">
+      Title="FormNameGeneratorPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type={x:Type viewModels:FormNameGeneratorViewModel}}">
 
 
     <Border BorderBrush="#30FFFFFF" BorderThickness="2" CornerRadius="10" VerticalAlignment="Top" HorizontalAlignment="Stretch">

@@ -38,49 +38,12 @@ public partial class DashboardViewModel : ViewModel
         private set => SetProperty(ref _uiRefreshCounter, value);
     }
 
-    private readonly ISupportTool? _supportTool;
-    private readonly IDialogService? _dialogService;
-    private readonly IFileSystem? _fileSystem;
+    private readonly ISupportTool _supportTool;
+    private readonly IDialogService _dialogService;
+    private readonly IFileSystem _fileSystem;
 
     private NoteModel? _lastSelectedNote;
     private Models.Form? _lastSelectedForm;
-
-    public DashboardViewModel()
-    {
-        _debounceService = new DesignTimeDebounceService();
-
-        var note1 = new NoteModel("x")
-        {
-            CaseNumber = "00123456",
-            Notes = "This is the first sample note."
-        };
-        var note2 = new NoteModel("x")
-        {
-            CaseNumber = "00234567",
-            Notes = "This is the second sample note."
-        };
-
-        var contact1 = new Models.Contact("x") { Name = "John Doe", Email = "john.doe@email.com", Phone = "888-555-1234", PhoneExtension = "1234" };
-        note1.Contacts.Add(contact1);
-        note1.Contacts.FirstOrDefault(x => !x.IsBlank, note1.Contacts.First())?.Select();
-
-        var dealer1 = new Models.Dealer { Name = "Sample Dealer", ServerCode = "SVR1" };
-        var company1 = new Models.Company { Name = "Sample Company", CompanyCode = "C001" };
-        dealer1.Companies.Add(company1);
-        dealer1.Companies.FirstOrDefault(x => !x.IsBlank, dealer1.Companies.First())?.Select();
-        note1.Dealers.Add(dealer1);
-        note1.Dealers.FirstOrDefault(x => !x.IsBlank, note1.Dealers.First())?.Select();
-
-        var form1 = new Models.Form { Name = "Sample Form 1", Notes = "Notes for form 1" };
-        var testDeal1 = new Models.TestDeal { DealNumber = "D001", Purpose = "Test purpose 1" };
-        form1.TestDeals.Add(testDeal1);
-        form1.TestDeals.FirstOrDefault(x => !x.IsBlank, form1.TestDeals.First())?.Select();
-        note1.Forms.Add(form1);
-        note1.Forms.FirstOrDefault(x => !x.IsBlank, note1.Forms.First())?.Select();
-
-        _notes = new ManagedObservableCollection<NoteModel>(() => new NoteModel("x"), [note1, note2]);
-        note1.Select();
-    }
 
     public DashboardViewModel(ISupportTool supportTool, IDialogService dialogService, IFileSystem fileSystem, IDebounceService debounceService, ILogService? logger = null)
     {
@@ -583,4 +546,54 @@ public partial class DashboardViewModel : ViewModel
             }
         }
     }
+
+    //private void btnLoad_Click(object sender, RoutedEventArgs e)
+    //{
+    //    var text = Clipboard.GetText();
+
+    //    if (string.IsNullOrEmpty(text)) return;
+
+    //    var lines = text.Split('\n');
+
+    //    if (!lines[0].Equals("Case Number\r")) return;
+
+    //    var newNote = LoadSFNotes(lines);
+
+    //    NotesList.Add(newNote);
+    //    tcTabs.Items.Add(newNote.TabItem);
+    //    tcTabs.SelectedItem = newNote.TabItem;
+    //    ToggleClose();
+
+    //    Clipboard.Clear();
+    //}
+
+    //private NotesInfo LoadSFNotes(string[] notes)
+    //{
+    //    var submittedIdx = Array.IndexOf(notes, "Submitted Values:\r");
+    //    var serverIdx = Array.IndexOf(notes, "Server-Provided Values:\r");
+    //    string[]? submittedValues = null;
+    //    string[]? serverValues = null;
+
+    //    if (submittedIdx > 0)
+    //        submittedValues = notes[submittedIdx..];
+
+    //    if (submittedIdx > 0 && serverIdx > 0)
+    //        submittedValues = notes[submittedIdx..serverIdx];
+
+    //    if (serverIdx > 0)
+    //        serverValues = notes[serverIdx..];
+
+    //    NotesInfo newNote = new(NotesList[0].TabItem.Clone())
+    //    {
+    //        CaseText = notes.Length >= 1 ? notes[1].Trim() : string.Empty,
+    //        ContactName = notes.Length >= 10 ? notes[10].Trim() : string.Empty,
+    //        Email = submittedValues is not null && submittedValues.Length >= 3 ? submittedValues[3][7..].Trim() : string.Empty,
+    //        Phone = submittedValues is not null && submittedValues.Length >= 4 ? submittedValues[4][6..].Trim() : string.Empty,
+    //        Companies = submittedValues is not null && submittedValues.Length >= 5 ? submittedValues[5][15..].Trim() : string.Empty,
+    //        Dealership = submittedValues is not null && submittedValues.Length >= 6 ? submittedValues[6][13..].Trim() : string.Empty,
+    //        ServerId = serverValues is not null && serverValues.Length >= 2 ? serverValues[2][10..].Trim() : string.Empty
+    //    };
+
+    //    return newNote;
+    //}
 }

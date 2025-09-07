@@ -10,7 +10,7 @@
       mc:Ignorable="d"
       d:DesignHeight="900" d:DesignWidth="1200"
       Title="DashboardPage"
-      d:DataContext="{d:DesignInstance viewModels:DashboardViewModel,  IsDesignTimeCreatable=True}" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+      d:DataContext="{d:DesignInstance viewModels:DashboardViewModel,  IsDesignTimeCreatable=False}" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
 
     <Grid ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="OutermostGrid">
         <Grid.ColumnDefinitions>
@@ -47,11 +47,11 @@
                 <ui:SymbolIcon Symbol="DocumentTextToolbox24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
             </ui:Button>
             <ui:Button Margin="0,0,5,0" Command="{Binding LoadCaseCommand}">
-                <ui:SymbolIcon Symbol="ArrowDownload24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
+                    <ui:SymbolIcon Symbol="ArrowDownload24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
                 </ui:Button>
             </WrapPanel>
 
-        <controls:ManagedObservableCollectionSelector Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" ItemsSource="{Binding Notes}" 
+        <controls:HorizontalRadioButtons Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" ItemsSource="{Binding Notes}" 
                              RadioButtonCommand="{Binding NoteClickedCommand}" 
                              CommandParameterPath="Id"
                              ContentBindingPath="CaseNumber"
@@ -102,7 +102,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.Dealers}" 
+            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Dealers}" 
                                                          RadioButtonCommand="{Binding DealerClickedCommand}" 
                                                          CommandParameterPath="DataContext"
                                                          ContentBindingPath="CompositeDealerName"
@@ -111,7 +111,7 @@
                                  RefreshTrigger="{Binding UiRefreshCounter}"
                                  DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="3"/>
 
-            <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.SelectedDealer.Companies}" 
+            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedDealer.Companies}" 
                                                          RadioButtonCommand="{Binding CompanyClickedCommand}" 
                                                          CommandParameterPath="DataContext"
                                                          ContentBindingPath="CompositeCompanyName"
@@ -165,7 +165,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.Forms}" 
+            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Forms}" 
                                          RadioButtonCommand="{Binding FormClickedCommand}" 
                                          CommandParameterPath="DataContext"
                                          ContentBindingPath="Name"
@@ -174,7 +174,7 @@
                  RefreshTrigger="{Binding UiRefreshCounter}"
                  DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="2"/>
 
-            <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.SelectedForm.TestDeals}" 
+            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.SelectedForm.TestDeals}" 
                                          RadioButtonCommand="{Binding DealClickedCommand}" 
                                          CommandParameterPath="DataContext"
                                          ContentBindingPath="DealNumber"
@@ -232,7 +232,7 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
 
-            <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.Contacts}" 
+            <controls:HorizontalRadioButtons ItemsSource="{Binding SelectedNote.Contacts}" 
                                      RadioButtonCommand="{Binding ContactClickedCommand}" 
                                      CommandParameterPath="DataContext"
                                      ContentBindingPath="Name"

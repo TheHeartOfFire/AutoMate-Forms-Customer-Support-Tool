@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 
 namespace AMFormsCST.Desktop.Controls;
 /// <summary>
-/// Interaction logic for ManagedObservableCollectionSelector.xaml
+/// Interaction logic for HorizontalRadioButtons.xaml
 /// </summary>
-public partial class ManagedObservableCollectionSelector : UserControl
+public partial class HorizontalRadioButtons : UserControl
 {
-    public ManagedObservableCollectionSelector()
+    public HorizontalRadioButtons()
     {
         InitializeComponent();
     }
@@ -30,7 +30,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             "ItemsSource",
             typeof(IEnumerable), // Or a more specific collection type if you know it
-            typeof(ManagedObservableCollectionSelector),
+            typeof(HorizontalRadioButtons),
             new PropertyMetadata(null));
 
     public IEnumerable ItemsSource
@@ -44,7 +44,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             "RadioButtonCommand",
             typeof(ICommand),
-            typeof(ManagedObservableCollectionSelector),
+            typeof(HorizontalRadioButtons),
             new PropertyMetadata(null));
 
     public ICommand RadioButtonCommand
@@ -59,7 +59,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             "CommandParameterPath",
             typeof(string),
-            typeof(ManagedObservableCollectionSelector),
+            typeof(HorizontalRadioButtons),
             new PropertyMetadata("DataContext")); // Default to "DataContext" if not specified
 
     public string CommandParameterPath
@@ -71,7 +71,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
             DependencyProperty.Register(
                 "ContentBindingPath",
                 typeof(string),
-                typeof(ManagedObservableCollectionSelector),
+                typeof(HorizontalRadioButtons),
                 new PropertyMetadata(string.Empty)); // Default to empty string
 
     public string ContentBindingPath
@@ -84,7 +84,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             "ContentFallbackValue",
             typeof(string),
-            typeof(ManagedObservableCollectionSelector),
+            typeof(HorizontalRadioButtons),
             new PropertyMetadata(string.Empty)); // Default to empty string
 
     public string ContentFallbackValue
@@ -97,7 +97,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             nameof(GroupName),      // The name of the property
             typeof(string),         // The type of the property
-            typeof(ManagedObservableCollectionSelector), // The type of the owner class
+            typeof(HorizontalRadioButtons), // The type of the owner class
             new PropertyMetadata(string.Empty)); // Default value, or you can use null
 
 
@@ -111,7 +111,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         DependencyProperty.Register(
             "RefreshTrigger",
             typeof(object),
-            typeof(ManagedObservableCollectionSelector),
+            typeof(HorizontalRadioButtons),
             new PropertyMetadata(null));
 
     public object RefreshTrigger
@@ -120,7 +120,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
         set { SetValue(RefreshTriggerProperty, value); }
     }
     public static readonly DependencyProperty DeleteCommandProperty =
-    DependencyProperty.Register(nameof(DeleteCommand), typeof(ICommand), typeof(ManagedObservableCollectionSelector), new PropertyMetadata(null));
+    DependencyProperty.Register(nameof(DeleteCommand), typeof(ICommand), typeof(HorizontalRadioButtons), new PropertyMetadata(null));
 
     public ICommand DeleteCommand
     {
@@ -128,3 +128,4 @@ public partial class ManagedObservableCollectionSelector : UserControl
         set { SetValue(DeleteCommandProperty, value); }
     }
 }
+

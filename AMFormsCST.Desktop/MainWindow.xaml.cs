@@ -22,9 +22,9 @@ namespace AMFormsCST.Desktop;
 /// Interaction logic for MainWindow.xaml
 /// </summary>
 public partial class MainWindow : IWindow
-{
+{ 
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Design time data
+    // TODO: Notes Importing(from clipboard, eventually from headless browser)
     // TODO: Tool Tips
     // TODO: Readme
     // TODO: Remove unnecessary comments and usings

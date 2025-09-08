@@ -1,0 +1,290 @@
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Types.Notebook;
+using AMFormsCST.Desktop.BaseClasses;
+using AMFormsCST.Desktop.Types;
+using AMFormsCST.Desktop.ViewModels.Pages;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog.Context;
+using System.Collections.Specialized;
+using System.ComponentModel;
+
+namespace AMFormsCST.Desktop.Models;
+public partial class NoteModel : ManagedObservableCollectionItem
+{
+    private bool _isInit;
+
+    [ObservableProperty]
+    private int _uiRefreshCounter;
+
+    private string? _caseNumber = string.Empty; 
+    public string? CaseNumber 
+    {
+        get => _caseNumber;
+        set
+        {
+            var oldValue = _caseNumber;
+            if (SetProperty(ref _caseNumber, value))
+            {
+                OnPropertyChanged(nameof(IsBlank));
+                UpdateCore();
+
+                using (LogContext.PushProperty("NoteId", Id))
+                using (LogContext.PushProperty("Notes", Notes))
+                using (LogContext.PushProperty("Dealers", Dealers.Count))
+                using (LogContext.PushProperty("Contacts", Contacts.Count))
+                using (LogContext.PushProperty("Forms", Forms.Count))
+                using (LogContext.PushProperty("Old Value", oldValue))
+                using (LogContext.PushProperty("New Value", value))
+                {
+                    _logger?.LogInfo($"CaseNumber changed: {value}");
+                }
+            }
+        }
+    }
+    private string? _notes; 
+    public string? Notes
+    {
+        get => _notes;
+        set
+        {
+            var oldValue = _notes;
+            if (SetProperty(ref _notes, value))
+            {
+                OnPropertyChanged(nameof(IsBlank));
+                UpdateCore();
+
+                using (LogContext.PushProperty("NoteId", Id))
+                using (LogContext.PushProperty("Case#", CaseNumber))
+                using (LogContext.PushProperty("Dealers", Dealers.Count))
+                using (LogContext.PushProperty("Contacts", Contacts.Count))
+                using (LogContext.PushProperty("Forms", Forms.Count))
+                using (LogContext.PushProperty("Old Value", oldValue))
+                using (LogContext.PushProperty("New Value", value))
+                {
+                    _logger?.LogInfo($"Notes changed: {value}");
+                }
+            }
+        }
+    }
+
+    public ManagedObservableCollection<Dealer> Dealers { get; set; }
+    public Dealer? SelectedDealer => Dealers.SelectedItem;
+    public ManagedObservableCollection<Contact> Contacts { get; set; }
+    public Contact? SelectedContact => Contacts.SelectedItem;
+    public ManagedObservableCollection<Form> Forms { get; set; }
+    public Form? SelectedForm => Forms.SelectedItem;
+    public override Guid Id { get; } = Guid.NewGuid();
+    public override bool IsBlank
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(CaseNumber) || !string.IsNullOrEmpty(Notes))
+                return false;
+            if (Dealers.Any(d => !d.IsBlank) ||
+                Contacts.Any(c => !c.IsBlank) ||
+                Forms.Any(f => !f.IsBlank))
+                return false;
+            return true;
+        }
+    }
+
+    internal INote? CoreType { get; set; }
+    internal DashboardViewModel? Parent { get; set; }
+
+    public NoteModel(string phoneExtensionDelimiter, ILogService? logger = null) : base(logger)
+    {
+        _isInit = true;
+        CoreType = new Note(logger);
+
+        InitContacts(phoneExtensionDelimiter);
+        InitDealers();
+        InitForms();
+
+        _isInit = false;
+        UpdateCore();
+
+        using (LogContext.PushProperty("NoteId", Id))
+        using (LogContext.PushProperty("Case#", CaseNumber))
+        using (LogContext.PushProperty("Notes", Notes))
+        using (LogContext.PushProperty("Dealers", Dealers.Count))
+        using (LogContext.PushProperty("Contacts", Contacts.Count))
+        using (LogContext.PushProperty("Forms", Forms.Count))
+        {
+            _logger?.LogInfo("NoteModel initialized.");
+        }
+    }
+
+    public NoteModel(INote note, string phoneExtensionDelimiter, ILogService? logger = null) : base(logger)
+    {
+        _isInit = true;
+        CoreType = note;
+
+        InitDealers();
+        InitContacts(phoneExtensionDelimiter);
+        InitForms();
+
+        CaseNumber = note.CaseText;
+        Notes = note.NotesText;
+        _isInit = false;
+        UpdateCore();
+
+        { 
+            using (LogContext.PushProperty("NoteId", Id))
+            using (LogContext.PushProperty("Case#", CaseNumber))
+            using (LogContext.PushProperty("Notes", Notes))
+            using (LogContext.PushProperty("Dealers", Dealers.Count))
+            using (LogContext.PushProperty("Contacts", Contacts.Count))
+            using (LogContext.PushProperty("Forms", Forms.Count))
+            {
+                _logger?.LogInfo($"NoteModel loaded from core type.");
+            }
+        }
+    }
+    private void InitDealers()
+    {
+        var dealers = CoreType?.Dealers.ToList()
+                .Select(coreDealer =>
+                {
+                    var dealer = new Dealer(coreDealer, _logger)
+                    {
+                        CoreType = coreDealer,
+                        Parent = this
+                    };
+                    dealer.PropertyChanged += OnDealerPropertyChanged;
+                    return dealer;
+                });
+
+        Dealers = new ManagedObservableCollection<Dealer>(
+            () => new Dealer(_logger),
+            dealers,
+            _logger
+        );
+        Dealers.CollectionChanged += Dealers_CollectionChanged;
+        Dealers.FirstOrDefault()?.Select();
+    }
+    private void InitContacts(string phoneExtensionDelimiter)
+    {
+        var contacts = CoreType?.Contacts.ToList()
+                .Select(coreContact =>
+                {
+                    var contact = new Contact(coreContact, _logger)
+                    {
+                        CoreType = coreContact,
+                        Parent = this
+                    };
+                    contact.PropertyChanged += OnContactPropertyChanged;
+                    return contact;
+                });
+
+        Contacts = new ManagedObservableCollection<Contact>(
+            () => new Contact(phoneExtensionDelimiter, _logger),
+            contacts,
+            _logger
+        );
+        Contacts.CollectionChanged += Contacts_CollectionChanged;
+        Contacts.FirstOrDefault()?.Select();
+    }
+    private void InitForms()
+    {
+        var forms = CoreType?.Forms.ToList()
+                .Select(coreForm =>
+                {
+                    var form = new Form(coreForm, _logger)
+                    {
+                        CoreType = coreForm,
+                        Parent = this
+                    };
+                    form.PropertyChanged += OnFormPropertyChanged;
+                    return form;
+                });
+
+        Forms = new ManagedObservableCollection<Form>(
+            () => new Form(_logger),
+            forms,
+            _logger
+        );
+        Forms.CollectionChanged += Forms_CollectionChanged;
+        Forms.FirstOrDefault()?.Select();
+    }
+
+    private void OnDealerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Dealer>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedDealer));
+        }
+    }
+
+    private void OnContactPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+
+        if (e.PropertyName == nameof(ManagedObservableCollection<Contact>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedContact));
+        }
+    }
+
+    private void OnFormPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ManagedObservableCollection<Form>.SelectedItem))
+        {
+            OnPropertyChanged(nameof(SelectedForm));
+        }
+    }
+
+    private void Dealers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+            foreach (Dealer d in e.NewItems) d.Parent = this;
+        UpdateCore();
+        _logger?.LogDebug("Dealers collection changed.");
+    }
+    private void Contacts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+            foreach (Contact c in e.NewItems) c.Parent = this;
+        UpdateCore();
+        _logger?.LogDebug("Contacts collection changed.");
+    }
+    private void Forms_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+            foreach (Form f in e.NewItems) f.Parent = this;
+        UpdateCore();
+        _logger?.LogDebug("Forms collection changed.");
+    }
+
+    internal void UpdateCore()
+    {
+        if (CoreType == null || _isInit) return;
+        CoreType.CaseText = CaseNumber ?? string.Empty;
+        CoreType.NotesText = Notes ?? string.Empty;
+        CoreType.Dealers.Clear();
+        CoreType.Dealers.AddRange(Dealers.Select(d => (Core.Types.Notebook.Dealer)d));
+        CoreType.Contacts.Clear();
+        CoreType.Contacts.AddRange(Contacts.Select(c => (Core.Types.Notebook.Contact)c));
+        CoreType.Forms.Clear();
+        CoreType.Forms.AddRange(Forms.Select(f => (Core.Types.Notebook.Form)f));
+        _logger?.LogDebug($"NoteModel core updated. ID: {Id}\tCore ID: {CoreType.Id}");
+    }
+
+    public static implicit operator Note(NoteModel note)
+    {
+        if (note is null || note.CoreType is null) return new Note();
+        return new Note(note.CoreType.Id)
+        {
+            CaseText = note.CaseNumber ?? string.Empty,
+            NotesText = note.Notes ?? string.Empty,
+            Dealers = [..note.Dealers.Select(d => (Core.Types.Notebook.Dealer)d)],
+            Contacts = [..note.Contacts.Select(c => (Core.Types.Notebook.Contact)c)],
+            Forms = [..note.Forms.Select(f => (Core.Types.Notebook.Form)f)]
+        };
+    }
+
+    internal void RaiseChildPropertyChanged()
+    {
+        OnPropertyChanged(string.Empty); 
+    }
+
+}

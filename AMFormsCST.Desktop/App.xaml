@@ -1,0 +1,22 @@
+﻿<Application x:Class="AMFormsCST.Desktop.App"  
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"  
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
+             xmlns:local="clr-namespace:AMFormsCST.Desktop"  
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"  
+             xmlns:converters="clr-namespace:AMFormsCST.Desktop.Converters"  
+             DispatcherUnhandledException="OnDispatcherUnhandledException"  
+             Exit="OnExit"  
+             Startup="OnStartup">  
+    
+    <Application.Resources>  
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />  
+                <ResourceDictionary Source="Controls/GalleryNavigationPresenter.xaml" />  
+            </ResourceDictionary.MergedDictionaries>  
+            <converters:RadioButtonCommandParameterConverter x:Key="RadioButtonCommandParameterConverter" />  
+        </ResourceDictionary>  
+    </Application.Resources>  
+    
+</Application>

@@ -103,7 +103,7 @@ public partial class Templates : UserControl
         item.Items.Add(AddContextMenuItem(box, "E-Mail Address", "Notes:EmailAddress"));
         item.Items.Add(AddContextMenuItem(box, "Phone#", "Notes:Phone"));
         item.Items.Add(AddContextMenuItem(box, "Notes", "Notes:Notes"));
-        item.Items.Add(AddContextMenuItem(box, "Case #", "Notes:CaseNumber"));
+        item.Items.Add(AddContextMenuItem(box, "Case#", "Notes:CaseNumber"));
         item.Items.Add(AddContextMenuItem(box, "Forms", "Notes:Forms"));
         item.Items.Add(AddContextMenuItem(box, "First Name", "Notes:FirstName"));
         item.Items.Add(AddContextMenuItem(box, "A/M Mail Address", "Notes:AMMailingAddress"));

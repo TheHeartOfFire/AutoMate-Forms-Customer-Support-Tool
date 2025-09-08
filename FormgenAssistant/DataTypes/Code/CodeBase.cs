@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FormgenAssistant.DataTypes.Code
 {
-    public abstract class CodeBase 
+    public abstract class CodeBase
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
@@ -29,14 +29,14 @@ namespace FormgenAssistant.DataTypes.Code
             Inputs.Add(new CodeInput(description, description, Inputs.Count));
             return this;
         }
-        public CodeBase AddInput(int index, string description )
+        public CodeBase AddInput(int index, string description)
         {
 
             foreach (var input in Inputs.Where(input => input.Index >= index))
                 input.Index++;
-            
+
             Inputs.Add(new CodeInput(description, description, index));
-            
+
             return this;
         }
         public CodeBase RemoveInput(int index)
@@ -51,7 +51,7 @@ namespace FormgenAssistant.DataTypes.Code
         }
         public CodeBase AddInput(string value, string description)
         {
-            Inputs.Add(new CodeInput(value, description, Inputs.Count) );
+            Inputs.Add(new CodeInput(value, description, Inputs.Count));
             return this;
         }
         public CodeBase AddInput(CodeBase value, string description)
@@ -84,7 +84,7 @@ namespace FormgenAssistant.DataTypes.Code
 
             foreach (var input in Inputs)
                 input.SetValue(inputs[input.Index]);
-            
+
             return this;
         }
 

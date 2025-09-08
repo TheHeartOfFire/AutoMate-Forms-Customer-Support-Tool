@@ -1,0 +1,136 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:AMFormsCST.Desktop.Views.Pages.Tools"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
+    x:Class="AMFormsCST.Desktop.Views.Pages.Tools.FormNameGeneratorPage"
+      xmlns:viewModels="clr-namespace:AMFormsCST.Desktop.ViewModels.Pages.Tools"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="FormNameGeneratorPage" d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type viewModels:FormNameGeneratorViewModel}}">
+
+
+    <Border BorderBrush="#30FFFFFF" BorderThickness="2" CornerRadius="10" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <Label Content="Form Name Generator" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold"/>
+                <Separator/>
+            </StackPanel>
+            <Grid Grid.Row="1" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <Label Content="Title" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox HorizontalAlignment="Stretch" PlaceholderText="Enter your form Title" Text="{Binding Form.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel MaxWidth="200" Margin="10,0,0,0" Grid.Column="1">
+                    <Label Content="Code" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your form code" Text="{Binding Form.Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel MaxWidth="200" Margin="10,0,0,0" Grid.Column="2">
+                    <Label Content="Revision Date" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your revision date" Text="{Binding Form.RevisionDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,10,0,10" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" MaxWidth="75">
+                    <Label Content="State" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="State" Text="{Binding Form.State, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="1">
+                    <Label Content="Dealership Name" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your dealership name" Text="{Binding Form.Dealer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center"  Margin="10,0,0,0" Grid.Column="2">
+                    <Label Content="OEM" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your OEM" Text="{Binding Form.Oem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="3">
+                    <Label Content="Bank Name" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your bank name" Text="{Binding Form.Bank, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="4">
+                    <Label Content="Provider Name" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <ui:TextBox PlaceholderText="Enter your provider name" Text="{Binding Form.Provider, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Vertical" Grid.Row="3" Margin="0,0,0,0">
+                <Label Content="File Name" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBox HorizontalAlignment="Stretch" IsReadOnly="True" Text="{Binding Form.FileName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <ui:Button Margin="10,0,0,0" VerticalAlignment="Stretch" Grid.Column="1" Command="{Binding CopyFileNameCommand}">
+                        <ui:SymbolIcon Symbol="Copy24" Filled="true" FontSize="18"/>
+                    </ui:Button>
+                    <ui:Button Margin="10,0,0,0" VerticalAlignment="Stretch" Grid.Column="2" Command="{Binding ClearFormCommand}">
+                        <ui:SymbolIcon Symbol="Eraser24" Filled="true" FontSize="18"/>
+                    </ui:Button>
+                </Grid>
+            </StackPanel>
+
+            <Grid Grid.Row="4" Margin="0,10,0,0">
+                <Grid.Resources>
+                    <Style TargetType="RadioButton" x:Key="RadioButtonAsToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <RadioButton Content="Pdf" Margin="0,0,0,0" GroupName="Format" Style="{StaticResource RadioButtonAsToggleButton}"
+                             IsChecked="{Binding IsPdfSelected, Mode=TwoWay}"/>
+                <RadioButton Content="Impact" Margin="10,0,0,0" GroupName="Format" Style="{StaticResource RadioButtonAsToggleButton}" Grid.Column="2"
+                             IsChecked="{Binding IsImpactSelected, Mode=TwoWay}"/>
+                <ToggleButton Content="Sold" Margin="10,0,0,0" Grid.Column="4"
+                             IsChecked="{Binding IsSoldSelected, Mode=TwoWay}"/>
+                <ToggleButton Content="Trade" Margin="10,0,0,0" Grid.Column="6"
+                             IsChecked="{Binding IsTradeSelected, Mode=TwoWay}"/>
+                <ToggleButton Content="LAW" Margin="10,0,0,0" Grid.Column="8"
+                             IsChecked="{Binding IsLawSelected, Mode=TwoWay}"/>
+                        <ToggleButton Content="Custom" Margin="10,0,0,0" Grid.Column="10"
+                             IsChecked="{Binding IsCustomSelected, Mode=TwoWay}"/>
+                <ToggleButton Content="Vehicle Merchandising" Margin="10,0,0,0" Grid.Column="12" HorizontalAlignment="Stretch"
+                             IsChecked="{Binding IsVehicleMerchandisingSelected, Mode=TwoWay}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</Page>

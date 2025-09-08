@@ -125,7 +125,6 @@ namespace FormgenAssistant.Pages
             var selectedSnippet = _snippets.FirstOrDefault(x => x.Name == ((ListBoxItem)lstSnippets.SelectedItem).Content as string);
             if (selectedSnippet is null) return;
 
-            //TODO: Allow CodeBase as Input
 
             var boxes = wrpInputs.Children;
             var inputs = (from object? box in boxes select box as TextBox into textBox where textBox is not null select textBox.Text).ToList();

@@ -18,25 +18,27 @@
         WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
         SizeChanged="MainWindow_OnSizeChanged"
-                 MinWidth="1050" MinHeight="775" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-    <Grid ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                 MinWidth="1200" MinHeight="775"
+                 Topmost="{Binding ViewModel.IsWindowTopmost, Mode=OneWay}"
+                 >
+    <Grid>
         <ui:NavigationView
     x:Name="NavigationView"
     Padding="42,0,42,0"
     BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
     EnableDebugMessages="True"
-    FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
+    FooterMenuItemsSource="{Binding ViewModel.NavigationFooter, Mode=OneWay}"
     FrameMargin="0"
     IsBackButtonVisible="Visible"
     IsPaneToggleVisible="True"
-    MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
+    MenuItemsSource="{Binding ViewModel.NavigationItems, Mode=OneWay}"
     OpenPaneLength="310"
     PaneClosed="NavigationView_OnPaneClosed"
     PaneDisplayMode="Left"
     PaneOpened="NavigationView_OnPaneOpened"
     SelectionChanged="OnNavigationSelectionChanged"
     TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
-    Transition="FadeInWithSlide" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+    Transition="FadeInWithSlide">
             <ui:NavigationView.Header>
                 <StackPanel Margin="42,32,42,20">
                     <ui:BreadcrumbBar x:Name="BreadcrumbBar" />
@@ -53,12 +55,14 @@
             </ui:NavigationView.AutoSuggestBox>
             <ui:NavigationView.ContentOverlay>
                 <Grid>
+                    <!-- The ContentPresenter has been moved here -->
+                    <ContentPresenter x:Name="RootContentDialog" />
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
                 </Grid>
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+        <!-- The ContentPresenter has been removed from here -->
 
         <ui:TitleBar
     x:Name="TitleBar"
@@ -68,17 +72,27 @@
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/Solera_Logo_Full.png" />
             </ui:TitleBar.Icon>
+            <ui:TitleBar.TrailingContent>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+                    <ToggleButton IsChecked="{Binding ViewModel.IsWindowTopmost, Mode=TwoWay}" 
+                                  Content="AoT" VerticalAlignment="Center" ToolTip="Always On Top" Margin="5"/>
+                    <ToggleButton IsChecked="{Binding ViewModel.IsLightTheme, Mode=TwoWay}"  
+                                  VerticalAlignment="Center" ToolTip="Toggle Theme" Margin="5">
+                        <ui:SymbolIcon Symbol="DarkTheme24"/>
+                    </ToggleButton>
+                </StackPanel>
+            </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
-        <tray:NotifyIcon
+        <!--<tray:NotifyIcon
     Grid.Row="0"
     FocusOnLeftClick="True"
     Icon="pack://application:,,,/Assets/AMLogo.png"
     MenuOnRightClick="True"
-    TooltipText="Auto/Mate Forms CST" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+    TooltipText="Solera Case Management Tool">
             <tray:NotifyIcon.Menu>
                 <ContextMenu ItemsSource="{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
             </tray:NotifyIcon.Menu>
-        </tray:NotifyIcon>
+        </tray:NotifyIcon>-->
     </Grid>
 </ui:FluentWindow>

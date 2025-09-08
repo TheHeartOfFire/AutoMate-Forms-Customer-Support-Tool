@@ -21,9 +21,15 @@ namespace AMFormsCST.Core.Types.CodeBlocks.Formulae
                 .SetInputValue(0, "\' \'")
                 .SetInputValue(1, new SeplistCode()
                     .SetInputValue(0, "\', \'")
-                    .SetInputValue(1, GetInput(0) as string ?? string.Empty)
-                    .SetInputValue(2, GetInput(1) as string ?? string.Empty))
-                .SetInputValue(2, GetInput(2) as string ?? string.Empty);
+                    .SetInputValue(1, GetInput(0) is CodeBase ? 
+                    GetInput(0) as CodeBase ?? string.Empty : 
+                    GetInput(0) as string ?? string.Empty)
+                    .SetInputValue(2, GetInput(1) is CodeBase ? 
+                    GetInput(1) as CodeBase ?? string.Empty : 
+                    GetInput(1) as string ?? string.Empty))
+                .SetInputValue(2, GetInput(2) is CodeBase ?
+                    GetInput(2) as CodeBase ?? string.Empty :
+                    GetInput(2) as string ?? string.Empty);
         }
     }
 }

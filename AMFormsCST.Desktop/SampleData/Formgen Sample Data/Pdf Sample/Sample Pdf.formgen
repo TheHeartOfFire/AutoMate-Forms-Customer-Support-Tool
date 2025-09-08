@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <formDef version="4" publishedUUID="ae167e9f-28e5-4e61-bf63-fb2772281644" legacyImport="false" totalPages="5" defaultPoints="10" missingSourceJpeg="false" duplex="false" maxAccessoryLines="3" prePrintedLaserForm="false">
   <pages pageNumber="1" defaultPoints="0" leftPrinterMargin="18" rightPrinterMargin="18" topPrinterMargin="18" bottomPrinterMargin="18">
     <fields>
@@ -1597,8 +1597,7 @@
       <entry>
         <key>554</key>
         <value uniqueId="554" formFieldType="SIGNATURE" legacyCol="0" legacyLine="0" x="42" y="711" w="108" h="18" manualSize="true" fontPoints="10" boldFont="false" shrinkFontToFit="false" pictureLeft="10" pictureRight="0" displayPartialField="false" startChar="1" endChar="10" perCharDeltaPts="0" alignment="Center">
-          <expression>
-          </expression>
+          <expression></expression>
           <sampleData>Sign Here</sampleData>
           <formatOption>None</formatOption>
         </value>
@@ -2047,6 +2046,6 @@
   <codeLines order="9" type="POST" destVariable="OTHERCHARGES">
     <expression>F272 + F86 + F667 + F21 + F692 + TradeCreditN + ACC</expression>
   </codeLines>
-  <formCategory>Retail</formCategory>
+  <formCategory>Other</formCategory>
   <validStates>TX</validStates>
 </formDef>

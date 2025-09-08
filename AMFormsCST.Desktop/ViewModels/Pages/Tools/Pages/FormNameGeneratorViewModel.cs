@@ -1,144 +1,181 @@
-﻿using AMFormsCST.Desktop.Models.FormNameGenerator;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.Models.FormNameGenerator;
+using AMFormsCST.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
+
 public partial class FormNameGeneratorViewModel : ViewModel
 {
+    private readonly ISupportTool _supportTool;
+
     [ObservableProperty]
-    private Form _form = new();
-    [ObservableProperty]
-    private bool _isPdfSelected; // This will initially be false by default
-    partial void OnIsPdfSelectedChanged(bool value)
+    private Form _form;
+
+    #region Toggle Properties
+    private bool _isPdfSelected;
+    public bool IsPdfSelected
     {
-        if (value) // If this button is checked
+        get => _isPdfSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Pdf);
-        }
-        else // If this button is unchecked
-        {
-            // Only remove if it was explicitly unchecked (e.g., by another button in its group)
-            Form.RemoveTag(Form.Tag.Pdf);
+            if (SetProperty(ref _isPdfSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Pdf);
+                    Form.RemoveTag(Form.Tag.Impact);
+                    IsImpactSelected = false;
+                }
+                else if (!IsImpactSelected)
+                {
+                    IsImpactSelected = true;
+                }
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isImpactSelected;
-    partial void OnIsImpactSelectedChanged(bool value)
+    public bool IsImpactSelected
     {
-        if (value)
+        get => _isImpactSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Impact);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Impact);
+            if (SetProperty(ref _isImpactSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Impact);
+                    Form.RemoveTag(Form.Tag.Pdf);
+                    IsPdfSelected = false;
+                }
+                else if (!IsPdfSelected)
+                {
+                    IsPdfSelected = true;
+                }
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isSoldSelected;
-    partial void OnIsSoldSelectedChanged(bool value)
+    public bool IsSoldSelected
     {
-        if (value)
+        get => _isSoldSelected;
+        set
         {
-            IsTradeSelected = false;
-            Form.AddTag(Form.Tag.Sold);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Sold);
+            if (SetProperty(ref _isSoldSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Sold);
+                    IsTradeSelected = false;
+                }
+                else
+                {
+                    Form.RemoveTag(Form.Tag.Sold);
+                }
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isTradeSelected;
-    partial void OnIsTradeSelectedChanged(bool value)
+    public bool IsTradeSelected
     {
-        if (value)
+        get => _isTradeSelected;
+        set
         {
-            IsSoldSelected = false;
-            Form.AddTag(Form.Tag.Trade);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Trade);
+            if (SetProperty(ref _isTradeSelected, value))
+            {
+                if (value)
+                {
+                    Form.AddTag(Form.Tag.Trade);
+                    IsSoldSelected = false;
+                }
+                else
+                {
+                    Form.RemoveTag(Form.Tag.Trade);
+                }
+            }
         }
     }
 
-    // --- Properties for ToggleButtons (independent) ---
-
-    [ObservableProperty]
     private bool _isLawSelected;
-    partial void OnIsLawSelectedChanged(bool value)
+    public bool IsLawSelected
     {
-        if (value)
+        get => _isLawSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Law);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Law);
+            if (SetProperty(ref _isLawSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.Law); else Form.RemoveTag(Form.Tag.Law);
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isCustomSelected;
-    partial void OnIsCustomSelectedChanged(bool value)
+    public bool IsCustomSelected
     {
-        if (value)
+        get => _isCustomSelected;
+        set
         {
-            Form.AddTag(Form.Tag.Custom);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.Custom);
+            if (SetProperty(ref _isCustomSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.Custom); else Form.RemoveTag(Form.Tag.Custom);
+            }
         }
     }
 
-    [ObservableProperty]
     private bool _isVehicleMerchandisingSelected;
-    partial void OnIsVehicleMerchandisingSelectedChanged(bool value)
+    public bool IsVehicleMerchandisingSelected
     {
-        if (value)
+        get => _isVehicleMerchandisingSelected;
+        set
         {
-            Form.AddTag(Form.Tag.VehicleMerchandising);
-        }
-        else
-        {
-            Form.RemoveTag(Form.Tag.VehicleMerchandising);
+            if (SetProperty(ref _isVehicleMerchandisingSelected, value))
+            {
+                if (value) Form.AddTag(Form.Tag.VehicleMerchandising); else Form.RemoveTag(Form.Tag.VehicleMerchandising);
+            }
         }
     }
+    #endregion
 
-    // Constructor to set initial UI state and synchronize with model
+    public FormNameGeneratorViewModel(ISupportTool supportTool)
+    {
+        _supportTool = supportTool;
+        _form = new Form(_supportTool);
+        ResetForm();
+    }
     public FormNameGeneratorViewModel()
     {
-        
-        _isPdfSelected = true; 
+        _supportTool = new DesignTimeSupportTool();
+        _form = new Form(_supportTool)
+        {
+            Title = "Retail Installment Contract",
+            Code = "553-TX-eps",
+            RevisionDate = "01/24",
+            State = "TX"
+        };
+        IsPdfSelected = true;
+        IsLawSelected = true;
     }
+
     [RelayCommand]
     private void CopyFileName()
     {
         if (!string.IsNullOrEmpty(Form.FileName))
         {
             Clipboard.SetText(Form.FileName);
-            // Optionally, provide user feedback, e.g., a simple notification or toast.
-            
         }
     }
 
     [RelayCommand]
-    private void ClearForm()
-    {
-        // 1. Clear the data in the model
-        Form.Clear();
+    private void ClearForm() => ResetForm();
 
+    private void ResetForm()
+    {
+        Form.Clear();
         IsPdfSelected = true;
         IsImpactSelected = false;
         IsSoldSelected = false;

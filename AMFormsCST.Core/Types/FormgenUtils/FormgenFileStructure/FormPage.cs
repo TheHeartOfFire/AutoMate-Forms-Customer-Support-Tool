@@ -1,12 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class FormPage
+    public partial class FormPage : IEquatable<FormPage>, INotifyPropertyChanged
     {
-        public FormPageSettings? Settings { get; set; }
-        public List<FormField> Fields { get; set; } = new();
+        [NotifyPropertyChanged]
+        private FormPageSettings? _settings;
+        [NotifyPropertyChanged]
+        private List<FormField> _fields = new();
+
+        public FormPage()
+        {
+            Settings = new FormPageSettings();
+            Settings.PropertyChanged += (s, e) => OnPropertyChanged();
+        }
+
         public FormPage(XmlNode node)
         {
             if (node.Attributes != null) Settings = new FormPageSettings(node.Attributes);
@@ -16,6 +26,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             {
                 Fields.Add(new FormField(child));
             }
+            if (Settings is not null) Settings.PropertyChanged += (s, e) => OnPropertyChanged();
         }
 
         public void GenerateXml(XmlWriter xml)
@@ -35,5 +46,14 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.WriteEndElement();
             xml.WriteEndElement();
         }
+
+        public bool Equals(FormPage? other) => 
+            other is not null &&
+            Settings?.Equals(other.Settings) == true &&
+            Fields.Count == other.Fields.Count &&
+            Fields.SequenceEqual(other.Fields);
+
+        public override bool Equals(object? obj) => Equals(obj as FormPage);
+        public override int GetHashCode() => HashCode.Combine(Settings, Fields);
     }
 }

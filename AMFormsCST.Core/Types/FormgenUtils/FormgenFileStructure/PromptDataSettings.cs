@@ -1,20 +1,34 @@
-﻿using System.Xml;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class PromptDataSettings
+    public partial class PromptDataSettings : IEquatable<PromptDataSettings>, INotifyPropertyChanged
     {
-        public PromptType Type { get; set; }
-        public bool IsExpression { get; set; }
-        public bool Required { get; set; }
-        public int Length { get; set; }
-        public int DecimalPlaces { get; set; }
-        public string Delimiter { get; set; }
-        public bool AllowNegative { get; set; }
-        public bool ForceUpperCase { get; set; }
-        public bool MakeBuyerVars { get; set; }
-        public bool IncludeNoneAsOption { get; set; }
-
+        [NotifyPropertyChanged]
+        private PromptType _type;
+        [NotifyPropertyChanged]
+        private bool _isExpression;
+        [NotifyPropertyChanged]
+        private bool _required;
+        [NotifyPropertyChanged]
+        private int _length;
+        [NotifyPropertyChanged]
+        private int _decimalPlaces;
+        [NotifyPropertyChanged]
+        private string _delimiter;
+        [NotifyPropertyChanged]
+        private bool _allowNegative;
+        [NotifyPropertyChanged]
+        private bool _forceUpperCase;
+        [NotifyPropertyChanged]
+        private bool _makeBuyerVars;
+        [NotifyPropertyChanged]
+        private bool _includeNoneAsOption;
+        public PromptDataSettings()
+        {
+        }
         internal void GenerateXml(XmlWriter xml)
         {
             xml.WriteAttributeString("type", GetPromptType(Type));
@@ -150,6 +164,23 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             PromptType.ZIP10 => "Zip10",
             _ => "ABC",
         };
+
+        public bool Equals(PromptDataSettings? other) => 
+            other != null &&
+            Type == other.Type &&
+            IsExpression == other.IsExpression &&
+            Required == other.Required &&
+            Length == other.Length &&
+            DecimalPlaces == other.DecimalPlaces &&
+            Delimiter?.Equals(other.Delimiter) == true &&
+            AllowNegative == other.AllowNegative &&
+            ForceUpperCase == other.ForceUpperCase &&
+            MakeBuyerVars == other.MakeBuyerVars &&
+            IncludeNoneAsOption == other.IncludeNoneAsOption;
+
+        public override bool Equals(object? obj) => Equals(obj as PromptDataSettings);
+        public override int GetHashCode() => HashCode.Combine(Type, IsExpression, Required, Length, DecimalPlaces, Delimiter, AllowNegative,
+            HashCode.Combine(ForceUpperCase, MakeBuyerVars, IncludeNoneAsOption));
     }
 
 }

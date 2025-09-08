@@ -1,15 +1,26 @@
-﻿using System.Xml;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class FormPageSettings
+    public partial class FormPageSettings : IEquatable<FormPageSettings>, INotifyPropertyChanged
     {
-        public int PageNumber { get; set; }
-        public int DefaultFontSize { get; set; }
-        public int LeftPrinterMargin { get; set; }
-        public int RightPrinterMargin { get; set; }
-        public int TopPrinterMargin { get; set; }
-        public int BottomPrinterMargin { get; set; }
+        [NotifyPropertyChanged]
+        private int _pageNumber;
+        [NotifyPropertyChanged]
+        private int _defaultFontSize;
+        [NotifyPropertyChanged]
+        private int _leftPrinterMargin;
+        [NotifyPropertyChanged]
+        private int _rightPrinterMargin;
+        [NotifyPropertyChanged]
+        private int _topPrinterMargin;
+        [NotifyPropertyChanged]
+        private int _bottomPrinterMargin;
+
+        public FormPageSettings() { }
+
         public FormPageSettings(XmlAttributeCollection attributes)
         {
             if (int.TryParse(attributes[0].Value, out int parsedInt))
@@ -42,5 +53,17 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 
         }
 
+        public bool Equals(FormPageSettings? other) =>
+            other is not null &&
+            PageNumber == other.PageNumber &&
+            DefaultFontSize == other.DefaultFontSize &&
+            LeftPrinterMargin == other.LeftPrinterMargin &&
+            RightPrinterMargin == other.RightPrinterMargin &&
+            TopPrinterMargin == other.TopPrinterMargin &&
+            BottomPrinterMargin == other.BottomPrinterMargin;
+
+        public override bool Equals(object? obj) => Equals(obj as FormPageSettings);
+        public override int GetHashCode() => HashCode.Combine(PageNumber, DefaultFontSize, 
+            LeftPrinterMargin, RightPrinterMargin, TopPrinterMargin, BottomPrinterMargin);
     }
 }

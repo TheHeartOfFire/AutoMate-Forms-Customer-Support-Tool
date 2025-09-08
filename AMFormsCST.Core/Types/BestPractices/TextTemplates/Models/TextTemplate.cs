@@ -1,12 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 public class TextTemplate : IEquatable<TextTemplate>
@@ -16,29 +10,45 @@ public class TextTemplate : IEquatable<TextTemplate>
     public string Name { get; set; }
     public string Description { get; set; }
     public string Text { get; set; }
-    public TextTemplate(string name, string description, string text)
+    public TemplateType Type { get; set; } 
+    public enum TemplateType
+    {
+        PublishComments,
+        InternalComments,
+        ClosureComments,
+        Email,
+        Other
+    }
+    public TextTemplate(string name, string description, string text, TemplateType type)
     {
         Id = Guid.NewGuid(); // Or pass in an existing ID for editing
         Name = name;
         Description = description;
         Text = text;
+        Type = type;
     }
     [JsonConstructor]
-    public TextTemplate(Guid id, string name, string description, string text)
+    public TextTemplate(Guid id, string name, string description, string text, TemplateType type)
     {
         Id = id;
         Name = name;
         Description = description;
         Text = text;
+        Type = type;
     }
 
     public List<ITextTemplateVariable> GetVariables(ISupportTool supportTool)
     {
         var variables = new List<ITextTemplateVariable>();
-        foreach (var variable in supportTool.Variables)
+        if (supportTool?.Settings?.UserSettings?.Organization?.Variables is null)
         {
-            if (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
-                Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase))
+            return variables;
+        }
+        foreach (var variable in supportTool.Settings.UserSettings.Organization.Variables)
+        {
+            if (Text is not null && 
+                (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
+                Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 variables.Add(variable);
             }
@@ -65,11 +75,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public bool Equals(TextTemplate? other)
     {
-        return other is not null && other.Text.Equals(Text);
-    }
-    public bool Equals(string? other)
-    {
-        return other is not null && other.Equals(Text);
+        return other is not null && other.Id.Equals(Id);
     }
 
     public override bool Equals(object? obj)
@@ -79,12 +85,12 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Text, Name, Description);
+        return HashCode.Combine(Id);
     }
 
     public static bool ContainsVariable(string text, ISupportTool supportTool)
     {
-        var variables = supportTool.Variables;
+        var variables = supportTool.Settings.UserSettings.Organization.Variables;
         foreach (var variable in variables)
         {
             if (text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
@@ -105,7 +111,7 @@ public class TextTemplate : IEquatable<TextTemplate>
 
     public static (int position, ITextTemplateVariable? variable, string alias) GetFirstVariable(string text, ISupportTool supportTool)
     {
-        var variables = supportTool.Variables;
+        var variables = supportTool.Settings.UserSettings.Organization.Variables;
 
         (int position, ITextTemplateVariable? variable, string alias) lowestIndex = (-1, null, string.Empty);
 

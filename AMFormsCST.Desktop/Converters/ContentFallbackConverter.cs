@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
@@ -50,9 +44,9 @@ public class ContentFallbackConverter : IMultiValueConverter
             }
         }
 
-        if (dataItem is Models.Company company) // Check if the data item is a Company
+        if (dataItem is Models.Company company) 
         {
-            // Using a new, distinct binding path for this format
+           
             if (bindingPath == "CompositeCompanyName")
             {
                 string companyCode = GetPropertyValue<string>(company, nameof(company.CompanyCode));
@@ -61,23 +55,23 @@ public class ContentFallbackConverter : IMultiValueConverter
                 bool hasCompanyCode = !string.IsNullOrEmpty(companyCode);
                 bool hasCompanyName = !string.IsNullOrEmpty(companyName);
 
-                // If both parts are empty, return fallback
+                
                 if (!hasCompanyCode && !hasCompanyName)
                 {
                     return fallbackValue;
                 }
-                // Format: (CompanyCode)CompanyName
+                
                 else if (hasCompanyCode && hasCompanyName)
                 {
                     return $"({companyCode}){companyName}";
                 }
-                // Just company code if no name
+                
                 else if (hasCompanyCode)
                 {
                     return $"({companyCode})";
                 }
-                // Just company name if no company code
-                else // if (hasCompanyName)
+                
+                else 
                 {
                     return companyName;
                 }

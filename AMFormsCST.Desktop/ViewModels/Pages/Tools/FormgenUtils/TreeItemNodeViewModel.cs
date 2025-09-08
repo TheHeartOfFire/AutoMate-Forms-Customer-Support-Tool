@@ -1,244 +1,106 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
-using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Models.FormgenUtilities;
+using AMFormsCST.Desktop.Models.FormgenUtilities.Grouping;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Shapes;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
+using AMFormsCST.Core.Interfaces;
 
-namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
-public partial class TreeItemNodeViewModel : ViewModel
+namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils;
+
+public partial class TreeItemNodeViewModel : ObservableObject
 {
     [ObservableProperty]
-    private string _nodeName = string.Empty;
-    public ObservableCollection<TreeItemNodeViewModel> Children { get; set; } = [];
+    private string? _header;
 
     [ObservableProperty]
-    private IFormgenFileProperties _properties = new FormProperties();
-    public enum Type { Form, Codelines, Init, Prompts, PostPrompts, Fields, Page, Tail }
+    private bool _isSelected;
 
-    public void Initialize(DotFormgen formgenfile, Type type = Type.Form, string name = "", object? tail = null)
+    [ObservableProperty]
+    private bool _isExpanded;
+
+    public object Data { get; }
+    public ObservableCollection<TreeItemNodeViewModel> Children { get; } = [];
+    private readonly FormgenUtilitiesViewModel _parentViewModel;
+    private readonly ILogService? _logger;
+
+    public TreeItemNodeViewModel(object data, FormgenUtilitiesViewModel parentViewModel, ILogService? logger = null)
     {
-        if (formgenfile is null) return;
-        switch (type)
+        Data = data;
+        _parentViewModel = parentViewModel;
+        _logger = logger;
+
+        var clHeader = "Code";
+
+        if (data is CodeLine line)
         {
-            case Type.Form:
-                NodeName = formgenfile.Title ?? string.Empty;
+            clHeader = line.Settings?.Variable;
+            if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Label)
+            {
+                clHeader = $"<----- {line.PromptData?.Message} ----->";
+            }
+            if (line.PromptData?.Settings?.Type is PromptDataSettings.PromptType.Separator)
+            {
+                clHeader = "<----- Separator ----->";
+            }
+        }
 
-                var codelines = new TreeItemNodeViewModel();
-                codelines.Initialize(formgenfile, Type.Codelines);
+        Header = data switch
+        {
+            DotFormgen f => f.Title ?? "Formgen File",
+            CodeLineCollection => "Code Lines",
+            PageGroup => "Pages",
+            CodeLineGroup g => g.Type.ToString(),
+            FormPage p => $"Page {p.Settings?.PageNumber ?? 0}",
+            FormField f => f.Expression ?? "Field",
+            CodeLine c => clHeader,
+            _ => "Unknown"
+        };
 
-                var fields = new TreeItemNodeViewModel();
-                fields.Initialize(formgenfile, Type.Fields);
+        _logger?.LogDebug($"TreeItemNodeViewModel created: Header='{Header}', DataType='{data.GetType().Name}'");
 
-                Children.Add(codelines);
-                Children.Add(fields);
-
-                Properties = new FormProperties
-                {
-                    Settings = new FormSettings
-                    {
-                        Version = formgenfile.Settings?.Version.ToString() ?? string.Empty,
-                        PublishedUUID = formgenfile.Settings?.UUID ?? string.Empty,
-                        LegacyImport = formgenfile.Settings?.LegacyImport ?? false,
-                        TotalPages = formgenfile.Pages.Count,
-                        DefaultPoints = formgenfile.Settings?.DefaultFontSize ?? 0,
-                        MissingSourceJpeg = formgenfile.Settings?.MissingSourceJpeg ?? false,
-                        Duplex = formgenfile.Settings?.Duplex ?? false,
-                        MaxAccessoryLines = formgenfile.Settings?.MaxAccessoryLines ?? 0,
-                        PrePrintedLaserForm = formgenfile.Settings?.PreprintedLaserForm ?? false
-                    },
-                    Title = formgenfile.Title ?? string.Empty,
-                    TradePrompt = formgenfile.TradePrompt,
-                    FormType = formgenfile.FormType,
-                    BillingName = formgenfile.BillingName ?? string.Empty,
-                    Category = formgenfile.Category,
-                    SalesPersonPrompt = formgenfile.SalesPersonPrompt,
-                    Username = formgenfile.Username ?? string.Empty
-                };
+        switch (data)
+        {
+            case DotFormgen formgenFile:
+                Children.Add(new TreeItemNodeViewModel(new CodeLineCollection(formgenFile.CodeLines, _logger), _parentViewModel, _logger) { IsExpanded = true });
+                Children.Add(new TreeItemNodeViewModel(new PageGroup(formgenFile.Pages, _logger), _parentViewModel, _logger));
                 break;
-            case Type.Codelines:
-                NodeName = "Code Lines";
 
-                var init = new TreeItemNodeViewModel();
-                init.Initialize(formgenfile, Type.Init);
-
-                var prompts = new TreeItemNodeViewModel();
-                prompts.Initialize(formgenfile, Type.Prompts);
-
-                var postPrompts = new TreeItemNodeViewModel();
-                postPrompts.Initialize(formgenfile, Type.PostPrompts);
-
-                Properties = new CodeLineStats{
-                    Total = formgenfile.CodeLines.Count,
-                    Init = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.INIT),
-                    Prompts = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.PROMPT),
-                    PostPrompts = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.POST)
-                };
-
-                Children.Add(init);
-                Children.Add(prompts);
-                Children.Add(postPrompts);
+            case CodeLineCollection codeLineCollection:
+                var allCodeLines = codeLineCollection.CodeLines.ToList();
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.INIT, allCodeLines.Where(c => c.Settings?.Type == CodeType.INIT), _logger), _parentViewModel, _logger));
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.PROMPT, allCodeLines.Where(c => c.Settings?.Type == CodeType.PROMPT), _logger), _parentViewModel, _logger) { IsExpanded = true });
+                Children.Add(new TreeItemNodeViewModel(new CodeLineGroup(CodeType.POST, allCodeLines.Where(c => c.Settings?.Type == CodeType.POST), _logger), _parentViewModel, _logger));
                 break;
-            case Type.Init:
-                NodeName = "Init";
 
-                foreach (var line in formgenfile.CodeLines.Where(x => x.Settings?.Type == CodeType.INIT))
+            case PageGroup pageGroup:
+                foreach (var page in pageGroup.Pages)
                 {
-                    var item = new TreeItemNodeViewModel();
-                    item.Initialize(formgenfile, Type.Tail, line.Expression ?? string.Empty, line);
-                    Children.Add(item);
-                }
-
-                Properties = new BasicStats { Total = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.INIT) };
-                break;
-            case Type.Prompts:
-                NodeName = "Prompts";
-
-                foreach (var line in formgenfile.CodeLines.Where(x => x.Settings?.Type == CodeType.PROMPT))
-                {
-                    var item = new TreeItemNodeViewModel();
-
-                    name = line.Settings?.Variable ?? string.Empty;
-                    if(name.Equals("F0"))
-                        name = line.PromptData?.Message ?? string.Empty;
-                    if(line.PromptData?.Settings?.Type == Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings
-                        .PromptType.Separator)
-                        name = "~~Separator~~";
-
-                    item.Initialize(formgenfile, Type.Tail, name, line);
-                    Children.Add(item);
-                }
-
-                Properties = new BasicStats { Total = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.PROMPT) };
-                break;
-            case Type.PostPrompts:
-                NodeName = "Post Prompts";
-
-                foreach (var line in formgenfile.CodeLines.Where(x => x.Settings?.Type == CodeType.POST))
-                {
-                    var item = new TreeItemNodeViewModel();
-                    item.Initialize(formgenfile, Type.Tail, line.Expression ?? string.Empty, line);
-                    Children.Add(item);
-                }
-
-                Properties = new BasicStats { Total = formgenfile.CodeLines.Count(x => x.Settings?.Type == CodeType.POST) };
-                break;
-            case Type.Fields:
-                NodeName = "Fields";
-
-                foreach (var page in formgenfile.Pages)
-                {
-                    var item = new TreeItemNodeViewModel();
-                    item.Initialize(formgenfile, Type.Page,
-                        page.Settings?.PageNumber.ToString() ?? string.Empty);
-                    Children.Add(item);
-                }
-
-                Properties = new FieldStats 
-                { 
-                    Fields = formgenfile.FieldCount(),
-                    Pages = formgenfile.Pages.Count,
-                };
-                break;
-            case Type.Page:
-                if (!int.TryParse(name, out int pageNumber)) break;
-                NodeName = "Page: " + name;
-
-                var currentPage = formgenfile.Pages.FirstOrDefault(x => x.Settings?.PageNumber == pageNumber);
-
-                if (currentPage is null) break;
-
-                foreach (var field in currentPage.Fields)
-                {
-                    var item = new TreeItemNodeViewModel();
-                    item.Initialize(formgenfile, Type.Tail, field.Expression ?? string.Empty, field);
-                    Children.Add(item);
-                }
-
-                Properties = new PageProperties
-                {
-                    Total = currentPage.Fields.Count,
-                    Settings = new PageSettings
-                    {
-                        PageNumber = currentPage.Settings?.PageNumber ?? 0,
-                        BottomPrinterMargin = currentPage.Settings?.BottomPrinterMargin ?? 0,
-                        DefaultFontSize = currentPage.Settings?.DefaultFontSize ?? 0,
-                        LeftPrinterMargin = currentPage.Settings?.LeftPrinterMargin ?? 0,
-                        RightPrinterMargin = currentPage.Settings?.RightPrinterMargin ?? 0,
-                        TopPrinterMargin = currentPage.Settings?.TopPrinterMargin ?? 0
-                    }
-                };
-                break;
-            case Type.Tail:
-                NodeName = name;
-                if (tail is CodeLine codeLine)
-                {
-                    Properties = new CodeLineProperties
-                    {
-                        Expression = codeLine.Expression ?? string.Empty,
-                        Settings = new Models.FormgenUtilities.CodeLineSettings
-                        {
-                            Order = codeLine.Settings?.Order ?? 0,
-                            Type = codeLine.Settings?.Type ?? CodeType.PROMPT,
-                            Variable = codeLine.Settings?.Variable
-                        },
-                        PromptData = new PromptDataProperties
-                        {
-                            Message = codeLine.PromptData?.Message ?? string.Empty,
-                            Settings = new Models.FormgenUtilities.PromptDataSettings
-                            {
-                                Type = codeLine.PromptData?.Settings?.Type ?? Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings.PromptType.Text,
-                                AllowNegative = codeLine.PromptData?.Settings?.AllowNegative ?? false,
-                                IncludeNoneAsOption = codeLine.PromptData?.Settings?.IncludeNoneAsOption ?? false,
-                                DecimalPlaces = codeLine.PromptData?.Settings?.DecimalPlaces ?? 0,
-                                Delimiter = codeLine.PromptData?.Settings?.Delimiter ?? string.Empty,
-                                ForceUpperCase = codeLine.PromptData?.Settings?.ForceUpperCase ?? false,
-                                IsExpression = codeLine.PromptData?.Settings?.IsExpression ?? false,
-                                Length = codeLine.PromptData?.Settings?.Length ?? 0,
-                                MakeBuyerVars = codeLine.PromptData?.Settings?.MakeBuyerVars ?? false,
-                                Required = codeLine.PromptData?.Settings?.Required ?? false
-                            },
-                            Choices = codeLine.PromptData?.Choices ?? []
-                        }
-                    };
-                }
-                else if (tail is FormField field)
-                {
-                    Properties = new FieldProperties
-                    {
-                        Expression = field.Expression ?? string.Empty,
-                        Settings = new FieldSettings
-                        {
-                            FontAlignment = field.Settings?.FontAlignment ?? FormFieldSettings.Alignment.LEFT,
-                            Bold = field.Settings?.Bold ?? false,
-                            DecimalPlaces = field.Settings?.DecimalPlaces ?? 0,
-                            DisplayPartial = field.Settings?.DisplayPartial ?? false,
-                            EndIndex = field.Settings?.EndIndex ?? 0,
-                            FontSize = field.Settings?.FontSize ?? 0,
-                            ID = field.Settings?.ID ?? 0,
-                            ImpactPosition = field.Settings?.ImpactPosition ?? new System.Drawing.Point(0, 0), 
-                            Kerning = field.Settings?.Kearning ?? 0, 
-                            LaserRect = field.Settings?.LaserRect ?? new System.Drawing.Rectangle(),
-                            Length = field.Settings?.Length ?? 0, 
-                            ManualSize = field.Settings?.ManualSize ?? false, 
-                            ShrinkToFit = field.Settings?.ShrinkToFit ?? false, 
-                            StartIndex = field.Settings?.StartIndex ?? 0 
-                        },
-                        FormattingOption = field.FormattingOption,
-                        SampleData = field.SampleData ?? string.Empty
-                    };
+                    Children.Add(new TreeItemNodeViewModel(page, _parentViewModel, _logger));
                 }
                 break;
 
+            case CodeLineGroup codeLineGroup:
+                foreach (var codeLine in codeLineGroup.CodeLines)
+                {
+                    Children.Add(new TreeItemNodeViewModel(codeLine, _parentViewModel, _logger));
+                }
+                break;
+
+            case FormPage page:
+                foreach (var field in page.Fields)
+                {
+                    Children.Add(new TreeItemNodeViewModel(field, _parentViewModel, _logger));
+                }
+                break;
         }
     }
 
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value)
+        {
+            _parentViewModel.SelectedNode = this;
+            _logger?.LogDebug($"TreeItemNodeViewModel selected: Header='{Header}'");
+        }
+    }
 }

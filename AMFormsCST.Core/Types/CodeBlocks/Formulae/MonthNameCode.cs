@@ -17,8 +17,8 @@ namespace AMFormsCST.Core.Types.CodeBlocks.Formulae
 
             return new CaseCode()
                 .AddExtraInputs(10)
-                .SetInputValue(0, GetInput(0) as string ?? string.Empty)
-                .SetInputDescription(0, (GetInput(0) as CodeBase)?.Description ?? string.Empty)
+                .SetInputValue(0, new MonthCode()
+                    .SetInputValue(0, GetInput(0) as string ?? string.Empty))
                 .SetInputValue(1, "1")
                 .SetInputValue(2, "\'JANUARY\'")
                 .SetInputValue(3, "2")

@@ -1,9 +1,4 @@
-﻿// This Source Code Form is subject to the terms of the MIT License.
-// If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
-// Copyright (C) Leszek Pomianowski and WPF UI Contributors.
-// All Rights Reserved.
-
-using AMFormsCST.Desktop.ViewModels;
+﻿using AMFormsCST.Desktop.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -23,14 +18,18 @@ internal static class ServiceCollectionExtensions
                 .GetTypes()
                 .Where(x =>
                     x.IsClass
-                    && x.Namespace!.StartsWith(namespaceName, StringComparison.InvariantCultureIgnoreCase)
+                    && x.Namespace != null
+                    && x.Namespace.StartsWith(namespaceName, StringComparison.InvariantCultureIgnoreCase)
                 );
 
             foreach (Type? type in types)
             {
                 if (services.All(x => x.ServiceType != type))
                 {
-                    if (type == typeof(ViewModel))
+                    if (
+                        type.Name == nameof(ViewModel)
+                        && type.Namespace == typeof(ViewModel).Namespace
+                    )
                     {
                         continue;
                     }

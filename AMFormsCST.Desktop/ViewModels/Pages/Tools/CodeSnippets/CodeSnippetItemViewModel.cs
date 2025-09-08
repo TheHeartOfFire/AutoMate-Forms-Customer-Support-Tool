@@ -1,13 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces.CodeBlocks;
 using AMFormsCST.Desktop.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.CodeSnippets;
 public partial class CodeSnippetItemViewModel : ObservableObject, ISelectable
@@ -34,6 +28,7 @@ public partial class CodeSnippetItemViewModel : ObservableObject, ISelectable
         Inputs = new ObservableCollection<CodeInputViewModel>(
             codeBase.Inputs.Select(input => new CodeInputViewModel(input, this))
         );
+        Output = CodeBase.GetCode();
     }
 
     public void Select()
@@ -46,7 +41,7 @@ public partial class CodeSnippetItemViewModel : ObservableObject, ISelectable
         IsSelected = false;
     }
 
-    public void InputChanged(CodeInputViewModel input)
+    public void InputChanged()
     {
         Output = CodeBase.GetCode();
     }

@@ -1,24 +1,44 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
 using System.Text;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class DotFormgen
+    public partial class DotFormgen : INotifyPropertyChanged, IEquatable<DotFormgen>
     {
-        public DotFormgenSettings Settings { get; set; }
-        public List<FormPage> Pages { get; set; } = [];
-        public string? Title { get; set; }
-        public bool TradePrompt { get; set; }
-        public Format FormType { get; set; }
-        public bool SalesPersonPrompt { get; set; }
-        public string? Username { get; set; }
-        public string? BillingName { get; set; }
-        public List<CodeLine> CodeLines { get; set; } = [];
-        public FormCategory Category { get; set; }
-        public List<string> States { get; set; } = [];
+        [NotifyPropertyChanged]
+        private DotFormgenSettings _settings;
+
+        [NotifyPropertyChanged]
+        private List<FormPage> _pages = new();
+
+        [NotifyPropertyChanged]
+        private string? _title;
+
+        [NotifyPropertyChanged]
+        private bool _tradePrompt;
+
+        [NotifyPropertyChanged]
+        private Format _formType;
+
+        [NotifyPropertyChanged]
+        private bool _salesPersonPrompt;
+
+        [NotifyPropertyChanged]
+        private string? _username;
+
+        [NotifyPropertyChanged]
+        private string? _billingName;
+
+        [NotifyPropertyChanged]
+        private List<CodeLine> _codeLines = new();
+
+        [NotifyPropertyChanged]
+        private FormCategory _category;
+
+        [NotifyPropertyChanged]
+        private List<string> _states = new();
 
         public enum Format
         {
@@ -56,52 +76,56 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             StateSpecificDMV,
             WeOweYouOweDueBill
         }
+
+        public DotFormgen()
+        {
+            Settings = new DotFormgenSettings();
+            Settings.PropertyChanged += (s, e) => OnPropertyChanged();
+        }
+
         public DotFormgen(XmlElement document)
         {
             Settings = new DotFormgenSettings(document.Attributes);
+            Settings.PropertyChanged += (s, e) => OnPropertyChanged();
             foreach (XmlNode node in document.ChildNodes)
             {
                 switch (node.Name)
                 {
-                    case "pages":
-                        Pages.Add(new FormPage(node));
+                    case "pages": Pages.Add(new FormPage(node));
                         break;
-                    case "title":
-                        Title = node.InnerText;
+                    case "title": Title = node.InnerText;
                         break;
                     case "tradePrompt":
                         if (bool.TryParse(node.InnerText, out var parsedBool))
                             TradePrompt = parsedBool;
                         break;
-                    case "formPrintType":
-                        FormType = GetFormat(node.InnerText);
+                    case "formPrintType": FormType = GetFormat(node.InnerText);
                         break;
                     case "salespersonPrompt":
                         if (bool.TryParse(node.InnerText, out parsedBool))
                             SalesPersonPrompt = parsedBool;
                         break;
-                    case "username":
-                        Username = node.InnerText;
+                    case "username": Username = node.InnerText;
                         break;
-                    case "billingName":
-                        BillingName = node.InnerText;
+                    case "billingName": BillingName = node.InnerText;
                         break;
-                    case "codeLines":
-                        CodeLines.Add(new CodeLine(node));
+                    case "codeLines": CodeLines.Add(new CodeLine(node));
                         break;
-                    case "formCategory":
-                        Category = GetCategory(node.InnerText);
+                    case "formCategory": Category = GetCategory(node.InnerText);
                         break;
                     case "validStates":
                         States.Add(node.InnerText);
                         break;
                 }
             }
+            foreach (var page in Pages) page.PropertyChanged += (s, e) => OnPropertyChanged();
+            foreach (var line in CodeLines) line.PropertyChanged += (s, e) => OnPropertyChanged();
+
         }
 
         public CodeLine GetPrompt(int index)
         {
-            var prompts = CodeLines.Where(x => x.Settings is { Type: CodeLineSettings.CodeType.PROMPT }).ToList();
+            var prompts = CodeLines.Where(x => x.Settings is {Type: CodeLineSettings.CodeType.PROMPT}).ToList();
 
             return prompts[index];
         }
@@ -109,7 +133,7 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         public FormField GetField(int index)
         {
             var fields = new List<FormField>();
-            foreach (var page in Pages) fields.AddRange(page.Fields);
+            foreach(var page in Pages) fields.AddRange(page.Fields);
 
             return fields[index];
         }
@@ -124,15 +148,15 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         }
         public int InitCount()
         {
-            return CodeLines.Count(x => x.Settings is { Type: CodeLineSettings.CodeType.INIT });
+            return CodeLines.Count(x => x.Settings is {Type: CodeLineSettings.CodeType.INIT});
         }
         public int PromptCount()
         {
-            return CodeLines.Count(x => x.Settings is { Type: CodeLineSettings.CodeType.PROMPT });
+            return CodeLines.Count(x => x.Settings is {Type: CodeLineSettings.CodeType.PROMPT});
         }
         public int PostCount()
         {
-            return CodeLines.Count(x => x.Settings is { Type: CodeLineSettings.CodeType.POST });
+            return CodeLines.Count(x => x.Settings is {Type: CodeLineSettings.CodeType.POST});
         }
         public CodeLine ClonePrompt(CodeLine prompt, string? newName, int newIndex)
         {
@@ -145,8 +169,8 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             "Pdf" => Format.Pdf,
             "LegacyImpact" => Format.LegacyImpact,
             _ => Format.Pdf,
-        };
-
+        }; 
+        
         public static string GetFormat(Format format) => format switch
         {
             Format.Pdf => "Pdf",
@@ -214,8 +238,8 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
         {
             var output = new StringBuilder();
             var sw = new StringWriterWithEncoding(output, Encoding.UTF8);
-            var xml = XmlWriter.Create(sw, new XmlWriterSettings() { Indent = true });
-
+            var xml = XmlWriter.Create(sw, new XmlWriterSettings() { Indent = true});
+            
             xml.WriteStartDocument(true);
 
             xml.WriteStartElement("formDef");
@@ -251,17 +275,17 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
                 xml.WriteEndElement();
             }
 
-            foreach (var line in CodeLines.Where(line => line.Settings is { Type: CodeLineSettings.CodeType.INIT }))
+            foreach (var line in CodeLines.Where(line => line.Settings is {Type: CodeLineSettings.CodeType.INIT}))
             {
                 line.GenerateXml(xml);
             }
 
-            foreach (var line in CodeLines.Where(line => line.Settings is { Type: CodeLineSettings.CodeType.PROMPT }))
+            foreach (var line in CodeLines.Where(line => line.Settings is {Type: CodeLineSettings.CodeType.PROMPT}))
             {
                 line.GenerateXml(xml);
             }
 
-            foreach (var line in CodeLines.Where(line => line.Settings is { Type: CodeLineSettings.CodeType.POST }))
+            foreach (var line in CodeLines.Where(line => line.Settings is {Type: CodeLineSettings.CodeType.POST}))
             {
                 line.GenerateXml(xml);
             }
@@ -282,6 +306,33 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.Close();
             return output.ToString();
         }
+
+        public DotFormgen Clone()
+        {
+            // Serialize to XML and deserialize to a new instance for a deep copy
+            var xml = this.GenerateXML();
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xml);
+            return new DotFormgen(xmlDoc.DocumentElement!);
+        }
+
+        public bool Equals(DotFormgen? other) =>
+            other is not null &&
+            Settings.Equals(other.Settings) &&
+            Pages.SequenceEqual(other.Pages) &&
+            (Title?.Equals(other.Title) ?? false) &&
+            TradePrompt == other.TradePrompt &&
+            FormType == other.FormType &&
+            SalesPersonPrompt == other.SalesPersonPrompt &&
+            (Username?.Equals(other.Username) ?? false) &&
+            (BillingName?.Equals(other.BillingName) ?? false) &&
+            CodeLines.SequenceEqual(other.CodeLines) &&
+            Category == other.Category &&
+            States.SequenceEqual(other.States);
+
+        public override bool Equals(object? obj) => Equals(obj as DotFormgen);
+        public override int GetHashCode() => HashCode.Combine(Settings, Pages, Title, TradePrompt, FormType, SalesPersonPrompt, 
+            HashCode.Combine(Username, BillingName, CodeLines, Category, States));
     }
     public class StringWriterWithEncoding(StringBuilder sb, Encoding encoding) : StringWriter(sb)
     {

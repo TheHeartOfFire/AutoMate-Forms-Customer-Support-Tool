@@ -1,12 +1,17 @@
-﻿using System.Xml;
+﻿using AMFormsCST.Core.Attributes;
+using AMFormsCST.Core.Interfaces.Attributes;
+using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
 {
-    public class CodeLineSettings
+    public partial class CodeLineSettings : IEquatable<CodeLineSettings>, INotifyPropertyChanged
     {
-        public int Order { get; set; }
-        public CodeType Type { get; set; }
-        public string? Variable { get; set; }
+        [NotifyPropertyChanged]
+        private int _order;
+        [NotifyPropertyChanged]
+        private CodeType _type = CodeType.PROMPT;
+        [NotifyPropertyChanged]
+        private string? _variable;
         public enum CodeType
         {
             INIT,
@@ -28,6 +33,9 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             Type = settings.Type;
             Variable = newName;
         }
+        public CodeLineSettings() { }
+
+
         public static CodeType GetCodeType(string type) => type switch
         {
             "INIT" => CodeType.INIT,
@@ -49,5 +57,17 @@ namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure
             xml.WriteAttributeString("type", GetCodeType(Type));
             xml.WriteAttributeString("destVariable", Variable);
         }
+
+        public bool Equals(CodeLineSettings? other) => 
+            other is not null &&
+            Order == other.Order &&
+            Type == other.Type &&
+            Variable?.Equals(other.Variable) == true;
+
+
+        public override bool Equals(object? obj) => Equals(obj as CodeLineSettings);
+        
+
+        public override int GetHashCode() => HashCode.Combine(Order, Type, Variable);
     }
 }

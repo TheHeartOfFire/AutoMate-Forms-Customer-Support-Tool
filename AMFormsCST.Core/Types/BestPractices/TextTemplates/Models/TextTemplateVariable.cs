@@ -1,9 +1,4 @@
 ﻿using AMFormsCST.Core.Interfaces.BestPractices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 public class TextTemplateVariable(string properName, string name, string prefix, string description, List<string> aliases, Func<string> getValue) : ITextTemplateVariable

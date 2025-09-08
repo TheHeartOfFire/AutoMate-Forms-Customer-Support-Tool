@@ -1,12 +1,10 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
-using AMFormsCST.Core.Types.Notebook;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces.Notebook;
 
 namespace AMFormsCST.Core.Interfaces.Utils;
 public interface INotebook
 {
-    INote CurrentNote { get; set; }
-    IList<INote> Notes { get; set; }
-
+    SelectableList<INote> Notes { get; set; }
     void AddNote(bool select = false);
     void AddNote(INote note, bool select = false);
     void Clear();

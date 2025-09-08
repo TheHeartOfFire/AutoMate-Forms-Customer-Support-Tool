@@ -1,68 +1,132 @@
-﻿using AMFormsCST.Core.Interfaces.BestPractices;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-using AMFormsCST.Core.Types.Notebook;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using AMFormsCST.Core.Utils;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace AMFormsCST.Core;
-internal static class IO
+public static class IO
 {
     private static readonly string _appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     private static readonly string _rootPath;
     private static readonly string _notesPath;
-    internal static readonly string BackupPath;
+    private static readonly string _settingsPath;
+    public static readonly string BackupPath;
     private static readonly string _templatesPath;
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private static readonly string _configPath;
+    private static JsonSerializerOptions _jsonOptions = new() { WriteIndented = true }; 
 
-    internal static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
+    public static ILogService? Logger { get; private set; }
+
+    public static void ConfigureLogger(ILogService? logger = null)
+    {
+        if (logger == null) return;
+        Logger = logger;
+        Logger?.LogInfo("IO logger configured.");
+    }
+
+    public static string BackupFormgenFilePath(string uuid) => $"{BackupPath}\\{uuid}\\{DateTime.Now:mm-dd-yyyy.hh-mm-ss}.bak";
+
     static IO()
     {
-        _rootPath = Path.Combine(_appData, "AMFormsCST");
+        _rootPath = Path.Combine(_appData, "Solera Case Management Tool");
         _notesPath = Path.Combine(_rootPath, "SavedNotes.json");
+        _settingsPath = Path.Combine(_rootPath, "AppSettings.json");
         BackupPath = Path.Combine(_rootPath, "FormgenBackup");
         _templatesPath = Path.Combine(_rootPath, "TextTemplates.json");
+        _configPath = Path.Combine(_rootPath, "Config.json");
 
         try
         {
-            if (!Directory.Exists(_rootPath))
-            {
-                Directory.CreateDirectory(_rootPath);
-            }
-            if (!Directory.Exists(BackupPath)) 
-            {
-                Directory.CreateDirectory(BackupPath);
-            }
+            if (!Directory.Exists(_rootPath)) Directory.CreateDirectory(_rootPath);
+            if (!Directory.Exists(BackupPath)) Directory.CreateDirectory(BackupPath);
         }
         catch (Exception ex)
         {
-            
-            Console.WriteLine($"Error creating application directories: {ex.Message}");
+            Logger?.LogError("Error creating application directories.", ex);
         }
     }
-    internal static void BackupFormgenFile(string uuid, XmlDocument file, uint? retentionCount)
+
+    /// <summary>
+    /// Configures the JSON serializer with options provided by the UI project.
+    /// </summary>
+    public static void ConfigureJson(JsonSerializerOptions options)
     {
-        var di = Directory.CreateDirectory($"{BackupPath}\\{uuid}");
+        _jsonOptions = options;
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<ICompany>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IContact>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IDealer>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<IForm>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<ITestDeal>());
+        _jsonOptions.Converters.Add(new SelectableListJsonConverter<INote>());
+        Logger?.LogInfo("IO JSON serializer configured.");
+    }
 
-        if(retentionCount is not null && di.EnumerateFiles().Count() > retentionCount)
+    public static void SaveSettings(ISettings settings)
+    {
+        try
         {
-            var files = di.EnumerateFiles().OrderByDescending(x => x.LastWriteTime).Skip((int)retentionCount);
-            foreach (var fileToDelete in files)
-                fileToDelete.Delete();
+            var json = JsonSerializer.Serialize(settings, _jsonOptions);
+            File.WriteAllText(_settingsPath, json);
+            Logger?.LogInfo("Settings saved.");
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError("Error saving settings.", ex);
+        }
+    }
+
+    public static ISettings? LoadSettings()
+    {
+        if (!File.Exists(_settingsPath))
+        {
+            Logger?.LogWarning("Settings file not found.");
+            return null;
         }
 
-        file.Save(BackupFormgenFilePath(uuid));
+        try
+        {
+            var json = File.ReadAllText(_settingsPath);
+            var settings = JsonSerializer.Deserialize<ISettings>(json, _jsonOptions);
+            Logger?.LogInfo("Settings loaded.");
+            return settings;
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError("Error loading settings.", ex);
+            return null;
+        }
     }
-    internal static string AutoIncrement(string? input)
+
+    public static void BackupFormgenFile(string uuid, XmlDocument file, uint? retentionCount)
+    {
+        try
+        {
+            var di = Directory.CreateDirectory($"{BackupPath}\\{uuid}");
+
+            if(retentionCount is not null && di.EnumerateFiles().Count() > retentionCount)
+            {
+                var files = di.EnumerateFiles().OrderByDescending(x => x.LastWriteTime).Skip((int)retentionCount);
+                foreach (var fileToDelete in files)
+                {
+                    fileToDelete.Delete();
+                    Logger?.LogInfo($"Deleted old backup: {fileToDelete.FullName}");
+                }
+            }
+
+            file.Save(BackupFormgenFilePath(uuid));
+            Logger?.LogInfo($"Backup created for Formgen file: {uuid}");
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError("Error creating Formgen backup.", ex);
+        }
+    }
+
+    public static string AutoIncrement(string? input)
     {
         if (input == null) return input ?? string.Empty;
 
@@ -77,29 +141,30 @@ internal static class IO
         number++;
         var output = string.Concat(input.AsSpan(0, index + 1), number.ToString());
         return output;
-
     }
 
-    internal static void SaveNotes(List<INote> notes)
+    public static void SaveNotes(List<INote> notes)
     {
-        var concreteNotes = notes.Cast<Note>().ToList(); 
+        var concreteNotes = notes.Cast<INote>().ToList(); 
 
         var json = JsonSerializer.Serialize(concreteNotes, _jsonOptions);
 
         try
         {
             File.WriteAllText(_notesPath, json);
+            Logger?.LogInfo("Notes saved.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error saving Notes: {ex.Message}");
+            Logger?.LogError("Error saving Notes.", ex);
         }
     }
-    internal static List<INote> LoadNotes()
+    public static List<INote> LoadNotes()
     {
         if (!File.Exists(_notesPath))
         {
             SaveNotes([]); 
+            Logger?.LogWarning("Notes file not found. Created new file.");
             return [];
         }
 
@@ -107,27 +172,28 @@ internal static class IO
         {
             var json = File.ReadAllText(_notesPath);
 
-            var deserializedConcreteNotes = JsonSerializer.Deserialize<List<Note>>(json, _jsonOptions);
-
-            return deserializedConcreteNotes?.Cast<INote>().ToList() ?? [];
+            var deserializedNotes = JsonSerializer.Deserialize<List<INote>>(json, _jsonOptions);
+            Logger?.LogInfo("Notes loaded.");
+            return deserializedNotes ?? [];
         }
         catch (JsonException ex)
         {
-            Console.WriteLine($"Error deserializing Notes: {ex.Message}");
+            Logger?.LogError("Error deserializing Notes.", ex);
             return [];
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading Notes file: {ex.Message}");
+            Logger?.LogError("Error loading Notes file.", ex);
             return [];
         }
     }
 
-    internal static List<TextTemplate> LoadTemplates()
+    public static List<TextTemplate> LoadTemplates()
     {
         if (!File.Exists(_templatesPath))
         {
             SaveTemplates([]); 
+            Logger?.LogWarning("TextTemplates file not found. Created new file.");
             return []; 
         }
 
@@ -135,31 +201,68 @@ internal static class IO
         {
             var json = File.ReadAllText(_templatesPath);
             var templates = JsonSerializer.Deserialize<List<TextTemplate>>(json, _jsonOptions);
-
+            Logger?.LogInfo("TextTemplates loaded.");
             return templates ?? []; 
         }
         catch (JsonException ex)
         {
-            Console.WriteLine($"Error deserializing TextTemplates: {ex.Message}");
+            Logger?.LogError("Error deserializing TextTemplates.", ex);
             return []; 
         }
         catch (Exception ex) 
         {
-            Console.WriteLine($"Error loading TextTemplates file: {ex.Message}");
+            Logger?.LogError("Error loading TextTemplates file.", ex);
             return [];
         }
     }
-    internal static void SaveTemplates(List<TextTemplate> templates)
+    public static void SaveTemplates(List<TextTemplate> templates)
     {
         try
         {
             var json = JsonSerializer.Serialize(templates, _jsonOptions);
 
             File.WriteAllText(_templatesPath, json);
+            Logger?.LogInfo("TextTemplates saved.");
         }
         catch (Exception ex) 
         {
-            Console.WriteLine($"Error saving TextTemplates: {ex.Message}");
+            Logger?.LogError("Error saving TextTemplates.", ex);
+        }
+    }
+
+    public static void SaveConfig(Properties config)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(config, _jsonOptions);
+            File.WriteAllText(_configPath, json);
+            Logger?.LogInfo("Config saved.");
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError("Error saving config.", ex);
+        }
+    }
+
+    public static Properties? LoadConfig()
+    {
+        if (!File.Exists(_configPath))
+        {
+            Logger?.LogWarning("Config file not found.");
+            return null;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_configPath);
+            var config = JsonSerializer.Deserialize<Properties>(json, _jsonOptions);
+            Logger?.LogInfo("Config loaded.");
+            return config;
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogError("Error loading config.", ex);
+            return null;
         }
     }
 }

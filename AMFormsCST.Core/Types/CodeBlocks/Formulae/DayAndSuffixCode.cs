@@ -15,29 +15,37 @@ namespace AMFormsCST.Core.Types.CodeBlocks.Formulae
         {
             if (HasNoInputs()) return string.Empty;
 
+            string input = GetInput(0) as string;
+            if (string.IsNullOrWhiteSpace(input))
+                input = "Comparison";
+
             return new NumToTextCode()
-                       .SetInputValue(0, GetInput(0) as string ?? string.Empty)
+                       .SetInputValue(0, GetInput(0) is CodeBase ?
+                    GetInput(0) as CodeBase ?? string.Empty :
+                    GetInput(0) as string ?? string.Empty)
                        .SetInputValue(1, "0") +
                    " + " +
                    new CaseCode()
                 .AddExtraInputs(1)
-                .SetInputValue(0, GetInput(0) as string ?? string.Empty)
+                .SetInputValue(0, input)
                 .SetInputValue(1, "11")
-                .SetInputValue(2, "\'th\'")
+                .SetInputValue(2, "'th'")
                 .SetInputValue(3, "12")
-                .SetInputValue(4, "\'th\'")
+                .SetInputValue(4, "'th'")
                 .SetInputValue(5, "13")
-                .SetInputValue(6, "\'th\'")
+                .SetInputValue(6, "'th'")
                 .SetInputValue(7, new CaseCode()
                     .AddExtraInputs(1)
-                    .SetInputValue(0, $"{GetInput(0) as string ?? string.Empty} % 10")
+                    .SetInputValue(0, $"{ (GetInput(0) is CodeBase ?
+                    GetInput(0) as CodeBase ?? string.Empty :
+                    GetInput(0) as string ?? string.Empty) } % 10")
                     .SetInputValue(1, "1")
-                    .SetInputValue(2, "\'st\'")
+                    .SetInputValue(2, "'st'")
                     .SetInputValue(3, "2")
-                    .SetInputValue(4, "\'nd\'")
+                    .SetInputValue(4, "'nd'")
                     .SetInputValue(5, "3")
-                    .SetInputValue(6, "\'rd\'")
-                    .SetInputValue(7, "\'th\'"));
+                    .SetInputValue(6, "'rd'")
+                    .SetInputValue(7, "'th'"));
         }
     }
 }

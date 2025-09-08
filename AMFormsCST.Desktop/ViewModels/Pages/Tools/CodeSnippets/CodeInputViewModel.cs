@@ -1,11 +1,5 @@
 ﻿using AMFormsCST.Core.Types.CodeBlocks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.CodeSnippets;
 
@@ -30,7 +24,7 @@ public partial class CodeInputViewModel : ObservableObject
     partial void OnBindableValueChanged(string? value)
     {
         _codeInputModel.SetValue(value ?? string.Empty); 
-        _parent.InputChanged(this);
+        _parent.InputChanged();
     }
     
 }

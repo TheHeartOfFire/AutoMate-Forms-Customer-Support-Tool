@@ -1,53 +1,114 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows;
-using Wpf.Ui.Controls;
+﻿using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.Models.UserSettings;
 using CommunityToolkit.Mvvm.ComponentModel;
-using AMFormsCST.Desktop.Views.Pages;
-using AMFormsCST.Desktop.Views.Pages.Tools;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using Wpf.Ui.Appearance;
 
 namespace AMFormsCST.Desktop.ViewModels;
-public partial class MainWindowViewModel : ViewModel
+
+public partial class MainWindowViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private string _applicationTitle = string.Empty;
+    private readonly ISupportTool _supportTool;
+    private readonly ILogService? _logger;
 
     [ObservableProperty]
-    private ObservableCollection<object> _menuItems =
-    [
-        new NavigationViewItem("Home", SymbolRegular.Home24, typeof(DashboardPage)),
-        new NavigationViewItem()
+    private string _applicationTitle = "Case Management Tool";
+
+    [ObservableProperty]
+    private bool _isWindowTopmost;
+
+    [ObservableProperty]
+    private bool _isLightTheme;
+
+    [ObservableProperty]
+    private ObservableCollection<object> _navigationItems = [];
+
+    [ObservableProperty]
+    private ObservableCollection<object> _navigationFooter = [];
+
+    public MainWindowViewModel(ISupportTool supportTool, ILogService? logger = null)
+    {
+        _supportTool = supportTool;
+        _logger = logger;
+        _logger?.LogInfo("MainWindowViewModel initialized.");
+
+        var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
+        if (aotSetting != null)
         {
-            Content = "Tools",
-            Icon = new SymbolIcon { Symbol = SymbolRegular.DesktopToolbox20 },
-            TargetPageType = typeof(ToolsPage),
-            MenuItemsSource = new object[]
-            {
-                new NavigationViewItem("Formgen Utilities", SymbolRegular.DocumentTextToolbox24, typeof(FormgenUtilitiesPage)),
-                new NavigationViewItem("Form Name Generator", SymbolRegular.TextT12, typeof(FormNameGeneratorPage)),
-                new NavigationViewItem("Code Snippets", SymbolRegular.Code20, typeof(CodeSnippetsPage)),
-                new NavigationViewItem("Templates", SymbolRegular.MailTemplate24, typeof(TemplatesPage)),
-            },
+            IsWindowTopmost = aotSetting.IsEnabled;
+            aotSetting.PropertyChanged += OnUiSettingsChanged;
+            _logger?.LogDebug($"AlwaysOnTopSetting initialized: {IsWindowTopmost}");
         }
-    ];
 
-    [ObservableProperty]
-    private ObservableCollection<object> _footerMenuItems =
-    [
-        //new NavigationViewItem("Settings", SymbolRegular.Settings24, typeof(SettingsPage)),
-    ];
+        var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
+        if (themeSetting != null)
+        {
+            IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
+            themeSetting.PropertyChanged += OnUiSettingsChanged;
+            _logger?.LogDebug($"ThemeSetting initialized: {IsLightTheme}");
+        }
+    }
 
-    [ObservableProperty]
-    private ObservableCollection<Wpf.Ui.Controls.MenuItem> _trayMenuItems =
-    [
-        new Wpf.Ui.Controls.MenuItem { Header = "Home", Tag = "tray_home" },
-        new Wpf.Ui.Controls.MenuItem { Header = "Close", Tag = "tray_close" },
-    ];
+    private void OnUiSettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        try
+        {
+            if (e.PropertyName == nameof(AlwaysOnTopSetting.IsEnabled) && sender is AlwaysOnTopSetting aotSetting)
+            {
+                IsWindowTopmost = aotSetting.IsEnabled;
+                _logger?.LogInfo($"AlwaysOnTopSetting changed: {IsWindowTopmost}");
+            }
+            else if (e.PropertyName == nameof(ThemeSetting.Theme) && sender is ThemeSetting themeSetting)
+            {
+                IsLightTheme = themeSetting.Theme == ApplicationTheme.Light;
+                _logger?.LogInfo($"ThemeSetting changed: {IsLightTheme}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error in OnUiSettingsChanged.", ex);
+        }
+    }
+
+    partial void OnIsWindowTopmostChanged(bool value)
+    {
+        try
+        {
+            var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
+            if (aotSetting != null && aotSetting.IsEnabled != value)
+            {
+                aotSetting.IsEnabled = value;
+                _supportTool.SaveAllSettings();
+                _logger?.LogInfo($"IsWindowTopmost changed: {value}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error in OnIsWindowTopmostChanged.", ex);
+        }
+    }
+
+    partial void OnIsLightThemeChanged(bool value)
+    {
+        try
+        {
+            var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
+            if (themeSetting != null)
+            {
+                var newTheme = value ? ApplicationTheme.Light : ApplicationTheme.Dark;
+                if (themeSetting.Theme != newTheme)
+                {
+                    themeSetting.Theme = newTheme;
+                    ApplicationThemeManager.Apply(newTheme);
+                    _supportTool.SaveAllSettings();
+                    _logger?.LogInfo($"IsLightTheme changed: {value}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error in OnIsLightThemeChanged.", ex);
+        }
+    }
 }

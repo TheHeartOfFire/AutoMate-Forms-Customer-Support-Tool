@@ -1,50 +1,59 @@
-﻿using AMFormsCST.Core.Interfaces.Notebook;
+﻿using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces.Notebook;
+using AMFormsCST.Core.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Types.Notebook;
+[JsonDerivedType(typeof(Note), typeDiscriminator: "note")]
 public class Note : INote
 {
-    public string? ServerId { get; set; }
-    public string? Companies { get; set; }
-    public string? Dealership { get; set; }
-    public string? ContactName { get; set; }
-    public string? Email { get; set; }
-    public string? Phone { get; set; }
-    public string? PhoneExt { get; set; }
-    public string? NotesText { get; set; }
-    public string? CaseText { get; set; }
-    public string? FormsText { get; set; }
-    public string? DealText { get; set; }
+    private readonly ILogService? _logger;
 
-    public Guid _id = Guid.NewGuid();
+    public string CaseText { get; set; } = string.Empty;
+    public string NotesText { get; set; } = string.Empty;
+
+    public SelectableList<IDealer> Dealers { get; set; }
+    public SelectableList<IContact> Contacts { get; set; }
+    public SelectableList<IForm> Forms { get; set; }
+
     public Guid Id => _id;
 
-    public static Note Clone(Note note) => new()
-    {
-        ServerId = note.ServerId,
-        Companies = note.Companies,
-        Dealership = note.Dealership,
-        ContactName = note.ContactName,
-        Email = note.Email,
-        Phone = note.Phone,
-        PhoneExt = note.PhoneExt,
-        NotesText = note.NotesText,
-        CaseText = note.CaseText,
-        FormsText = note.FormsText,
-        DealText = note.DealText
-    };
+    public Note() : this(null) { }
 
-
-    public Note()
+    public Note(ILogService? logger)
     {
-        
+        _logger = logger;
+        Dealers = new SelectableList<IDealer>(_logger);
+        Contacts = new SelectableList<IContact>(_logger);
+        Forms = new SelectableList<IForm>(_logger);
+        _logger?.LogInfo($"Note initialized. Id: {_id}");
     }
-    public Note(Guid id)
+
+    public Note(Guid id) : this(null)
     {
         _id = id;
+        _logger?.LogInfo($"Note initialized with custom Id: {_id}");
     }
 
     #region Interface Implementation
+    private readonly Guid _id = Guid.NewGuid();
+
+    public INote Clone()
+    {
+        var clone = new Note(_logger)
+        {
+            CaseText = CaseText,
+            NotesText = NotesText,
+            Dealers = new SelectableList<IDealer>(Dealers.Select(d => d.Clone()), _logger),
+            Contacts = new SelectableList<IContact>(Contacts.Select(c => c.Clone()), _logger),
+            Forms = new SelectableList<IForm>(Forms.Select(f => f.Clone()), _logger)
+        };
+        _logger?.LogInfo($"Note cloned. Original Id: {_id}, Clone Id: {clone.Id}");
+        return clone;
+    }
+
     public bool Equals(INote? other)
     {
         if (other == null) return false;
@@ -63,25 +72,26 @@ public class Note : INote
 
     public bool Equals(INote? x, INote? y)
     {
+        if (x is null && y is null) return true;
         if (x is null || y is null) return false;
         return x.Id == y.Id;
     }
 
     public int GetHashCode([DisallowNull] INote obj) => obj.Id.GetHashCode();
 
-    public string Dump() =>
-        $"ServerId: {ServerId}\n" +
-        $"Companies: {Companies}\n" +
-        $"Dealership: {Dealership}\n" +
-        $"ContactName: {ContactName}\n" +
-        $"Email: {Email}\n" +
-        $"Phone: {Phone}\n" +
-        $"PhoneExt: {PhoneExt}\n" +
-        $"NotesText: {NotesText}\n" +
-        $"CaseText: {CaseText}\n" +
-        $"FormsText: {FormsText}\n" +
-        $"DealText: {DealText}\n" +
-        $"Id: {_id}";
+    public string Dump() 
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Note Dump:");
+        sb.AppendLine($"Id: {_id}");
+        sb.AppendLine($"CaseText: {CaseText}");
+        sb.AppendLine($"NotesText: {NotesText}");
+        sb.AppendLine($"Dealers: {string.Join(", ", Dealers.Select(d => d.Dump()))}");
+        sb.AppendLine($"Contacts: {string.Join(", ", Contacts.Select(c => c.Dump()))}");
+        sb.AppendLine($"Forms: {string.Join(", ", Forms.Select(f => f.Dump()))}");
+        _logger?.LogDebug($"Note Dump called for Id: {_id}");
+        return sb.ToString();
+    }
     #endregion
 
 }

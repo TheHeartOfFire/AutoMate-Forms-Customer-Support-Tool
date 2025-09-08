@@ -1,22 +1,38 @@
-﻿using AMFormsCST.Desktop.Interfaces;
-using AMFormsCST.Desktop.Views.Pages;
+﻿using AMFormsCST.Core;
+using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Core.Interfaces.BestPractices;
+using AMFormsCST.Core.Interfaces.UserSettings;
+using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Types;
+using AMFormsCST.Core.Types.BestPractices.Models;
+using AMFormsCST.Core.Types.BestPractices.Practices;
+using AMFormsCST.Core.Types.UserSettings;
+using AMFormsCST.Core.Utils;
+using AMFormsCST.Desktop.DependencyModel;
+using AMFormsCST.Desktop.Interfaces;
+using AMFormsCST.Desktop.Models.UserSettings;
 using AMFormsCST.Desktop.Resources;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.ViewModels.Pages;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Tools;
 using Lepo.i18n.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Configuration;
-using System.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Windows;
 using System.Windows.Threading;
+using Velopack;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
-using AMFormsCST.Desktop.Views.Pages.Tools;
-using AMFormsCST.Desktop.ViewModels.Pages.Tools;
-using AMFormsCST.Desktop.DependencyModel;
+using Serilog;
+using AMFormsCST.Core.Services;
+using Serilog.Formatting.Compact;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -24,20 +40,48 @@ namespace AMFormsCST.Desktop;
 /// </summary>
 public partial class App : Application
 {
-    private static readonly IHost _host = Host.CreateDefaultBuilder()
-        .ConfigureAppConfiguration(c =>
+    private static readonly IHost _host = BuildHost();
+
+    private static IHost BuildHost()
+    {
+        var jsonOptions = new JsonSerializerOptions
         {
-            _ = c.SetBasePath(AppContext.BaseDirectory);
-        })
-        .ConfigureServices(
-            (_1, services) =>
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { AddPolymorphicTypes }
+            }
+        };
+
+        IO.ConfigureJson(jsonOptions);
+
+        return Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration(c =>
+            {
+                _ = c.SetBasePath(AppContext.BaseDirectory);
+            })
+            .ConfigureServices((_1, services) =>
             {
                 _ = services.AddNavigationViewPageProvider();
+                services.AddSingleton<ILogService>(sp =>
+                {
+                    var logger = new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .WriteTo.Console()
+                        .WriteTo.File(
+                        path: "logs\\app.log", 
+                        formatter: new CompactJsonFormatter(), 
+                        rollingInterval: RollingInterval.Day)
+                        .Enrich.FromLogContext()
+                        .CreateLogger();
 
-                // App Host
+                    return new SerilogService(logger);
+                });
+                _ = services.AddTransient<IDebounceService, DebounceService>();
+
                 _ = services.AddHostedService<ApplicationHostService>();
 
-                // Main window container with navigation
                 _ = services.AddSingleton<IWindow, MainWindow>();
                 _ = services.AddSingleton<MainWindowViewModel>();
                 _ = services.AddSingleton<INavigationService, NavigationService>();
@@ -45,28 +89,102 @@ public partial class App : Application
                 _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
                 _ = services.AddSingleton<WindowsProviderService>();
 
-                // Top-level pages
                 _ = services.AddSingleton<DashboardPage>();
                 _ = services.AddSingleton<DashboardViewModel>();
                 _ = services.AddSingleton<ToolsPage>();
                 _ = services.AddSingleton<ToolsViewModel>();
-                //_ = services.AddSingleton<SettingsPage>();
-                //_ = services.AddSingleton<SettingsViewModel>();
+                _ = services.AddSingleton<SettingsPage>();
+                _ = services.AddSingleton<SettingsViewModel>();
 
-                //All other pages and view models
                 _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Assembly);
                 _ = services.AddTransientFromNamespace(
                     "AMFormsCST.Desktop.ViewModels",
                     GalleryAssembly.Assembly
                 );
 
+                _ = services.AddTransient<IDialogService, DialogService>();
+                _ = services.AddSingleton<IFileSystem, FileSystem>();
+                _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
+                _ = services.AddTransient<FormgenUtilsProperties>();
+
+                _ = services.AddSingleton<AutoMateFormModel>();
+                _ = services.AddSingleton<IFormNameBestPractice, AutoMateFormNameBestPractices>();
+                _ = services.AddSingleton<ITemplateRepository, TemplateRepository>();
+                _ = services.AddSingleton<IBestPracticeEnforcer, BestPracticeEnforcer>();
+                _ = services.AddSingleton<INotebook, Notebook>();
+                services.AddSingleton<IOrgVariables>(sp =>
+                {
+                    var enforcer = sp.GetRequiredService<IBestPracticeEnforcer>();
+                    var notebook = sp.GetRequiredService<INotebook>();
+                    var orgVars = new AutomateFormsOrgVariables(enforcer, notebook);
+
+                    return orgVars;
+                });
+                _ = services.AddSingleton<ISupportTool, SupportTool>();
+                _ = services.AddSingleton<IUpdateManagerService, UpdateManagerService>();
+                _ = services.AddSingleton<IUiSettings, UiSettings>();
+                _ = services.AddSingleton<IUserSettings, UserSettings>();
+                _ = services.AddSingleton<ISettings, Settings>();
+
                 _ = services.AddStringLocalizer(b =>
                 {
                     b.FromResource<Translations>(new("pl-PL"));
                 });
-            }
-        )
-        .Build();
+            })
+            .Build();
+    }
+    private static void AddPolymorphicTypes(JsonTypeInfo jsonTypeInfo)
+    {
+        if (jsonTypeInfo.Type == typeof(ISettings))
+        {
+            jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+            {
+                TypeDiscriminatorPropertyName = "$type",
+                UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                DerivedTypes = { new(typeof(Settings), "settings") }
+            };
+        }
+
+        if (jsonTypeInfo.Type == typeof(IUserSettings))
+        {
+            jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+            {
+                TypeDiscriminatorPropertyName = "$type",
+                UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                DerivedTypes = { new(typeof(UserSettings), "usersettings") }
+            };
+        }
+
+        if (jsonTypeInfo.Type == typeof(IUiSettings))
+        {
+            jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+            {
+                TypeDiscriminatorPropertyName = "$type",
+                UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                DerivedTypes = { new(typeof(UiSettings), "uisettings") }
+            };
+        }
+
+        if (jsonTypeInfo.Type == typeof(ISetting))
+        {
+            jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+            {
+                TypeDiscriminatorPropertyName = "$type",
+                UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                DerivedTypes =
+                {
+                    new(typeof(UserSettings), "usersettings"),
+                    new(typeof(UiSettings), "uisettings"),
+                    new(typeof(AutomateFormsOrgVariables), "orgvars"),
+
+                    new(typeof(ThemeSetting), "themesetting"),
+                    new(typeof(AlwaysOnTopSetting), "alwaysontopsetting"),
+                    new(typeof(NewTemplateSetting), "newtemplatesetting"),
+                    new(typeof(CapitalizeFormCodeSetting), "capitalizeformcodesetting")
+                }
+            };
+        }
+    }
 
     /// <summary>
     /// Gets registered service.
@@ -84,6 +202,7 @@ public partial class App : Application
     /// </summary>
     private void OnStartup(object sender, StartupEventArgs e)
     {
+        VelopackApp.Build().Run();
         _host.Start();
     }
 
@@ -92,17 +211,16 @@ public partial class App : Application
     /// </summary>
     private void OnExit(object sender, ExitEventArgs e)
     {
-        _host.StopAsync().Wait();
+        var supportTool = GetRequiredService<ISupportTool>();
+        supportTool.SaveAllSettings();
 
+        _host.StopAsync().Wait();
         _host.Dispose();
     }
 
     /// <summary>
     /// Occurs when an exception is thrown by an application but not handled.
     /// </summary>
-    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-        // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
-    }
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) { }
 }
 

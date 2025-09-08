@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Solera_Logo_Symbol_Only.ico</ApplicationIcon>
-    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <AssemblyVersion>2.0.3</AssemblyVersion>
     <FileVersion>$(assemblyversion)</FileVersion>
     <Version>$(assemblyversion)</Version>
   </PropertyGroup>
@@ -74,7 +74,7 @@
     <Resource Include="Assets\Solera_Logo_Symbol_Only.png" />
   </ItemGroup>
 	  <Target Name="VeloPack" AfterTargets="Publish">
-		<Exec Command="vpk pack -u SoleraCaseManagementTool -v $(assemblyversion) -p .\bin\Release\net9.0-windows7.0\win-x86 -e SoleraCaseManagementTool.exe" />
+		<Exec Command="vpk pack -u SoleraCaseManagementTool -v $(assemblyversion) -p .\bin\Release\net9.0-windows\publish -e AMFormsCST.Desktop.exe" />
 	</Target>
 	<Target Name="GitHub Release" AfterTargets="Publish">
 		<Exec Command="gh release create $(assemblyversion) --generate-notes" />

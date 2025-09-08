@@ -1,18 +1,10 @@
-﻿using AMFormsCST.Core;
-using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Core.Interfaces.CodeBlocks;
+﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Types.BestPractices.Practices;
 using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.CodeSnippets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;

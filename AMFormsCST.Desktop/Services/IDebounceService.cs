@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AMFormsCST.Desktop.Services;
+﻿namespace AMFormsCST.Desktop.Services;
 
 public interface IDebounceService
 {

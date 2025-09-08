@@ -1,7 +1,5 @@
 ﻿using AMFormsCST.Core.Attributes;
 using AMFormsCST.Core.Interfaces.Attributes;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure

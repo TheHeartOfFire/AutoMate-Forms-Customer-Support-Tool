@@ -1,18 +1,10 @@
 ﻿using AMFormsCST.Core.Helpers;
 using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.UserSettings;
-using AMFormsCST.Core.Types;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Core.Utils;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using System.Xml;
 
 namespace AMFormsCST.Core;
@@ -25,9 +17,8 @@ public static class IO
     public static readonly string BackupPath;
     private static readonly string _templatesPath;
     private static readonly string _configPath;
-    private static JsonSerializerOptions _jsonOptions = new() { WriteIndented = true }; // Default options
+    private static JsonSerializerOptions _jsonOptions = new() { WriteIndented = true }; 
 
-    // Add logger property
     public static ILogService? Logger { get; private set; }
 
     public static void ConfigureLogger(ILogService? logger = null)

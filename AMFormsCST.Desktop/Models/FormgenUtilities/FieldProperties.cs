@@ -2,10 +2,6 @@
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Windows;
-using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormField;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -56,7 +52,6 @@ public partial class FieldProperties : ObservableObject, IFormgenFileProperties
 
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        // Editable properties from FormField
         var fieldType = typeof(FormField);
         var exprProp = fieldType.GetProperty(nameof(FormField.Expression));
         if (exprProp != null)
@@ -70,14 +65,13 @@ public partial class FieldProperties : ObservableObject, IFormgenFileProperties
         if (formatOptionProp != null)
             yield return new DisplayProperty(_coreField, formatOptionProp, false, _logger);
 
-        // Editable properties from FieldSettings
         if (Settings is FieldSettings fieldSettings)
         {
             var settingsType = typeof(FieldSettings);
 
             var idProp = settingsType.GetProperty(nameof(FieldSettings.ID));
             if (idProp != null)
-                yield return new DisplayProperty(fieldSettings, idProp, true, _logger); // ID is usually read-only
+                yield return new DisplayProperty(fieldSettings, idProp, true, _logger); 
 
             var typeProp = settingsType.GetProperty(nameof(FieldSettings.Type));
             if (typeProp != null)

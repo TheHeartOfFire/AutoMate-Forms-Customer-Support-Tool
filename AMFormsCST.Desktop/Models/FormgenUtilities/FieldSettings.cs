@@ -1,12 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.FormFieldSettings;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;

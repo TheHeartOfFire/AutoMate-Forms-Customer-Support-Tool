@@ -2,10 +2,7 @@
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Types.Notebook;
-using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.BaseClasses;
-using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.Types;
@@ -13,7 +10,6 @@ using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.Views.Dialogs;
 using AMFormsCST.Desktop.Views.Pages.Tools;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
 using System.Runtime.ExceptionServices;
@@ -98,7 +94,6 @@ public partial class DashboardViewModel : ViewModel
             note.PropertyChanged += OnNoteModelPropertyChanged;
         }
 
-        // Populate Notes collection
         if (_supportTool.Notebook.Notes.Count == 0)
         {
             var initialNote = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);
@@ -130,7 +125,6 @@ public partial class DashboardViewModel : ViewModel
         }
 
         _notes.PropertyChanged += Notes_PropertyChanged;
-        // Initial subscription
         if (_notes.SelectedItem is not null)
         {
             Notes_PropertyChanged(this, new PropertyChangedEventArgs(nameof(Notes.SelectedItem)));

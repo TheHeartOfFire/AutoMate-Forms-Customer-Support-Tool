@@ -1,13 +1,9 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Models.UserSettings;
-using AMFormsCST.Desktop.Views.Pages;
-using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
 
 namespace AMFormsCST.Desktop.ViewModels;
 
@@ -37,7 +33,6 @@ public partial class MainWindowViewModel : ObservableObject
         _logger = logger;
         _logger?.LogInfo("MainWindowViewModel initialized.");
 
-        // Initialize and subscribe to setting changes
         var aotSetting = _supportTool.Settings.UiSettings.Settings.OfType<AlwaysOnTopSetting>().FirstOrDefault();
         if (aotSetting != null)
         {

@@ -1,10 +1,4 @@
 ﻿using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.Models.Templates;
 public class DeprecatedTemplateList

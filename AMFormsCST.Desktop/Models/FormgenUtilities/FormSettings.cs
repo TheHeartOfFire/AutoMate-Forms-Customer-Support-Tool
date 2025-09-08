@@ -20,7 +20,6 @@ public partial class FormSettings : ObservableObject, IFormgenFileSettings
     public string Version
     {
         get => _coreSettings.Version.ToString();
-        // Version is typically read-only, so no setter is provided.
     }
 
     public string PublishedUUID

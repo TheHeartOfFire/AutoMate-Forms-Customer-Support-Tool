@@ -1,6 +1,5 @@
 ﻿using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces;
-using System;
 using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Types.UserSettings;

@@ -22,7 +22,6 @@ using Lepo.i18n.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -32,11 +31,8 @@ using Velopack;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
 using Serilog;
-using Serilog.Sinks.SystemConsole;
 using AMFormsCST.Core.Services;
-using Serilog.Enrichers;
-using Serilog.Formatting.Json;
-using Serilog.Formatting.Compact; // Your SerilogService implementation
+using Serilog.Formatting.Compact;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -48,7 +44,6 @@ public partial class App : Application
 
     private static IHost BuildHost()
     {
-        // 1. Configure JSON serialization options here, in the Desktop project
         var jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -59,10 +54,8 @@ public partial class App : Application
             }
         };
 
-        // 2. Pass the configuration to the Core IO class
         IO.ConfigureJson(jsonOptions);
 
-        // 3. Build the host with all services
         return Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(c =>
             {
@@ -87,10 +80,8 @@ public partial class App : Application
                 });
                 _ = services.AddTransient<IDebounceService, DebounceService>();
 
-                // App Host
                 _ = services.AddHostedService<ApplicationHostService>();
 
-                // Main window container with navigation
                 _ = services.AddSingleton<IWindow, MainWindow>();
                 _ = services.AddSingleton<MainWindowViewModel>();
                 _ = services.AddSingleton<INavigationService, NavigationService>();
@@ -98,7 +89,6 @@ public partial class App : Application
                 _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
                 _ = services.AddSingleton<WindowsProviderService>();
 
-                // Top-level pages
                 _ = services.AddSingleton<DashboardPage>();
                 _ = services.AddSingleton<DashboardViewModel>();
                 _ = services.AddSingleton<ToolsPage>();
@@ -106,20 +96,17 @@ public partial class App : Application
                 _ = services.AddSingleton<SettingsPage>();
                 _ = services.AddSingleton<SettingsViewModel>();
 
-                //All other pages and view models
                 _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Assembly);
                 _ = services.AddTransientFromNamespace(
                     "AMFormsCST.Desktop.ViewModels",
                     GalleryAssembly.Assembly
                 );
 
-
                 _ = services.AddTransient<IDialogService, DialogService>();
                 _ = services.AddSingleton<IFileSystem, FileSystem>();
                 _ = services.AddTransient<IFormgenUtils, FormgenUtils>();
                 _ = services.AddTransient<FormgenUtilsProperties>();
 
-                // Register SupportTool and its dependencies as singletons
                 _ = services.AddSingleton<AutoMateFormModel>();
                 _ = services.AddSingleton<IFormNameBestPractice, AutoMateFormNameBestPractices>();
                 _ = services.AddSingleton<ITemplateRepository, TemplateRepository>();
@@ -135,7 +122,6 @@ public partial class App : Application
                 });
                 _ = services.AddSingleton<ISupportTool, SupportTool>();
                 _ = services.AddSingleton<IUpdateManagerService, UpdateManagerService>();
-                // Register Settings
                 _ = services.AddSingleton<IUiSettings, UiSettings>();
                 _ = services.AddSingleton<IUserSettings, UserSettings>();
                 _ = services.AddSingleton<ISettings, Settings>();
@@ -147,11 +133,8 @@ public partial class App : Application
             })
             .Build();
     }
-
-    // This method adds all concrete setting types to the JSON serializer
     private static void AddPolymorphicTypes(JsonTypeInfo jsonTypeInfo)
     {
-        // For deserializing the root object
         if (jsonTypeInfo.Type == typeof(ISettings))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
@@ -162,7 +145,6 @@ public partial class App : Application
             };
         }
 
-        // For the IUserSettings property
         if (jsonTypeInfo.Type == typeof(IUserSettings))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
@@ -173,7 +155,6 @@ public partial class App : Application
             };
         }
 
-        // For the IUiSettings property
         if (jsonTypeInfo.Type == typeof(IUiSettings))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
@@ -184,7 +165,6 @@ public partial class App : Application
             };
         }
 
-        // For the list of ISetting inside IUiSettings
         if (jsonTypeInfo.Type == typeof(ISetting))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
@@ -193,11 +173,10 @@ public partial class App : Application
                 UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
                 DerivedTypes =
                 {
-                    // Core types
                     new(typeof(UserSettings), "usersettings"),
                     new(typeof(UiSettings), "uisettings"),
                     new(typeof(AutomateFormsOrgVariables), "orgvars"),
-                    // Desktop types
+
                     new(typeof(ThemeSetting), "themesetting"),
                     new(typeof(AlwaysOnTopSetting), "alwaysontopsetting"),
                     new(typeof(NewTemplateSetting), "newtemplatesetting"),
@@ -232,7 +211,6 @@ public partial class App : Application
     /// </summary>
     private void OnExit(object sender, ExitEventArgs e)
     {
-        // Save settings on exit
         var supportTool = GetRequiredService<ISupportTool>();
         supportTool.SaveAllSettings();
 
@@ -243,9 +221,6 @@ public partial class App : Application
     /// <summary>
     /// Occurs when an exception is thrown by an application but not handled.
     /// </summary>
-    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-        // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
-    }
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) { }
 }
 

@@ -1,6 +1,5 @@
 ﻿using AMFormsCST.Core.Attributes;
 using AMFormsCST.Core.Interfaces.Attributes;
-using System;
 using System.Xml;
 
 namespace AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure

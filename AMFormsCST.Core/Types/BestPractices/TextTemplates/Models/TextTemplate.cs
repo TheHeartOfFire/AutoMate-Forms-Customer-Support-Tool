@@ -1,12 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 public class TextTemplate : IEquatable<TextTemplate>

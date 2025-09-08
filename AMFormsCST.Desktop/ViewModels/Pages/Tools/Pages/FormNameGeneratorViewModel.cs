@@ -29,7 +29,6 @@ public partial class FormNameGeneratorViewModel : ViewModel
                     Form.RemoveTag(Form.Tag.Impact);
                     IsImpactSelected = false;
                 }
-                // If IsPdfSelected is set to false, IsImpactSelected must be true to maintain a selection.
                 else if (!IsImpactSelected)
                 {
                     IsImpactSelected = true;
@@ -52,7 +51,6 @@ public partial class FormNameGeneratorViewModel : ViewModel
                     Form.RemoveTag(Form.Tag.Pdf);
                     IsPdfSelected = false;
                 }
-                // If IsImpactSelected is set to false, IsPdfSelected must be true to maintain a selection.
                 else if (!IsPdfSelected)
                 {
                     IsPdfSelected = true;
@@ -149,8 +147,6 @@ public partial class FormNameGeneratorViewModel : ViewModel
         _form = new Form(_supportTool);
         ResetForm();
     }
-
-    // Design-time constructor
     public FormNameGeneratorViewModel()
     {
         _supportTool = new DesignTimeSupportTool();

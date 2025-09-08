@@ -1,15 +1,11 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
-using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Desktop.BaseClasses;
-using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
-using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class Form : ManagedObservableCollectionItem
@@ -151,8 +147,6 @@ public partial class Form : ManagedObservableCollectionItem
 
     private void OnTestDealPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // This handler is for property changes on individual TestDeal items.
-        // It can be kept for future use or removed if not needed.
     }
 
     private void TestDeals_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

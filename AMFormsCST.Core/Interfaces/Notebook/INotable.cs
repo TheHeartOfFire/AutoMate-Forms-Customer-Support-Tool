@@ -1,10 +1,4 @@
-﻿using AMFormsCST.Core.Types.Notebook;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace AMFormsCST.Core.Interfaces.Notebook;
 public interface INotable<T> : IEquatable<T>, IEqualityComparer<T>

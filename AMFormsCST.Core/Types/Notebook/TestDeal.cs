@@ -1,12 +1,8 @@
 ﻿using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Core.Types.Notebook;
 [JsonDerivedType(typeof(TestDeal), typeDiscriminator: "testdeal")]

@@ -3,17 +3,7 @@ using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Views.Pages.Tools;
-using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -24,8 +14,6 @@ namespace AMFormsCST.Desktop;
 public partial class MainWindow : IWindow
 {
     // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Readme
-    // TODO: Remove unnecessary comments and usings
     // TODO: Finish Velopack installation and publish v2.0
     public MainWindowViewModel ViewModel { get; }
     private readonly ILogService _logger;

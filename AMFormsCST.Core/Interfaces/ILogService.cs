@@ -1,5 +1,3 @@
-using System;
-
 namespace AMFormsCST.Core.Interfaces
 {
     public interface ILogService

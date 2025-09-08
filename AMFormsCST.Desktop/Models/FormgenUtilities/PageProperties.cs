@@ -1,12 +1,5 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Reflection;
 using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
@@ -53,6 +46,5 @@ public class PageProperties : IFormgenFileProperties
             if (bottomMarginProp != null)
                 yield return new DisplayProperty(pageSettings, bottomMarginProp, false, _logger);
         }
-        // If Settings is null, yields nothing (empty collection)
     }
 }

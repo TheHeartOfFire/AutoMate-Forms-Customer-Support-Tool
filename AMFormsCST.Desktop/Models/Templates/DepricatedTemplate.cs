@@ -1,9 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
-using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Models.Templates;
@@ -55,7 +51,6 @@ public class DeprecatedTemplate
         string formattedText;
         try
         {
-            // Defensive: pad with empty strings if not enough variables
             var variableCount = deprecated.Variables;
             var defaults = deprecated.VariableDefaults ?? new List<string>();
             var args = defaults.Concat(Enumerable.Repeat(string.Empty, Math.Max(0, variableCount - defaults.Count))).Take(variableCount).ToArray();

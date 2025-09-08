@@ -1,7 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.UserSettings;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Interfaces.UserSettings;

@@ -35,6 +35,4 @@ public partial class PageHostDialogViewModel : ObservableObject
         ConfirmSelected = true;
         window.Close();
     }
-
-    // Add other commands here if the dialog needs more interaction (e.g., Save, Apply)
 }

@@ -1,12 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Types.BestPractices.Models;
 using AMFormsCST.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel;
 
 namespace AMFormsCST.Core.Types.BestPractices.Practices;

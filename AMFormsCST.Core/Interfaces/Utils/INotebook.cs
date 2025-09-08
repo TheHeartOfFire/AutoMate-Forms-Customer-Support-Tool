@@ -1,6 +1,5 @@
 ﻿using AMFormsCST.Core.Helpers;
 using AMFormsCST.Core.Interfaces.Notebook;
-using AMFormsCST.Core.Types.Notebook;
 
 namespace AMFormsCST.Core.Interfaces.Utils;
 public interface INotebook

@@ -1,9 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
@@ -45,7 +42,7 @@ public class FormgenUtils : IFormgenUtils
             xmlDoc.LoadXml(xmlContent);
             if (xmlDoc.DocumentElement is null) throw new XmlException("The XML file is empty or missing a root element.");
             ParsedFormgenFile = new DotFormgen(xmlDoc.DocumentElement);
-            _backupCopy = ParsedFormgenFile.Clone(); // Create a backup copy of the original file
+            _backupCopy = ParsedFormgenFile.Clone(); 
 
             ParsedFormgenFile.PropertyChanged += (s, e) => OnFormgenFileChanged();
 
@@ -116,7 +113,6 @@ public class FormgenUtils : IFormgenUtils
             var originalFileNameWithoutExt = _fileSystem.GetFileNameWithoutExtension(_filePath);
             var newFormgenPath = _fileSystem.CombinePath(directory, newName + ".formgen");
 
-            // Rename the .formgen file
             _fileSystem.MoveFile(_filePath, newFormgenPath);
             _logger?.LogInfo($"Renamed Formgen file from {_filePath} to {newFormgenPath}");
             _filePath = newFormgenPath;
@@ -173,7 +169,6 @@ public class FormgenUtils : IFormgenUtils
         {
             if (editedPrompt.Settings?.Variable is not null && originalPrompts.TryGetValue(editedPrompt.Settings.Variable, out var originalPrompt))
             {
-                // Update properties of the original prompt object
                 originalPrompt.Expression = editedPrompt.Expression;
                 if (originalPrompt.PromptData is not null && editedPrompt.PromptData is not null)
                 {
@@ -205,7 +200,6 @@ public class FormgenUtils : IFormgenUtils
             _logger?.LogInfo($"Cloned prompt: {promptToClone.Settings?.Variable} as {newName}");
         }
 
-        // Re-sort all codelines to maintain order by type and then by index
         ParsedFormgenFile.CodeLines = ParsedFormgenFile.CodeLines
             .OrderBy(cl => cl.Settings?.Type)
             .ThenBy(cl => cl.Settings?.Order)
@@ -218,22 +212,19 @@ public class FormgenUtils : IFormgenUtils
 
         try
         {
-            // Open the source file to get its prompts
             var sourceXmlContent = _fileSystem.ReadAllText(fromFilePath);
             var sourceDoc = new XmlDocument();
             sourceDoc.LoadXml(sourceXmlContent);
-            if (sourceDoc.DocumentElement is null) return; // Can't copy from an empty file
+            if (sourceDoc.DocumentElement is null) return; 
             var sourceFormgen = new DotFormgen(sourceDoc.DocumentElement);
             var sourcePrompts = sourceFormgen.CodeLines.Where(cl => cl.Settings?.Type == CodeLineSettings.CodeType.PROMPT);
 
-            // Get existing prompts in the target file
             var targetPrompts = GetPrompts().ToList();
             int maxIndex = targetPrompts.Any() ? targetPrompts.Max(p => p.Settings?.Order ?? 0) : 0;
             var targetPromptNames = new HashSet<string?>(targetPrompts.Select(p => p.Settings?.Variable));
 
             foreach (var sourcePrompt in sourcePrompts)
             {
-                // Only add if a prompt with the same variable name doesn't already exist
                 if (sourcePrompt.Settings?.Variable is not null && !targetPromptNames.Contains(sourcePrompt.Settings.Variable))
                 {
                     maxIndex++;
@@ -260,7 +251,6 @@ public class FormgenUtils : IFormgenUtils
             var backupDir = _fileSystem.CombinePath(IO.BackupPath, $"{_fileSystem.GetFileNameWithoutExtension(_filePath)}_{_backupCopy.Settings.UUID}");
             _fileSystem.CreateDirectory(backupDir);
 
-            // Enforce retention policy
             var retentionQty = Properties.BackupRetentionQty;
             if (retentionQty > 0)
             {
@@ -279,7 +269,6 @@ public class FormgenUtils : IFormgenUtils
                 }
             }
 
-            // Create new backup
             var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             var backupFileName = $"{{{timestamp}}}.bak";
             var backupPath = _fileSystem.CombinePath(backupDir, backupFileName);

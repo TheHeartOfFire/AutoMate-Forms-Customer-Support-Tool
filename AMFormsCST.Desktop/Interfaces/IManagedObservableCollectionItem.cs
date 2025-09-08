@@ -1,12 +1,5 @@
-﻿using AMFormsCST.Desktop.Models;
-using AMFormsCST.Desktop.Types;
-using System;
-using System.Collections.Generic;
+﻿using AMFormsCST.Desktop.Types;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace AMFormsCST.Desktop.Interfaces
 {

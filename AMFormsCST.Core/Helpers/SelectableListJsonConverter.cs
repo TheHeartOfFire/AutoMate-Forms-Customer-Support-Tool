@@ -1,5 +1,4 @@
 using AMFormsCST.Core.Interfaces.Notebook;
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -20,12 +19,10 @@ public class SelectableListJsonConverter<T> : JsonConverter<SelectableList<T>> w
         {
             if (reader.TokenType == JsonTokenType.EndArray)
             {
-                // Select the first item by default after deserialization
                 list.SelectedItem = list.FirstOrDefault();
                 return list;
             }
 
-            // The serializer will use the correct derived type converter because of [JsonDerivedType] attributes
             var element = JsonSerializer.Deserialize<T>(ref reader, options);
             if (element != null)
             {

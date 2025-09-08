@@ -11,14 +11,12 @@ public class Properties
     [JsonInclude]
     public ErrorMessages ErrorMessages { get; set; }
 
-    // Parameterless constructor for JSON deserialization and default creation
     public Properties()
     {
         FormgenUtils = new FormgenUtilsProperties();
         ErrorMessages = new ErrorMessages();
     }
 
-    // Logger-initializing constructor for runtime use
     public Properties(ILogService? logger = null) : this()
     {
         _logger = logger;

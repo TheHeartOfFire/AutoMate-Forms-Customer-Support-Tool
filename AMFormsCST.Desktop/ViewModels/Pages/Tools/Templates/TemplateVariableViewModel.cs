@@ -1,12 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
-using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates
 {

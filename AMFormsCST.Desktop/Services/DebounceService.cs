@@ -1,11 +1,4 @@
-﻿using AMFormsCST.Core;
-using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Core.Interfaces.Notebook;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Services
 {

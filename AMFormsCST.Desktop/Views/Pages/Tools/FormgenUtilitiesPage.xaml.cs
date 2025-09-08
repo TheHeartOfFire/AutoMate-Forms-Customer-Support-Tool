@@ -1,9 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Core.Utils;
 using AMFormsCST.Desktop.ControlsLookup;
-using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;

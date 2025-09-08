@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace AMFormsCST.Desktop.Controls;
 /// <summary>
@@ -25,11 +14,10 @@ public partial class ManagedObservableCollectionSelector : UserControl
         InitializeComponent();
     }
 
-    // Dependency Property for ItemsSource
     public static readonly DependencyProperty ItemsSourceProperty =
         DependencyProperty.Register(
             "ItemsSource",
-            typeof(IEnumerable), // Or a more specific collection type if you know it
+            typeof(IEnumerable), 
             typeof(ManagedObservableCollectionSelector),
             new PropertyMetadata(null));
 
@@ -39,7 +27,6 @@ public partial class ManagedObservableCollectionSelector : UserControl
         set { SetValue(ItemsSourceProperty, value); }
     }
 
-    // Dependency Property for the Command
     public static readonly DependencyProperty RadioButtonCommandProperty =
         DependencyProperty.Register(
             "RadioButtonCommand",
@@ -53,14 +40,12 @@ public partial class ManagedObservableCollectionSelector : UserControl
         set { SetValue(RadioButtonCommandProperty, value); }
     }
 
-    // Dependency Property for the CommandParameter Path (e.g., "Id", "DataContext")
-    // This allows you to specify which property of the bound item to pass as the command parameter
     public static readonly DependencyProperty CommandParameterPathProperty =
         DependencyProperty.Register(
             "CommandParameterPath",
             typeof(string),
             typeof(ManagedObservableCollectionSelector),
-            new PropertyMetadata("DataContext")); // Default to "DataContext" if not specified
+            new PropertyMetadata("DataContext")); 
 
     public string CommandParameterPath
     {
@@ -72,7 +57,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
                 "ContentBindingPath",
                 typeof(string),
                 typeof(ManagedObservableCollectionSelector),
-                new PropertyMetadata(string.Empty)); // Default to empty string
+                new PropertyMetadata(string.Empty)); 
 
     public string ContentBindingPath
     {
@@ -85,7 +70,7 @@ public partial class ManagedObservableCollectionSelector : UserControl
             "ContentFallbackValue",
             typeof(string),
             typeof(ManagedObservableCollectionSelector),
-            new PropertyMetadata(string.Empty)); // Default to empty string
+            new PropertyMetadata(string.Empty)); 
 
     public string ContentFallbackValue
     {
@@ -95,10 +80,10 @@ public partial class ManagedObservableCollectionSelector : UserControl
 
     public static readonly DependencyProperty GroupNameProperty =
         DependencyProperty.Register(
-            nameof(GroupName),      // The name of the property
-            typeof(string),         // The type of the property
-            typeof(ManagedObservableCollectionSelector), // The type of the owner class
-            new PropertyMetadata(string.Empty)); // Default value, or you can use null
+            nameof(GroupName),      
+            typeof(string),         
+            typeof(ManagedObservableCollectionSelector), 
+            new PropertyMetadata(string.Empty)); 
 
 
     public string GroupName

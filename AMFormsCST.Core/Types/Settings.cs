@@ -1,7 +1,5 @@
 ﻿using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Types;
@@ -62,7 +60,6 @@ public class Settings : ISettings
         _uiSettings = uiSettings ?? throw new ArgumentNullException(nameof(uiSettings), "UI settings cannot be null.");
     }
 
-    // Logger-initializing constructor for runtime use only
     public Settings(IUserSettings userSettings, IUiSettings uiSettings, ILogService? logger)
         : this(userSettings, uiSettings)
     {

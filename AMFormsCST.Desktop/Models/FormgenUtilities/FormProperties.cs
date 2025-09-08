@@ -2,8 +2,6 @@
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
-using System.Reflection;
 using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.DotFormgen;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
@@ -133,12 +131,10 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
             _ => "Unknown",
         };
 
-    // This method replaces GetUIElements()
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
         var formType = typeof(DotFormgen);
 
-        // Editable properties from DotFormgen
         var titleProp = formType.GetProperty(nameof(DotFormgen.Title));
         if (titleProp != null)
             yield return new DisplayProperty(_coreFormgenFile, titleProp, true, _logger);
@@ -167,14 +163,13 @@ public partial class FormProperties : ObservableObject, IFormgenFileProperties
         if (salesPersonPromptProp != null)
             yield return new DisplayProperty(_coreFormgenFile, salesPersonPromptProp, false, _logger);
 
-        // Add other properties from FormSettings, etc.
         if (Settings is FormSettings formSettings)
         {
             var settingsType = typeof(FormSettings);
 
             var uuidProp = settingsType.GetProperty(nameof(FormSettings.PublishedUUID));
             if (uuidProp != null)
-                yield return new DisplayProperty(formSettings, uuidProp, true, _logger); // UUID is read-only
+                yield return new DisplayProperty(formSettings, uuidProp, true, _logger); 
 
             var totalPagesProp = settingsType.GetProperty(nameof(FormSettings.TotalPages));
             if (totalPagesProp != null)

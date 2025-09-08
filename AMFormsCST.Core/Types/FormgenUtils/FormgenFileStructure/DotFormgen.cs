@@ -1,8 +1,5 @@
 ﻿using AMFormsCST.Core.Attributes;
 using AMFormsCST.Core.Interfaces.Attributes;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 

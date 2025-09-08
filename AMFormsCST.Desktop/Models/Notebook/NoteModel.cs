@@ -1,18 +1,13 @@
-﻿using AMFormsCST.Core;
-using AMFormsCST.Core.Interfaces;
+﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Desktop.BaseClasses;
-using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using AMFormsCST.Desktop.ViewModels.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
-using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class NoteModel : ManagedObservableCollectionItem
@@ -289,7 +284,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
 
     internal void RaiseChildPropertyChanged()
     {
-        OnPropertyChanged(string.Empty); // An empty string signals that all properties have changed.
+        OnPropertyChanged(string.Empty); 
     }
 
 }

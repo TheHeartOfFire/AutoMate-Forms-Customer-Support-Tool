@@ -1,7 +1,4 @@
-﻿using AMFormsCST.Core.Types.UserSettings;
-using System.Text.Json.Serialization;
-
-namespace AMFormsCST.Core.Interfaces.UserSettings;
+﻿namespace AMFormsCST.Core.Interfaces.UserSettings;
 
 public interface IUserSettings : ISetting
 {

@@ -2,9 +2,6 @@
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Types;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.ComponentModel;
-using System.Windows.Controls;
 using static AMFormsCST.Desktop.Interfaces.IManagedObservableCollectionItem;
 
 namespace AMFormsCST.Desktop.BaseClasses

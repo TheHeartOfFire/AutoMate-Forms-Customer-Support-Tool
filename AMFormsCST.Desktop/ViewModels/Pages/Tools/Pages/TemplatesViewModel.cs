@@ -3,19 +3,12 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models.Templates;
 using AMFormsCST.Desktop.Services;
-using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 using AMFormsCST.Desktop.Views.Dialogs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 public partial class TemplatesViewModel : ViewModel

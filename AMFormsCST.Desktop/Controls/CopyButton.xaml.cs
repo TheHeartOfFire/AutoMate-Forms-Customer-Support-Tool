@@ -38,7 +38,6 @@ public partial class CopyButton : UserControl
         }
         catch
         {
-            // Could not copy text to clipboard
         }
     }
 }

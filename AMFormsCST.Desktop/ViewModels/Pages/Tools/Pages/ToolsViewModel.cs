@@ -1,16 +1,9 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.ControlsLookup;
 using AMFormsCST.Desktop.Models;
-using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools
 {

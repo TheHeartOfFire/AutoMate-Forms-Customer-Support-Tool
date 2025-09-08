@@ -1,9 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using VehicleType = AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel.SoldTrade;
 using Format = AMFormsCST.Core.Types.BestPractices.Models.AutoMateFormModel.FormFormat;
 

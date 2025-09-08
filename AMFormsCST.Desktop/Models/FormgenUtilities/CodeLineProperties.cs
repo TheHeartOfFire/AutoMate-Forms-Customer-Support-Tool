@@ -2,10 +2,6 @@
 using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 
@@ -63,12 +59,10 @@ public partial class CodeLineProperties : ObservableObject, IFormgenFileProperti
     /// </summary>
     public IEnumerable<DisplayProperty> GetDisplayProperties()
     {
-        // Editable property: Expression
         var exprProp = typeof(CodeLine).GetProperty(nameof(CodeLine.Expression));
         if (exprProp != null)
             yield return new DisplayProperty(_coreCodeLine, exprProp);
 
-        // Editable properties from Settings (Order, Type, Variable)
         if (Settings is CodeLineSettings codeLineSettings)
         {
             var settingsType = typeof(CodeLineSettings);
@@ -85,7 +79,6 @@ public partial class CodeLineProperties : ObservableObject, IFormgenFileProperti
                 yield return new DisplayProperty(codeLineSettings, variableProp);
         }
 
-        // Editable properties from PromptData (Message, Choices)
         if (PromptData is not null)
         {
             var promptType = typeof(PromptDataProperties);

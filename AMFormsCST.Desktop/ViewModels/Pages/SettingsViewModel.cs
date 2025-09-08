@@ -3,14 +3,10 @@ using AMFormsCST.Desktop.Models.UserSettings;
 using AMFormsCST.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages;
 
@@ -24,14 +20,12 @@ public partial class SettingsViewModel : ViewModel
     [ObservableProperty]
     private string _appVersion = string.Empty;
 
-    // UI Settings Properties
     [ObservableProperty]
     private ApplicationTheme _currentTheme;
 
     [ObservableProperty]
     private bool _alwaysOnTop;
 
-    // User Settings Properties
     [ObservableProperty]
     private bool _selectNewTemplate;
 
@@ -48,7 +42,6 @@ public partial class SettingsViewModel : ViewModel
         _logger = logger;
         _logger?.LogInfo("SettingsViewModel initialized.");
 
-        // Subscribe to property changes on this ViewModel
         PropertyChanged += OnSettingsViewModelPropertyChanged;
         if (!_isInitialized)
             InitializeViewModel();
@@ -64,7 +57,6 @@ public partial class SettingsViewModel : ViewModel
         AppVersion = $"Version {GetAppVersion()}";
         _logger?.LogDebug($"AppVersion set: {AppVersion}");
 
-        // Load settings from the core service
         var themeSetting = _supportTool.Settings.UiSettings.Settings.OfType<ThemeSetting>().FirstOrDefault();
         if (themeSetting != null) CurrentTheme = themeSetting.Theme;
 
@@ -133,7 +125,6 @@ public partial class SettingsViewModel : ViewModel
                     break;
             }
 
-            // Save settings if the view model is initialized
             if (_isInitialized)
             {
                 _supportTool.SaveAllSettings();
@@ -160,8 +151,6 @@ public partial class SettingsViewModel : ViewModel
         }
     }
 
-    private static string GetAppVersion()
-    {
-        return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion ?? "1.0.0";
-    }
+    private static string GetAppVersion() => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion ?? "1.0.0";
+    
 }

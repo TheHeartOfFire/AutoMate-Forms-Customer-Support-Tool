@@ -3,8 +3,6 @@ using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace AMFormsCST.Core.Types.UserSettings;
@@ -39,7 +37,6 @@ public class AutomateFormsOrgVariables : IOrgVariables
         Variables = RegisterVariables();
     }
 
-    // Constructor for Dependency Injection
     public AutomateFormsOrgVariables(IBestPracticeEnforcer? enforcer, INotebook? notebook, ILogService? logger = null)
     {
         _logger = logger;
@@ -83,8 +80,6 @@ public class AutomateFormsOrgVariables : IOrgVariables
         var selectedContact = selectedNote?.Contacts.SelectedItem;
         var selectedForm = selectedNote?.Forms.SelectedItem;
         var selectedTestDeal = selectedForm?.TestDeals.SelectedItem;
-
-        // Fix: Change square brackets [] to parentheses () for List initialization in RegisterVariables()
 
         var variables = new List<ITextTemplateVariable>
         { 

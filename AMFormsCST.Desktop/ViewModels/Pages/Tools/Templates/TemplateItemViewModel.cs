@@ -2,15 +2,8 @@
 using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models;
-using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 
@@ -28,7 +21,6 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
         {
             if (SetProperty(ref _variables, value))
             {
-                // Unsubscribe from previous items
                 if (_variables != null)
                 {
                     foreach (var variable in _variables)
@@ -39,17 +31,14 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
 
                 _variables = value;
 
-                // Subscribe to new items
                 if (_variables != null)
                 {
                     foreach (var variable in _variables)
                     {
                         variable.PropertyChanged += OnVariablePropertyChanged;
                     }
-                    _variables.CollectionChanged += OnVariablesCollectionChanged; // Handle adds/removes to the collection
+                    _variables.CollectionChanged += OnVariablesCollectionChanged; 
                 }
-
-                // Notify Output has changed when the collection itself changes
                 OnPropertyChanged(nameof(Output));
             }
         }
@@ -67,7 +56,6 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
             template.GetVariables(_supportTool)
                     .Select(variable => new TemplateVariableViewModel(variable, _logger) { Variable = variable }));
 
-        // Initial subscription for existing variables
         foreach (var variable in Variables)
         {
             variable.PropertyChanged += OnVariablePropertyChanged;
@@ -155,25 +143,20 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
     }
     public void RefreshTemplateData()
     {
-        // First, notify that the base Template object might have changed (e.g., Name, Description)
-        OnPropertyChanged(nameof(Template)); // This will re-evaluate bindings like Template.Name, Template.Description
+        OnPropertyChanged(nameof(Template)); 
 
-        // Then, re-process the template text to update variables
         var preprocessedTemplate = PreProcessTemplate(Template.Text);
 
-        // Create new TemplateVariableViewModels for the updated template content
         var newVariables = new ObservableCollection<TemplateVariableViewModel>(
             preprocessedTemplate.variables
                 .Select(variable => new TemplateVariableViewModel(variable.variable, _logger) { Variable = variable.variable }));
 
-        // Update the existing Variables collection.
         Variables.Clear();
         foreach (var v in newVariables)
         {
-            Variables.Add(v); // This will trigger OnVariablesCollectionChanged and subscribe the new variable
+            Variables.Add(v); 
         }
 
-        // After updating variables, explicitly notify Output to re-evaluate
         OnPropertyChanged(nameof(Output));
         _logger?.LogInfo($"TemplateItemViewModel '{Template.Name}' data refreshed.");
     }

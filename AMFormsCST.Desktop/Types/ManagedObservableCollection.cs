@@ -1,11 +1,9 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
-using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 
 namespace AMFormsCST.Desktop.Types;
 
@@ -130,7 +128,6 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
             _isEnsuringBlank = true;
             var blankItems = this.Where(x => x.IsBlank).ToList();
 
-            // Remove any extra blank items
             foreach (var extra in blankItems.Skip(1))
             {
                 _logger?.LogDebug($"Removing extra blank: {extra}");
@@ -139,7 +136,6 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
 
             var singleBlank = this.FirstOrDefault(x => x.IsBlank);
 
-            // If no blank item exists, create and add one to the end
             if (singleBlank == null)
             {
                 if (_blankFactory == null)
@@ -152,7 +148,6 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
                 _logger?.LogDebug("Adding new blank item to the end.");
                 base.Add(newBlank);
             }
-            // If a blank item exists but it's not the last one, move it to the end
             else if (this.LastOrDefault() != singleBlank)
             {
                 _logger?.LogDebug($"Moving blank item to the end: {singleBlank}");
@@ -171,13 +166,10 @@ public class ManagedObservableCollection<T> : ObservableCollection<T>, INotifyPr
 
     private void UpdateSelectionAfterChange(T? removedItem = null)
     {
-        // Only update selection if selected item was removed
         if (removedItem != null && Equals(_selectedItem, removedItem))
         {
-            // Select first item if available
             this.FirstOrDefault()?.Select();
         }
-        // Do not override selection to first non-blank, just keep current selection if possible
         _logger?.LogDebug("Selection updated after collection change.");
     }
 }

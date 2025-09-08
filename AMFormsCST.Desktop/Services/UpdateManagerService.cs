@@ -1,7 +1,4 @@
 ﻿using AMFormsCST.Core.Interfaces;
-using AMFormsCST.Desktop.Interfaces;
-using System;
-using System.Threading.Tasks;
 using Velopack;
 using Velopack.Sources;
 using Wpf.Ui;
@@ -19,7 +16,6 @@ public class UpdateManagerService : IUpdateManagerService
     {
         _snackbarService = snackbarService;
         _logger = logger;
-        // Initialize the UpdateManager with your GitHub repository source.
         _updateManager = new UpdateManager(new GithubSource("https://github.com/TheHeartOfFire/AutoMate-Forms-Customer-Support-Tool", null, false));
         _logger?.LogInfo("UpdateManagerService initialized.");
     }
@@ -56,7 +52,7 @@ public class UpdateManagerService : IUpdateManagerService
             if (newVersion == null)
             {
                 _logger?.LogInfo("No updates found on startup.");
-                return; // No updates, exit silently.
+                return; 
             }
 
             _logger?.LogInfo($"Update available on startup: {newVersion.TargetFullRelease.Version}");
@@ -64,7 +60,6 @@ public class UpdateManagerService : IUpdateManagerService
         }
         catch (Exception ex)
         {
-            // Suppress exceptions on startup check to avoid interrupting the user.
             _logger?.LogWarning($"Update check on startup failed: {ex.Message}");
         }
     }

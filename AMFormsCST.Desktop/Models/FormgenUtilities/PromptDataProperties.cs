@@ -1,11 +1,6 @@
 ﻿using AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure;
 using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.PromptDataSettings;
-using System.Reflection;
 using AMFormsCST.Core.Interfaces;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
@@ -53,17 +48,14 @@ public partial class PromptDataProperties : ObservableObject, IFormgenFileProper
     {
         var promptType = typeof(PromptData);
 
-        // Editable property: Message
         var messageProp = promptType.GetProperty(nameof(PromptData.Message));
         if (messageProp != null)
             yield return new DisplayProperty(_corePromptData, messageProp, false, _logger);
 
-        // Editable property: Choices (if any)
         var choicesProp = promptType.GetProperty(nameof(PromptData.Choices));
         if (choicesProp != null && _corePromptData.Choices.Count != 0)
             yield return new DisplayProperty(_corePromptData, choicesProp, false, _logger);
 
-        // Editable properties from PromptDataSettings
         if (Settings is PromptDataSettings promptSettings)
         {
             var settingsType = typeof(PromptDataSettings);

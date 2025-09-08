@@ -1,10 +1,4 @@
-using AMFormsCST.Desktop.Converters;
-using AMFormsCST.Desktop.Interfaces;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using Wpf.Ui.Controls;
 using System.Reflection;
 using AMFormsCST.Core.Interfaces;
 
@@ -22,7 +16,6 @@ public class DisplayProperty : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    // For editable properties
     public DisplayProperty(object source, PropertyInfo propertyInfo, bool isReadOnly = false, ILogService? logger = null)
     {
         Name = propertyInfo.Name;
@@ -35,7 +28,6 @@ public class DisplayProperty : INotifyPropertyChanged
         _logger?.LogInfo($"DisplayProperty created for '{Name}' (Type: {Type.Name}, ReadOnly: {IsReadOnly})");
     }
 
-    // For summary/statistic properties
     public DisplayProperty(string name, object? value, Type type, bool isReadOnly = true, ILogService? logger = null)
     {
         Name = name;

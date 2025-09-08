@@ -8,11 +8,8 @@ using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.FormgenUtils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Xml;
@@ -86,9 +83,6 @@ public partial class FormgenUtilitiesViewModel : ViewModel
 
         try
         {
-            // The resource name is the project's default namespace + the file's path with '.' separators.
-            // Spaces in the path are replaced with underscores.
-            // If this fails, run the app with debug code to list all resource names and find the correct one.
             var resourceName = "AMFormsCST.Desktop.SampleData.Formgen_Sample_Data.Pdf_Sample.Sample Pdf.formgen";
             var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream(resourceName);
@@ -102,9 +96,6 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         }
         catch (Exception ex)
         {
-            // Fallback to a minimal valid XML to prevent the designer from crashing
-            // if the resource can't be found or fails to parse.
-
             var resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
 
             var fallbackUuid = Guid.NewGuid().ToString();
@@ -140,7 +131,6 @@ public partial class FormgenUtilitiesViewModel : ViewModel
         var xmlElement = xmlDoc.DocumentElement!;
         var sampleFormgen = new DotFormgen(xmlElement);
 
-        // Update VM properties from the loaded sample data
         FilePath = @"C:\SampleData\Sample Pdf.formgen";
         FormTitle = sampleFormgen.Title ?? "Sample Form";
         Uuid = sampleFormgen.Settings.UUID;

@@ -1,8 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
-using AMFormsCST.Core.Types.Notebook;
 using AMFormsCST.Desktop.BaseClasses;
-using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System;

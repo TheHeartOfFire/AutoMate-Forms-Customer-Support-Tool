@@ -1,10 +1,6 @@
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models.FormgenUtilities.Grouping;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Media.Animation;
-using static AMFormsCST.Core.Types.FormgenUtils.FormgenFileStructure.CodeLineSettings;
 
 namespace AMFormsCST.Desktop.Models.FormgenUtilities;
 

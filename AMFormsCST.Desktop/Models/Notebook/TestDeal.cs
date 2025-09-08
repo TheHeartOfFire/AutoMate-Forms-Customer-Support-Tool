@@ -1,11 +1,8 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Desktop.BaseClasses;
-using AMFormsCST.Desktop.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
-using System;
-using System.Linq;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class TestDeal : ManagedObservableCollectionItem

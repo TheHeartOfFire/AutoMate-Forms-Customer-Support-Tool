@@ -1,16 +1,11 @@
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
-using AMFormsCST.Core.Interfaces.CodeBlocks;
-using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces.Utils;
-using AMFormsCST.Core.Types.BestPractices;
 using AMFormsCST.Core.Types.BestPractices.Models;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using Moq;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using static AMFormsCST.Core.Types.BestPractices.TextTemplates.Models.TextTemplate;
 
 namespace AMFormsCST.Desktop.Services;
@@ -29,7 +24,6 @@ public class DesignTimeSupportTool : ISupportTool
 
     public DesignTimeSupportTool()
     {
-        // Mock the dependency chain required by the Form model
         var mockFormNamePractice = new Mock<IFormNameBestPractice>();
         var mockEnforcer = new Mock<IBestPracticeEnforcer>();
         mockFormNamePractice.SetupProperty(p => p.Model, new AutoMateFormModel
@@ -48,7 +42,6 @@ public class DesignTimeSupportTool : ISupportTool
             IsVehicleMerchandising = false
         });
 
-        // When GetFormName is called, execute our design-time string generation logic
         mockEnforcer.Setup(e => e.GetFormName()).Returns(() =>
         {
             var model = mockFormNamePractice.Object.Model as AutoMateFormModel;
@@ -61,7 +54,6 @@ public class DesignTimeSupportTool : ISupportTool
             return model.IsLAW ? GenerateImpactLawName(model) : GenerateImpactName(model);
         });
 
-        // Setup mock for Templates
         var templates = new List<TextTemplate>
         {
             new("Case Intro", "Standard introduction for a new case.", "Hello {FirstName}, this is in regards to case #{CaseNumber}.", TemplateType.InternalComments),
@@ -73,17 +65,15 @@ public class DesignTimeSupportTool : ISupportTool
         mockEnforcer.Setup(e => e.FormNameBestPractice).Returns(mockFormNamePractice.Object);
         Enforcer = mockEnforcer.Object;
 
-        // Initialize other properties with basic mocks to avoid null reference exceptions
         CodeBlocks = new Mock<ICodeBlocks>().Object;
         FormgenUtils = new Mock<IFormgenUtils>().Object;
         Notebook = new Mock<INotebook>().Object;
         Settings = new Mock<ISettings>().Object;
     }
 
-    public void SaveAllSettings() { /* No-op for design time */ }
+    public void SaveAllSettings() { }
 
     #region File Name Generation Logic
-    // This logic is adapted from your FormgenAssistant project to simulate the real behavior.
     private static string GenerateLaserLawName(AutoMateFormModel model)
     {
         var parts = new List<string>

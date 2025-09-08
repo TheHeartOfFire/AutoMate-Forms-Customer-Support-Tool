@@ -23,7 +23,6 @@ public class Notebook : INotebook
             Notes.Add(new Note(logger));
             _logger?.LogInfo("No notes found. Added a blank note.");
         }
-        // Always select the first note
         Notes.SelectedItem = Notes.FirstOrDefault();
         _logger?.LogDebug($"Selected note: {Notes.SelectedItem?.Id}");
 

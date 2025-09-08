@@ -43,25 +43,28 @@ public class UpdateManagerService : IUpdateManagerService
         }
     }
 
-    public async Task CheckForUpdatesOnStartupAsync()
+    public Task CheckForUpdatesOnStartupAsync()
     {
-        try
+        return Task.Run(async () =>
         {
-            _logger?.LogInfo("Checking for updates on startup...");
-            var newVersion = await _updateManager.CheckForUpdatesAsync();
-            if (newVersion == null)
+            try
             {
-                _logger?.LogInfo("No updates found on startup.");
-                return; 
-            }
+                _logger?.LogInfo("Checking for updates on startup...");
+                var newVersion = await _updateManager.CheckForUpdatesAsync();
+                if (newVersion == null)
+                {
+                    _logger?.LogInfo("No updates found on startup.");
+                    return;
+                }
 
-            _logger?.LogInfo($"Update available on startup: {newVersion.TargetFullRelease.Version}");
-            await DownloadAndApplyUpdate(newVersion);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogWarning($"Update check on startup failed: {ex.Message}");
-        }
+                _logger?.LogInfo($"Update available on startup: {newVersion.TargetFullRelease.Version}");
+                await DownloadAndApplyUpdate(newVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning($"Update check on startup failed: {ex.Message}");
+            }
+        });
     }
 
     private async Task DownloadAndApplyUpdate(UpdateInfo newVersion)

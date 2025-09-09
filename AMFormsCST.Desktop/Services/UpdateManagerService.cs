@@ -1,4 +1,5 @@
 ﻿using AMFormsCST.Core.Interfaces;
+using System.Windows;
 using Velopack;
 using Velopack.Sources;
 using Wpf.Ui;
@@ -42,10 +43,10 @@ public class UpdateManagerService : IUpdateManagerService
             _logger?.LogError("Update check failed.", ex);
         }
     }
-
-    public Task CheckForUpdatesOnStartupAsync()
+    
+    public async Task CheckForUpdatesOnStartupAsync()
     {
-        return Task.Run(async () =>
+        await Task.Run(async () =>
         {
             try
             {
@@ -58,7 +59,11 @@ public class UpdateManagerService : IUpdateManagerService
                 }
 
                 _logger?.LogInfo($"Update available on startup: {newVersion.TargetFullRelease.Version}");
-                await DownloadAndApplyUpdate(newVersion);
+                // Dispatch UI-related update tasks to the main thread
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await DownloadAndApplyUpdate(newVersion);
+                });
             }
             catch (Exception ex)
             {

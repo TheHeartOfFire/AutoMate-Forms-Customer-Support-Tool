@@ -1,5 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Interfaces;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Views.Pages.Tools;
@@ -13,8 +14,6 @@ namespace AMFormsCST.Desktop;
 /// </summary>
 public partial class MainWindow : IWindow
 {
-    // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Finish Velopack installation and publish v2.0
     public MainWindowViewModel ViewModel { get; }
     private readonly ILogService _logger;
 
@@ -27,9 +26,11 @@ public partial class MainWindow : IWindow
         IServiceProvider serviceProvider,
         ISnackbarService snackbarService,
         IContentDialogService contentDialogService,
-        ILogService logger
+        ILogService logger,
+        IUpdateManagerService updateManagerService
     )
     {
+        updateManagerService.CheckForUpdatesOnStartupAsync().ConfigureAwait(false);
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
 
         ViewModel = viewModel;

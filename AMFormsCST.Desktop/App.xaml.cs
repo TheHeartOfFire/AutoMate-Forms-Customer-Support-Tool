@@ -204,6 +204,8 @@ public partial class App : Application
     {
         VelopackApp.Build().Run();
         _host.Start();
+        GetRequiredService<IUpdateManagerService>().CheckForUpdatesOnStartupAsync();
+
     }
 
     /// <summary>

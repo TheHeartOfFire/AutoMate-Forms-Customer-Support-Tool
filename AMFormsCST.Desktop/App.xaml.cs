@@ -206,7 +206,6 @@ public partial class App : Application
     {
         var velopackLogger = new VelopackSerilogLogger(GetRequiredService<ILogService>());
         VelopackApp.Build().SetLogger(velopackLogger).Run();
-        GetRequiredService<IUpdateManagerService>().CheckForUpdatesOnStartupAsync();
         _host.Start();
 
     }

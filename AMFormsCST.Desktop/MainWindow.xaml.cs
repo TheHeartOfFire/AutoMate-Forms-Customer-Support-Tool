@@ -1,5 +1,6 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Interfaces;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.Views.Pages;
 using AMFormsCST.Desktop.Views.Pages.Tools;
@@ -25,9 +26,11 @@ public partial class MainWindow : IWindow
         IServiceProvider serviceProvider,
         ISnackbarService snackbarService,
         IContentDialogService contentDialogService,
-        ILogService logger
+        ILogService logger,
+        IUpdateManagerService updateManagerService
     )
     {
+        updateManagerService.CheckForUpdatesOnStartupAsync().ConfigureAwait(false);
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
 
         ViewModel = viewModel;

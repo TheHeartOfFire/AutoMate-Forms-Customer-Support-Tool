@@ -13,8 +13,6 @@ namespace AMFormsCST.Desktop;
 /// </summary>
 public partial class MainWindow : IWindow
 {
-    // This is as good of a place as any to put my 2.0 release TODO list:
-    // TODO: Finish Velopack installation and publish v2.0
     public MainWindowViewModel ViewModel { get; }
     private readonly ILogService _logger;
 

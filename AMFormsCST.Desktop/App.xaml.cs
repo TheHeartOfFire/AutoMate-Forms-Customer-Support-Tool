@@ -3,6 +3,7 @@ using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Core.Interfaces.Utils;
+using AMFormsCST.Core.Services;
 using AMFormsCST.Core.Types;
 using AMFormsCST.Core.Types.BestPractices.Models;
 using AMFormsCST.Core.Types.BestPractices.Practices;
@@ -22,6 +23,10 @@ using Lepo.i18n.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
+using Serilog.Formatting.Compact;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -30,9 +35,6 @@ using System.Windows.Threading;
 using Velopack;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
-using Serilog;
-using AMFormsCST.Core.Services;
-using Serilog.Formatting.Compact;
 
 namespace AMFormsCST.Desktop;
 /// <summary>
@@ -202,9 +204,10 @@ public partial class App : Application
     /// </summary>
     private void OnStartup(object sender, StartupEventArgs e)
     {
-        VelopackApp.Build().Run();
-        _host.Start();
+        var velopackLogger = new VelopackSerilogLogger(GetRequiredService<ILogService>());
+        VelopackApp.Build().SetLogger(velopackLogger).Run();
         GetRequiredService<IUpdateManagerService>().CheckForUpdatesOnStartupAsync();
+        _host.Start();
 
     }
 

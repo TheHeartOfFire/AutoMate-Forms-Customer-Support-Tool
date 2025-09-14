@@ -146,19 +146,16 @@ public partial class NoteModel : ManagedObservableCollectionItem
         var dealers = CoreType?.Dealers.ToList()
                 .Select(coreDealer =>
                 {
-                    var dealer = new Dealer(coreDealer, _logger)
-                    {
-                        CoreType = coreDealer,
-                        Parent = this
-                    };
+                    var dealer = new Dealer(coreDealer, _logger) { Parent = this };
                     dealer.PropertyChanged += OnDealerPropertyChanged;
                     return dealer;
                 });
 
         Dealers = new ManagedObservableCollection<Dealer>(
-            () => new Dealer(_logger),
+            () => new Dealer(_logger) { Parent = this },
             dealers,
-            _logger
+            _logger,
+            (d) => d.PropertyChanged += OnDealerPropertyChanged
         );
         Dealers.CollectionChanged += Dealers_CollectionChanged;
         Dealers.FirstOrDefault()?.Select();
@@ -168,19 +165,16 @@ public partial class NoteModel : ManagedObservableCollectionItem
         var contacts = CoreType?.Contacts.ToList()
                 .Select(coreContact =>
                 {
-                    var contact = new Contact(coreContact, _logger)
-                    {
-                        CoreType = coreContact,
-                        Parent = this
-                    };
+                    var contact = new Contact(coreContact, _logger) { Parent = this };
                     contact.PropertyChanged += OnContactPropertyChanged;
                     return contact;
                 });
 
         Contacts = new ManagedObservableCollection<Contact>(
-            () => new Contact(phoneExtensionDelimiter, _logger),
+            () => new Contact(phoneExtensionDelimiter, _logger) { Parent = this },
             contacts,
-            _logger
+            _logger,
+            (c) => c.PropertyChanged += OnContactPropertyChanged
         );
         Contacts.CollectionChanged += Contacts_CollectionChanged;
         Contacts.FirstOrDefault()?.Select();
@@ -190,19 +184,16 @@ public partial class NoteModel : ManagedObservableCollectionItem
         var forms = CoreType?.Forms.ToList()
                 .Select(coreForm =>
                 {
-                    var form = new Form(coreForm, _logger)
-                    {
-                        CoreType = coreForm,
-                        Parent = this
-                    };
+                    var form = new Form(this, coreForm, _logger);
                     form.PropertyChanged += OnFormPropertyChanged;
                     return form;
                 });
 
         Forms = new ManagedObservableCollection<Form>(
-            () => new Form(_logger),
+            () => new Form(this, _logger),
             forms,
-            _logger
+            _logger,
+            (f) => f.PropertyChanged += OnFormPropertyChanged
         );
         Forms.CollectionChanged += Forms_CollectionChanged;
         Forms.FirstOrDefault()?.Select();
@@ -214,14 +205,21 @@ public partial class NoteModel : ManagedObservableCollectionItem
         {
             OnPropertyChanged(nameof(SelectedDealer));
         }
+        else
+        {
+            OnPropertyChanged(nameof(IsBlank));
+        }
     }
 
     private void OnContactPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-
         if (e.PropertyName == nameof(ManagedObservableCollection<Contact>.SelectedItem))
         {
             OnPropertyChanged(nameof(SelectedContact));
+        }
+        else
+        {
+            OnPropertyChanged(nameof(IsBlank));
         }
     }
 
@@ -231,26 +229,56 @@ public partial class NoteModel : ManagedObservableCollectionItem
         {
             OnPropertyChanged(nameof(SelectedForm));
         }
+        else
+        {
+            OnPropertyChanged(nameof(IsBlank));
+        }
     }
 
     private void Dealers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
-            foreach (Dealer d in e.NewItems) d.Parent = this;
+            foreach (Dealer d in e.NewItems)
+            {
+                d.Parent = this;
+                d.PropertyChanged -= OnDealerPropertyChanged;
+                d.PropertyChanged += OnDealerPropertyChanged;
+            }
+        if (e.OldItems != null)
+            foreach (Dealer d in e.OldItems)
+                d.PropertyChanged -= OnDealerPropertyChanged;
         UpdateCore();
         _logger?.LogDebug("Dealers collection changed.");
     }
     private void Contacts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
-            foreach (Contact c in e.NewItems) c.Parent = this;
+            foreach (Contact c in e.NewItems)
+            {
+                c.Parent = this;
+                c.PropertyChanged -= OnContactPropertyChanged;
+                c.PropertyChanged += OnContactPropertyChanged;
+            }
+        if (e.OldItems != null)
+            foreach (Contact c in e.OldItems)
+                c.PropertyChanged -= OnContactPropertyChanged;
         UpdateCore();
         _logger?.LogDebug("Contacts collection changed.");
     }
     private void Forms_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
-            foreach (Form f in e.NewItems) f.Parent = this;
+            foreach (Form f in e.NewItems)
+            {
+                f.Parent = this;
+                f.PropertyChanged -= OnFormPropertyChanged;
+                f.PropertyChanged += OnFormPropertyChanged;
+            }
+
+        if (e.OldItems != null)
+            foreach (Form f in e.OldItems)
+                f.PropertyChanged -= OnFormPropertyChanged;
+
         UpdateCore();
         _logger?.LogDebug("Forms collection changed.");
     }

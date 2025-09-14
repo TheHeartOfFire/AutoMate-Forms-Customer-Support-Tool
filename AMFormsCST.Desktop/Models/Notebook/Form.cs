@@ -77,11 +77,11 @@ public partial class Form : ManagedObservableCollectionItem
         }
     }
 
-    public Form(ILogService? logger = null) : base(logger)
+    public Form(NoteModel parent, ILogService? logger = null) : base(logger)
     {
         _isInitializing = true;
         CoreType = new Core.Types.Notebook.Form();
-
+        Parent = parent;
         InitTestDeals();
 
         TestDeals ??= new ManagedObservableCollection<TestDeal>(
@@ -93,10 +93,11 @@ public partial class Form : ManagedObservableCollectionItem
         _logger?.LogInfo("Form initialized.");
         _isInitializing = false;
     }
-    public Form(IForm form, ILogService? logger = null) : base(logger)
+    public Form(NoteModel parent, IForm form, ILogService? logger = null) : base(logger)
     {
         _isInitializing = true;
         CoreType = form;
+        Parent = parent;
 
         InitTestDeals();
 
@@ -130,7 +131,8 @@ public partial class Form : ManagedObservableCollectionItem
         TestDeals = new ManagedObservableCollection<TestDeal>(
             () => new TestDeal(_logger),
             testDeals,
-            _logger
+            _logger,
+            (td) => td.PropertyChanged += OnTestDealPropertyChanged
         );
         TestDeals.PropertyChanged += OnTestDealsPropertyChanged;
         TestDeals.CollectionChanged += TestDeals_CollectionChanged;
@@ -147,12 +149,21 @@ public partial class Form : ManagedObservableCollectionItem
 
     private void OnTestDealPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        OnPropertyChanged(nameof(IsBlank));
     }
 
     private void TestDeals_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
-            foreach (TestDeal td in e.NewItems) td.Parent = this;
+            foreach (TestDeal td in e.NewItems)
+            {
+                td.Parent = this;
+                td.PropertyChanged -= OnTestDealPropertyChanged;
+                td.PropertyChanged += OnTestDealPropertyChanged;
+            }
+        if (e.OldItems != null)
+            foreach (TestDeal td in e.OldItems)
+                td.PropertyChanged -= OnTestDealPropertyChanged;
         UpdateCore();
         _logger?.LogDebug("TestDeals collection changed.");
     }
@@ -170,7 +181,6 @@ public partial class Form : ManagedObservableCollectionItem
         CoreType.TestDeals.Clear();
         CoreType.TestDeals.AddRange(TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td));
         Parent?.UpdateCore();
-        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Form core updated.");
     }
 

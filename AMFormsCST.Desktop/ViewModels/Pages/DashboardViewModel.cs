@@ -67,7 +67,7 @@ public partial class DashboardViewModel : ViewModel
         note1.Dealers.Add(dealer1);
         note1.Dealers.FirstOrDefault(x => !x.IsBlank, note1.Dealers.First())?.Select();
 
-        var form1 = new Models.Form { Name = "Sample Form 1", Notes = "Notes for form 1" };
+        var form1 = new Models.Form(note1) { Name = "Sample Form 1", Notes = "Notes for form 1" };
         var testDeal1 = new Models.TestDeal { DealNumber = "D001", Purpose = "Test purpose 1" };
         form1.TestDeals.Add(testDeal1);
         form1.TestDeals.FirstOrDefault(x => !x.IsBlank, form1.TestDeals.First())?.Select();

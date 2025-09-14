@@ -95,7 +95,8 @@ namespace AMFormsCST.Desktop.Models
             Companies = new ManagedObservableCollection<Company>(
                 () => new Company(_logger),
                 companies,
-                _logger
+                _logger,
+                (c) => c.PropertyChanged += OnCompanyPropertyChanged
             );
             Companies.PropertyChanged += OnCompaniesPropertyChanged;
             Companies.CollectionChanged += Companies_CollectionChanged;
@@ -112,12 +113,22 @@ namespace AMFormsCST.Desktop.Models
 
         private void OnCompanyPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            OnPropertyChanged(nameof(IsBlank));
         }
 
         private void Companies_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
-                foreach (Company c in e.NewItems) c.Parent = this;
+                foreach (Company c in e.NewItems)
+                {
+                    c.Parent = this;
+                    c.PropertyChanged -= OnCompanyPropertyChanged;
+                    c.PropertyChanged += OnCompanyPropertyChanged;
+                }
+            if (e.OldItems != null)
+                foreach (Company c in e.OldItems)
+                    c.PropertyChanged -= OnCompanyPropertyChanged;
+
             UpdateCore();
             _logger?.LogDebug("Companies collection changed.");
         }
@@ -170,13 +181,12 @@ namespace AMFormsCST.Desktop.Models
             CoreType.Companies.Clear();
             CoreType.Companies.AddRange(Companies.Select(c => (Core.Types.Notebook.Company)c));
             Parent?.UpdateCore();
-            Parent?.RaiseChildPropertyChanged();
             _logger?.LogDebug("Dealer core updated.");
         }
 
         internal void RaiseChildPropertyChanged()
         {
-            Parent?.RaiseChildPropertyChanged();
+            OnPropertyChanged(nameof(IsBlank));
         }
 
         public static implicit operator Core.Types.Notebook.Dealer(Dealer dealer)

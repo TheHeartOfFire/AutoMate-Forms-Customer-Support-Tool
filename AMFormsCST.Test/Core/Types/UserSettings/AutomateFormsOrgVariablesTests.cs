@@ -1,4 +1,5 @@
 using AMFormsCST.Core.Helpers;
+using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.Utils;
@@ -12,17 +13,15 @@ namespace AMFormsCST.Test.Core.Types.UserSettings;
 public class AutomateFormsOrgVariablesTests
 {
     [Fact]
-    public void Constructor_WithNullDependencies_InitializesLooseVariablesAndEmptyVariables()
+    public void Constructor_WithNullSupportToolFactory_InitializesLooseVariablesAndEmptyVariables()
     {
         // Arrange & Act
-        var orgVars = new AutomateFormsOrgVariables(null, null);
+        var orgVars = new AutomateFormsOrgVariables(() => null);
 
         // Assert
         Assert.NotNull(orgVars.LooseVariables);
         Assert.NotNull(orgVars.Variables);
         Assert.Empty(orgVars.Variables);
-        Assert.Null(orgVars.Enforcer);
-        Assert.Null(orgVars.Notebook);
 
         // Check default loose variables
         Assert.Contains("AMMailingAddress", orgVars.LooseVariables.Keys);
@@ -34,14 +33,14 @@ public class AutomateFormsOrgVariablesTests
     public void Constructor_WithDependencies_RegistersVariables()
     {
         // Arrange
-        var mockEnforcer = new Mock<IBestPracticeEnforcer>();
+        var mockSupportTool = new Mock<ISupportTool>();
         var mockNotebook = new Mock<INotebook>();
         var mockNote = new Mock<INote>();
         var mockDealer = new Mock<IDealer>();
 
         mockDealer.SetupGet(d => d.ServerCode).Returns("SVR1");
-        mockDealer.SetupGet(d => d.Companies).Returns(new SelectableList<ICompany>()); // Setup nested collection
-        
+        mockDealer.SetupGet(d => d.Companies).Returns(new SelectableList<ICompany>());
+
         var dealerList = new SelectableList<IDealer> { mockDealer.Object };
         dealerList.SelectedItem = mockDealer.Object;
 
@@ -52,13 +51,12 @@ public class AutomateFormsOrgVariablesTests
         var notesList = new SelectableList<INote> { mockNote.Object };
         notesList.SelectedItem = mockNote.Object;
         mockNotebook.SetupGet(n => n.Notes).Returns(notesList);
+        mockSupportTool.SetupGet(st => st.Notebook).Returns(mockNotebook.Object);
 
         // Act
-        var orgVars = new AutomateFormsOrgVariables(mockEnforcer.Object, mockNotebook.Object);
+        var orgVars = new AutomateFormsOrgVariables(() => mockSupportTool.Object);
 
         // Assert
-        Assert.Same(mockEnforcer.Object, orgVars.Enforcer);
-        Assert.Same(mockNotebook.Object, orgVars.Notebook);
         Assert.NotEmpty(orgVars.Variables);
 
         var serverIdVar = orgVars.Variables.Find(v => v.Name.Equals("serverid", System.StringComparison.OrdinalIgnoreCase));
@@ -70,7 +68,7 @@ public class AutomateFormsOrgVariablesTests
     public void InstantiateVariables_UpdatesDependenciesAndVariables()
     {
         // Arrange
-        var mockEnforcer1 = new Mock<IBestPracticeEnforcer>();
+        var mockSupportTool1 = new Mock<ISupportTool>();
         var mockNotebook1 = new Mock<INotebook>();
         var mockNote1 = new Mock<INote>();
         var mockDealer1 = new Mock<IDealer>();
@@ -84,10 +82,14 @@ public class AutomateFormsOrgVariablesTests
         var notesList1 = new SelectableList<INote> { mockNote1.Object };
         notesList1.SelectedItem = mockNote1.Object;
         mockNotebook1.SetupGet(n => n.Notes).Returns(notesList1);
+        mockSupportTool1.SetupGet(st => st.Notebook).Returns(mockNotebook1.Object);
 
-        var orgVars = new AutomateFormsOrgVariables(mockEnforcer1.Object, mockNotebook1.Object);
+        var orgVars = new AutomateFormsOrgVariables(() => mockSupportTool1.Object);
+        // Access variables to initialize Lazy
+        var initialValue = orgVars.Variables.Find(v => v.Name.Equals("serverid", System.StringComparison.OrdinalIgnoreCase))?.GetValue();
+        Assert.Equal("A", initialValue);
 
-        var mockEnforcer2 = new Mock<IBestPracticeEnforcer>();
+        var mockSupportTool2 = new Mock<ISupportTool>();
         var mockNotebook2 = new Mock<INotebook>();
         var mockNote2 = new Mock<INote>();
         var mockDealer2 = new Mock<IDealer>();
@@ -101,13 +103,12 @@ public class AutomateFormsOrgVariablesTests
         var notesList2 = new SelectableList<INote> { mockNote2.Object };
         notesList2.SelectedItem = mockNote2.Object;
         mockNotebook2.SetupGet(n => n.Notes).Returns(notesList2);
+        mockSupportTool2.SetupGet(st => st.Notebook).Returns(mockNotebook2.Object);
 
         // Act
-        orgVars.InstantiateVariables(mockEnforcer2.Object, mockNotebook2.Object);
+        orgVars.InstantiateVariables(mockSupportTool2.Object);
 
         // Assert
-        Assert.Same(mockEnforcer2.Object, orgVars.Enforcer);
-        Assert.Same(mockNotebook2.Object, orgVars.Notebook);
         var serverIdVar = orgVars.Variables.Find(v => v.Name.Equals("serverid", System.StringComparison.OrdinalIgnoreCase));
         Assert.NotNull(serverIdVar);
         Assert.Equal("B", serverIdVar.GetValue());
@@ -117,7 +118,7 @@ public class AutomateFormsOrgVariablesTests
     public void RegisterVariables_FirstNameVariable_ReturnsFirstWordOfContactName()
     {
         // Arrange
-        var mockEnforcer = new Mock<IBestPracticeEnforcer>();
+        var mockSupportTool = new Mock<ISupportTool>();
         var mockNotebook = new Mock<INotebook>();
         var mockNote = new Mock<INote>();
         var mockContact = new Mock<IContact>();
@@ -131,8 +132,9 @@ public class AutomateFormsOrgVariablesTests
         var notesList = new SelectableList<INote> { mockNote.Object };
         notesList.SelectedItem = mockNote.Object;
         mockNotebook.SetupGet(n => n.Notes).Returns(notesList);
+        mockSupportTool.SetupGet(st => st.Notebook).Returns(mockNotebook.Object);
 
-        var orgVars = new AutomateFormsOrgVariables(mockEnforcer.Object, mockNotebook.Object);
+        var orgVars = new AutomateFormsOrgVariables(() => mockSupportTool.Object);
 
         // Act
         var firstNameVar = orgVars.Variables.Find(v => v.Name.Equals("firstname", System.StringComparison.OrdinalIgnoreCase));
@@ -146,7 +148,7 @@ public class AutomateFormsOrgVariablesTests
     public void RegisterVariables_FirstNameVariable_ReturnsFullNameIfNoSpace()
     {
         // Arrange
-        var mockEnforcer = new Mock<IBestPracticeEnforcer>();
+        var mockSupportTool = new Mock<ISupportTool>();
         var mockNotebook = new Mock<INotebook>();
         var mockNote = new Mock<INote>();
         var mockContact = new Mock<IContact>();
@@ -160,8 +162,9 @@ public class AutomateFormsOrgVariablesTests
         var notesList = new SelectableList<INote> { mockNote.Object };
         notesList.SelectedItem = mockNote.Object;
         mockNotebook.SetupGet(n => n.Notes).Returns(notesList);
+        mockSupportTool.SetupGet(st => st.Notebook).Returns(mockNotebook.Object);
 
-        var orgVars = new AutomateFormsOrgVariables(mockEnforcer.Object, mockNotebook.Object);
+        var orgVars = new AutomateFormsOrgVariables(() => mockSupportTool.Object);
 
         // Act
         var firstNameVar = orgVars.Variables.Find(v => v.Name.Equals("firstname", System.StringComparison.OrdinalIgnoreCase));
@@ -169,31 +172,5 @@ public class AutomateFormsOrgVariablesTests
 
         // Assert
         Assert.Equal("SingleName", value);
-    }
-
-    [Fact]
-    public void RegisterVariables_FormNameGeneratorVariable_CallsEnforcer()
-    {
-        // Arrange
-        var mockEnforcer = new Mock<IBestPracticeEnforcer>();
-        mockEnforcer.Setup(e => e.GetFormName()).Returns("FormName123");
-        var mockNotebook = new Mock<INotebook>();
-        var mockNote = new Mock<INote>();
-        mockNote.SetupGet(n => n.Dealers).Returns(new SelectableList<IDealer>());
-        mockNote.SetupGet(n => n.Contacts).Returns(new SelectableList<IContact>());
-        mockNote.SetupGet(n => n.Forms).Returns(new SelectableList<IForm>());
-        var notesList = new SelectableList<INote> { mockNote.Object };
-        notesList.SelectedItem = mockNote.Object;
-        mockNotebook.SetupGet(n => n.Notes).Returns(notesList);
-
-        var orgVars = new AutomateFormsOrgVariables(mockEnforcer.Object, mockNotebook.Object);
-
-        // Act
-        var formNameVar = orgVars.Variables.Find(v => v.Name.Equals("formname", System.StringComparison.OrdinalIgnoreCase));
-        var value = formNameVar?.GetValue();
-
-        // Assert
-        Assert.Equal("FormName123", value);
-        mockEnforcer.Verify(e => e.GetFormName(), Times.Once);
     }
 }

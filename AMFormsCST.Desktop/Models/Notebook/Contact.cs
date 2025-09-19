@@ -153,7 +153,6 @@ public partial class Contact : ManagedObservableCollectionItem
         CoreType.PhoneExtension = PhoneExtension ?? string.Empty;
         CoreType.PhoneExtensionDelimiter = PhoneExtensionDelimiter ?? " ";
         Parent?.UpdateCore();
-        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Contact core updated.");
     }
 

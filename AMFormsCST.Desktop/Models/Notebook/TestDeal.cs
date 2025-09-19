@@ -69,7 +69,6 @@ public partial class TestDeal : ManagedObservableCollectionItem
         CoreType.DealNumber = DealNumber ?? string.Empty;
         CoreType.Purpose = Purpose ?? string.Empty;
         Parent?.UpdateCore();
-        Parent?.Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("TestDeal core updated.");
     }
 

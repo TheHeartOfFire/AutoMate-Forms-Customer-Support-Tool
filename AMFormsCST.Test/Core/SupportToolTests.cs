@@ -34,7 +34,7 @@ public class SupportToolTests
         mockSettings.SetupGet(s => s.UiSettings).Returns(mockUiSettings.Object);
 
         // Make sure InstantiateVariables can be called
-        mockOrgVars.Setup(o => o.InstantiateVariables(It.IsAny<IBestPracticeEnforcer>(), It.IsAny<INotebook>()));
+        mockOrgVars.Setup(o => o.InstantiateVariables(It.IsAny<ISupportTool>()));
 
         // Ensure the settings file does not exist so IO.LoadSettings() returns null
         var settingsPathField = typeof(IO).GetField("_settingsPath", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
@@ -59,6 +59,6 @@ public class SupportToolTests
         Assert.Same(mockSettings.Object, tool.Settings);
 
         // Organization.InstantiateVariables should be called with the tool's Enforcer and Notebook
-        mockOrgVars.Verify(o => o.InstantiateVariables(tool.Enforcer, tool.Notebook), Times.Once);
+        mockOrgVars.Verify(o => o.InstantiateVariables(tool), Times.Once);
     }
 }

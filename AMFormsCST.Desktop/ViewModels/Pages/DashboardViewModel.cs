@@ -67,7 +67,7 @@ public partial class DashboardViewModel : ViewModel
         note1.Dealers.Add(dealer1);
         note1.Dealers.FirstOrDefault(x => !x.IsBlank, note1.Dealers.First())?.Select();
 
-        var form1 = new Models.Form { Name = "Sample Form 1", Notes = "Notes for form 1" };
+        var form1 = new Models.Form(note1) { Name = "Sample Form 1", Notes = "Notes for form 1" };
         var testDeal1 = new Models.TestDeal { DealNumber = "D001", Purpose = "Test purpose 1" };
         form1.TestDeals.Add(testDeal1);
         form1.TestDeals.FirstOrDefault(x => !x.IsBlank, form1.TestDeals.First())?.Select();
@@ -215,6 +215,10 @@ public partial class DashboardViewModel : ViewModel
 
             Notes.First(x => x.Id == caseId).Select();
 
+            if (_supportTool is not null &&
+                _supportTool.Notebook.Notes.SelectedItem?.Id != SelectedNote?.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+
             _logger?.LogInfo($"Note clicked and selected: {caseId}");
 
         }
@@ -233,6 +237,9 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote.SelectedDealer is null ||
                 dealer.Id == SelectedNote.SelectedDealer.Id) return;
             dealer.Select();
+            if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem?.Id != SelectedNote.SelectedDealer.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
 
             _logger?.LogInfo($"Dealer clicked and selected: {dealer.Id}");
         }
@@ -254,6 +261,12 @@ public partial class DashboardViewModel : ViewModel
 
             company.Select();
 
+            if (_supportTool is not null && 
+                _supportTool.Notebook.Notes.SelectedItem is not null && 
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem?.Id != SelectedNote.SelectedDealer.SelectedCompany.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+
             _logger?.LogInfo($"Company clicked and selected: {company.Id}");
         }
         catch (Exception ex)
@@ -272,6 +285,10 @@ public partial class DashboardViewModel : ViewModel
                 contact.Id == SelectedNote.SelectedContact.Id) return;
 
             contact.Select();
+            if (_supportTool is not null &&
+                _supportTool.Notebook.Notes.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem?.Id != SelectedNote.SelectedContact.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
             _logger?.LogInfo($"Contact clicked and selected: {contact.Id}");
         }
         catch (Exception ex)
@@ -290,6 +307,12 @@ public partial class DashboardViewModel : ViewModel
                 form.Id == SelectedNote.SelectedForm.Id) return;
 
             form.Select();
+
+            if (_supportTool is not null &&
+                _supportTool.Notebook.Notes.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem?.Id != SelectedNote.SelectedForm.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+
             _logger?.LogInfo($"Form clicked and selected: {form.Id}");
         }
         catch (Exception ex)
@@ -309,6 +332,12 @@ public partial class DashboardViewModel : ViewModel
                 deal.Id == SelectedNote.SelectedForm.SelectedTestDeal.Id) return;
 
             deal.Select();
+
+            if (_supportTool is not null &&
+                _supportTool.Notebook.Notes.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem is not null &&
+                _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem?.Id != SelectedNote.SelectedForm.SelectedTestDeal.CoreType?.Id)
+                _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
             _logger?.LogInfo($"Deal clicked and selected: {deal.Id}");
         }
         catch (Exception ex)

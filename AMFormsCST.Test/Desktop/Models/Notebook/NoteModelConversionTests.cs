@@ -41,7 +41,7 @@ public class NoteModelConversionTests
         noteModel.Contacts.Add(contact);
 
         // Populate a form and its deal
-        var form = new Form { Name = "MyForm.frp" };
+        var form = new Form(noteModel) { Name = "MyForm.frp" };
         var testDeal = new TestDeal { DealNumber = "DEAL99" };
         form.TestDeals.Add(testDeal);
         noteModel.Forms.Add(form);

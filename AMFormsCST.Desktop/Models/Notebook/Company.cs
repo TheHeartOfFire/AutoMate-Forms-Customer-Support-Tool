@@ -84,7 +84,6 @@ public partial class Company : ManagedObservableCollectionItem
         CoreType.CompanyCode = CompanyCode ?? string.Empty;
         CoreType.Notable = Notable;
         Parent?.UpdateCore();
-        Parent?.RaiseChildPropertyChanged();
         _logger?.LogDebug("Company core updated.");
     }
 

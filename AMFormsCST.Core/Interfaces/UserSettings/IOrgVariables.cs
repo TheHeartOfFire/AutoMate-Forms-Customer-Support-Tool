@@ -11,5 +11,5 @@ public interface IOrgVariables : ISetting
     Dictionary<string, string> LooseVariables { get; set; }
     List<ITextTemplateVariable> Variables { get; }
 
-    void InstantiateVariables(IBestPracticeEnforcer enforcer, INotebook notebook);
+    void InstantiateVariables(ISupportTool? supportTool);
 }

@@ -506,6 +506,10 @@ public partial class DashboardViewModel : ViewModel
         ApplyParsedNote(note);
         Notes.LastOrDefault(n => n.IsBlank == false)?.Select();
 
+        if (_supportTool is not null &&
+            _supportTool.Notebook.Notes.SelectedItem?.Id != SelectedNote?.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+
         _logger?.LogInfo("LoadCase command executed.");
     }
 

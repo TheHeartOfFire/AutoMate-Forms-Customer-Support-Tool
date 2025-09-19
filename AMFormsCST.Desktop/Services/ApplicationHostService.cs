@@ -59,7 +59,6 @@ public class ApplicationHostService : IHostedService
         try
         {
             _logger?.LogInfo("Checking for updates on startup.");
-            _ = _updateManagerService.CheckForUpdatesOnStartupAsync();
 
             if (Application.Current is null ||
                 Application.Current.Windows.OfType<MainWindow>().Any())

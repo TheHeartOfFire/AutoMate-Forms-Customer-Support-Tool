@@ -1,6 +1,8 @@
+using Serilog;
+
 namespace AMFormsCST.Core.Interfaces
 {
-    public interface ILogService
+    public interface ILogService : ILogger
     {
         void LogDebug(string message);
         void LogInfo(string message);

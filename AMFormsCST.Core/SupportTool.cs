@@ -36,7 +36,7 @@ public class SupportTool : ISupportTool
         Enforcer = new BestPracticeEnforcer(formNameBestPractice, templateRepository, logger);
 
         Settings = IO.LoadSettings() ?? defaultSettings;
-        Settings.UserSettings.Organization.InstantiateVariables(Enforcer, Notebook);
+        Settings.UserSettings.Organization.InstantiateVariables(this);
 
         Logger?.LogInfo("SupportTool initialized successfully.");
     }

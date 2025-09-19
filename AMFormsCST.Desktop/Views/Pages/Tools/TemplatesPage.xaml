@@ -21,6 +21,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Use ListBox for selection logic -->
+        <ui:DynamicScrollViewer>
         <ListBox Grid.Column="0"
                  ItemsSource="{Binding Templates}"
                  SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}">
@@ -33,67 +34,76 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-        <WrapPanel Grid.Column="1" Orientation="Vertical">
+        </ui:DynamicScrollViewer>
+        <ui:DynamicScrollViewer Grid.Column="1">
+        <StackPanel Orientation="Vertical">
             <Label Content="{Binding SelectedTemplate.Template.Name}" HorizontalAlignment="Center"/>
             <Label Content="{Binding SelectedTemplate.Template.Description}" HorizontalAlignment="Center"/>
             <Label Content="{Binding SelectedTemplate.Template.Type}" HorizontalAlignment="Center"/>
-            <ui:TextBox Text="{Binding SelectedTemplate.Output, Mode=OneWay}" TextWrapping="Wrap" Margin="10" IsReadOnly="True" IsReadOnlyCaretVisible="True"/>
-            <ItemsControl ItemsSource="{Binding SelectedTemplate.Variables}" HorizontalAlignment="Left">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type templateViewModels:TemplateVariableViewModel}">
-                        <ui:TextBox Margin="10,0,0,5" 
+                <Border Background="#1AFFFFFF" BorderBrush="LightGray" BorderThickness="1" Margin="0,5,10,0" CornerRadius="5" HorizontalAlignment="Center" >
+
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button
+              Command="{Binding RefreshTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="ArrowSync12"/>
+                        </ui:Button>
+                        <ui:Button
+              Command="{Binding CopyTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="Copy24"/>
+                        </ui:Button>
+                        <ui:Button
+              Command="{Binding AddTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="Add24"/>
+                        </ui:Button>
+                        <ui:Button
+              Command="{Binding EditTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="Edit24"/>
+                        </ui:Button>
+                        <ui:Button
+              Command="{Binding RemoveTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="Delete24"/>
+                        </ui:Button>
+                        <ui:Button
+              Command="{Binding ImportTemplateCommand}"
+              Margin="5"
+              Padding="10,5"
+              HorizontalAlignment="Left">
+                            <ui:SymbolIcon Symbol="ArrowDownload24"/>
+                        </ui:Button>
+                    </StackPanel>
+                </Border>
+                <ui:TextBox Text="{Binding SelectedTemplate.Output, Mode=OneWay}" TextWrapping="Wrap" Margin="10" IsReadOnly="True" IsReadOnlyCaretVisible="True"/>
+                <ItemsControl ItemsSource="{Binding SelectedTemplate.Variables}" HorizontalAlignment="Left">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type templateViewModels:TemplateVariableViewModel}">
+                            <ui:TextBox Margin="10,0,0,5" 
                                   Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                   PlaceholderText="{Binding DefaultValue}" 
                                   HorizontalAlignment="Stretch"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
-            <Border Background="#1AFFFFFF" BorderBrush="LightGray" BorderThickness="1" Margin="0,5,10,0" CornerRadius="5" HorizontalAlignment="Right">
-
-                <WrapPanel Orientation="Horizontal">
-                    <ui:Button
-                          Command="{Binding CopyTemplateCommand}"
-                          Margin="5"
-                          Padding="10,5"
-                          HorizontalAlignment="Left">
-                        <ui:SymbolIcon Symbol="Copy24"/>
-                    </ui:Button>
-                    <ui:Button
-                          Command="{Binding AddTemplateCommand}"
-                          Margin="5"
-                          Padding="10,5"
-                          HorizontalAlignment="Left">
-                        <ui:SymbolIcon Symbol="Add24"/>
-                    </ui:Button>
-                    <ui:Button
-                          Command="{Binding EditTemplateCommand}"
-                          Margin="5"
-                          Padding="10,5"
-                          HorizontalAlignment="Left">
-                        <ui:SymbolIcon Symbol="Edit24"/>
-                    </ui:Button>
-                    <ui:Button
-                          Command="{Binding RemoveTemplateCommand}"
-                          Margin="5"
-                          Padding="10,5"
-                          HorizontalAlignment="Left">
-                        <ui:SymbolIcon Symbol="Delete24"/>
-                    </ui:Button>
-                    <ui:Button
-                          Command="{Binding ImportTemplateCommand}"
-                          Margin="5"
-                          Padding="10,5"
-                          HorizontalAlignment="Left">
-                        <ui:SymbolIcon Symbol="ArrowDownload24"/>
-                    </ui:Button>
-                </WrapPanel>
-            </Border>
-        </WrapPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </ui:DynamicScrollViewer>
     </Grid>
 </Page>

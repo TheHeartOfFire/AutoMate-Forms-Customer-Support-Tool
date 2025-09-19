@@ -112,15 +112,14 @@ public partial class App : Application
                 _ = services.AddSingleton<ITemplateRepository, TemplateRepository>();
                 _ = services.AddSingleton<IBestPracticeEnforcer, BestPracticeEnforcer>();
                 _ = services.AddSingleton<INotebook, Notebook>();
-                services.AddSingleton<IOrgVariables>(sp =>
+                _ = services.AddSingleton<ISupportTool, SupportTool>();
+                _ = services.AddSingleton<IOrgVariables>(sp =>
                 {
-                    var enforcer = sp.GetRequiredService<IBestPracticeEnforcer>();
-                    var notebook = sp.GetRequiredService<INotebook>();
-                    var orgVars = new AutomateFormsOrgVariables(enforcer, notebook);
+                    var logger = sp.GetRequiredService<ILogService>();
+                    var orgVars = new AutomateFormsOrgVariables(() => sp.GetRequiredService<ISupportTool>(), logger);
 
                     return orgVars;
                 });
-                _ = services.AddSingleton<ISupportTool, SupportTool>();
                 _ = services.AddSingleton<IUpdateManagerService, UpdateManagerService>();
                 _ = services.AddSingleton<IUiSettings, UiSettings>();
                 _ = services.AddSingleton<IUserSettings, UserSettings>();

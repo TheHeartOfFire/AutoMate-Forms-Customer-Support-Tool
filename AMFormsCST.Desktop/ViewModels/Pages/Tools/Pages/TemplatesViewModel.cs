@@ -83,6 +83,12 @@ public partial class TemplatesViewModel : ViewModel
     }
 
     [RelayCommand]
+    private void RefreshTemplate()
+    {
+        SelectedTemplate.RefreshTemplateData();
+    }
+
+    [RelayCommand]
     private void EditTemplate()
     {
         try

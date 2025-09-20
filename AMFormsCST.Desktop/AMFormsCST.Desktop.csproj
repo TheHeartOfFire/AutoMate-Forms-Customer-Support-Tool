@@ -7,16 +7,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Solera_Logo_Symbol_Only.ico</ApplicationIcon>
-    <AssemblyVersion>2.1.0</AssemblyVersion>
+    <AssemblyVersion>2.2.0</AssemblyVersion>
     <FileVersion>$(assemblyversion)</FileVersion>
     <Version>$(assemblyversion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Helpers\**" />
+    <Compile Remove="Releases\**" />
     <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="Releases\**" />
     <None Remove="Helpers\**" />
+    <None Remove="Releases\**" />
     <Page Remove="Helpers\**" />
+    <Page Remove="Releases\**" />
   </ItemGroup>
 	
 	<ItemGroup>

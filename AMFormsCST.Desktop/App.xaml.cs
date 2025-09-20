@@ -15,17 +15,19 @@ using AMFormsCST.Desktop.Models.UserSettings;
 using AMFormsCST.Desktop.Resources;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
+using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages;
+using AMFormsCST.Desktop.ViewModels.Pages.Links;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.Views.Dialogs;
 using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Links;
 using AMFormsCST.Desktop.Views.Pages.Tools;
 using Lepo.i18n.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Extensions.Logging;
 using Serilog.Formatting.Compact;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -97,6 +99,8 @@ public partial class App : Application
                 _ = services.AddSingleton<ToolsViewModel>();
                 _ = services.AddSingleton<SettingsPage>();
                 _ = services.AddSingleton<SettingsViewModel>();
+                _ = services.AddSingleton<LinksPage>();
+                _ = services.AddSingleton<LinksViewModel>();
 
                 _ = services.AddTransientFromNamespace("AMFormsCST.Desktop.Views", GalleryAssembly.Assembly);
                 _ = services.AddTransientFromNamespace(
@@ -126,6 +130,10 @@ public partial class App : Application
                 _ = services.AddSingleton<IUiSettings, UiSettings>();
                 _ = services.AddSingleton<IUserSettings, UserSettings>();
                 _ = services.AddSingleton<ISettings, Settings>();
+                _ = services.AddSingleton<ILinksService, LinksService>();
+
+                _ = services.AddTransient<AddLinkDialogPage>();
+                _ = services.AddTransient<AddLinkDialogViewModel>();
 
                 _ = services.AddStringLocalizer(b =>
                 {

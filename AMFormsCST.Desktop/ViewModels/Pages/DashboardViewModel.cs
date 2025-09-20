@@ -13,6 +13,7 @@ using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
 using System.Runtime.ExceptionServices;
+using System.Text.RegularExpressions;
 using System.Windows;
 using Wpf.Ui;
 
@@ -510,6 +511,32 @@ public partial class DashboardViewModel : ViewModel
             _supportTool.Notebook.Notes.SelectedItem?.Id != SelectedNote?.CoreType?.Id)
             _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
 
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem?.Id != SelectedNote.SelectedDealer.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+
+        if (_supportTool is not null &&
+            _supportTool.Notebook.Notes.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem?.Id != SelectedNote.SelectedDealer.SelectedCompany.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+
+        if (_supportTool is not null &&
+            _supportTool.Notebook.Notes.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem?.Id != SelectedNote.SelectedContact.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+
+        if (_supportTool is not null &&
+            _supportTool.Notebook.Notes.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem?.Id != SelectedNote.SelectedForm.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+
+        if (_supportTool is not null &&
+            _supportTool.Notebook.Notes.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem is not null &&
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem?.Id != SelectedNote.SelectedForm.SelectedTestDeal.CoreType?.Id)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+
         _logger?.LogInfo("LoadCase command executed.");
     }
 
@@ -557,7 +584,18 @@ public partial class DashboardViewModel : ViewModel
             var contact = note.Contacts[0];
             contact.Name = GetValueAfter("Contact Name");
             contact.Email = GetValueFromKeyValue("Email:", submittedValues);
-            contact.Phone = GetValueFromKeyValue("Phone:", submittedValues);
+
+            var phoneRaw = GetValueFromKeyValue("Phone:", submittedValues);
+            var phoneMatch = Regex.Match(phoneRaw, @"^(\S+)\s*(?:ext\.?|x)?\s*(\d+)?$");
+            if (phoneMatch.Success)
+            {
+                contact.Phone = phoneMatch.Groups[1].Value;
+                contact.PhoneExtension = phoneMatch.Groups[2].Value;
+            }
+            else
+            {
+                contact.Phone = phoneRaw;
+            }
 
             var dealer = note.Dealers[0];
             dealer.Name = GetValueFromKeyValue("Company Name:", submittedValues);

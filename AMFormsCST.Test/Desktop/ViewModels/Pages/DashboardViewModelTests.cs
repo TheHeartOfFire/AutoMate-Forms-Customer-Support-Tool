@@ -392,7 +392,7 @@ Submitted Values:
 Name: Jane Doe
 Title: Office Manager
 Email: jane.doe@exampledealership.com
-Phone: 5551234567
+Phone: 5551234567 ext.123
 Company Number: 4
 Company Name: Example Dealership
 
@@ -408,7 +408,7 @@ AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12453488", "Jane Doe", "Request for new forms\r\nPlease add the attached forms for our dealership.", "jane.doe@exampledealership.com", "5551234567", "Example Dealership", "4", "G030"
+        "12453488", "Jane Doe", "Request for new forms\r\nPlease add the attached forms for our dealership.", "jane.doe@exampledealership.com", "5551234567", "123", "Example Dealership", "4", "G030"
 )]
     [InlineData(
     @"
@@ -449,7 +449,7 @@ AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12455241", "John Smith", "Title Application Request\r\nPlease add the state title application.", "john.smith@anotherauto.com", "5559876543", "Another Auto Group", "1", "T751"
+        "12455241", "John Smith", "Title Application Request\r\nPlease add the state title application.", "john.smith@anotherauto.com", "5559876543", "", "Another Auto Group", "1", "T751"
 )]
     [InlineData(
     @"
@@ -477,7 +477,7 @@ Submitted Values:
 Name: Susan Jones
 Title: Business Manager
 Email: susan.jones@genericauto.com
-Phone: 5555551212
+Phone: 5555551212 x101
 Company Number: 3
 Company Name: Generic Auto Mall
 
@@ -493,7 +493,7 @@ AMPS: 3.06.0386
 Tomcat: 3.6.389a
 Web Browser: 11
 ",
-        "12459417", "Susan Jones", "Generic Form Issue\r\nA field is not printing correctly on the form.\r\nAlso, another field should be blank.\r\nPlease assist.", "susan.jones@genericauto.com", "5555551212", "Generic Auto Mall", "3", "M450"
+        "12459417", "Susan Jones", "Generic Form Issue\r\nA field is not printing correctly on the form.\r\nAlso, another field should be blank.\r\nPlease assist.", "susan.jones@genericauto.com", "5555551212", "101", "Generic Auto Mall", "3", "M450"
 )]
     public void ParseCaseText_WithVariousInputs_CorrectlyPopulatesNoteModel(
                 string caseText,
@@ -502,6 +502,7 @@ Web Browser: 11
                 string expectedNotes,
                 string expectedEmail,
                 string expectedPhone,
+                string expectedPhoneExtension,
                 string expectedCompanyName,
                 string expectedCompanyNumber,
                 string expectedServerId)
@@ -532,5 +533,6 @@ Web Browser: 11
         Assert.Equal(expectedContactName, contact.Name);
         Assert.Equal(expectedEmail, contact.Email);
         Assert.Equal(expectedPhone, contact.Phone);
+        Assert.Equal(expectedPhoneExtension, contact.PhoneExtension);
     }
 }

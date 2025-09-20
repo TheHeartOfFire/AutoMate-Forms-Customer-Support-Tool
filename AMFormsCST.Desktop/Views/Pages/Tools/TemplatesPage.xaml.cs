@@ -1,6 +1,8 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.ControlsLookup;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools;
+using AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
+using System.Linq;
 using System.Windows.Controls;
 using Wpf.Ui.Controls;
 
@@ -22,10 +24,10 @@ public partial class TemplatesPage : Page
 
         InitializeComponent();
 
-        if (ViewModel.Templates is { Count: > 0 })
+        if (ViewModel.TemplatesView.Cast<object>().Any())
         {
-            ViewModel.SelectTemplate(ViewModel.Templates.First());
-            _logger?.LogInfo($"TemplatesPage initialized. First template selected: {ViewModel.Templates.First().Template.Name}");
+            ViewModel.SelectTemplate(ViewModel.TemplatesView.Cast<object>().First() as TemplateItemViewModel);
+            _logger?.LogInfo($"TemplatesPage initialized. First template selected.");
         }
         else
         {

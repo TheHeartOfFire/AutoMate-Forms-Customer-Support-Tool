@@ -11,30 +11,50 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="TemplatesPage"
-      d:DataContext="{d:DesignInstance viewModels:TemplatesViewModel, 
+      d:DataContext="{d:DesignInstance Type=viewModels:TemplatesViewModel, 
                                        IsDesignTimeCreatable=True}">
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto" MinWidth="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Use ListBox for selection logic -->
-        <ui:DynamicScrollViewer>
-        <ListBox Grid.Column="0"
-                 ItemsSource="{Binding Templates}"
-                 SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type templateViewModels:TemplateItemViewModel}">
-                    <StackPanel Margin="5">
-                        <TextBlock Text="{Binding Template.Name, Mode=OneWay}" FontWeight="Bold" FontSize="16"/>
-                        <TextBlock Text="{Binding Template.Description, Mode=OneWay}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        </ui:DynamicScrollViewer>
+        <DockPanel Grid.Column="0" Margin="5">
+            <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+                <ui:TextBox PlaceholderText="Filter templates..." 
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" 
+                            Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding SortOptions}" 
+                          SelectedItem="{Binding SelectedSortOption}"
+                          Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding TemplateTypes}"
+                          SelectedItem="{Binding SelectedFilterType, FallbackValue={x:Null}}"
+                          Margin="0,0,0,5">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TargetNullValue='All Types'}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Use ListBox for selection logic -->
+            <ui:DynamicScrollViewer>
+                <ListBox ItemsSource="{Binding TemplatesView}"
+                         SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}" 
+                         d:ItemsSource="{Binding }">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type templateViewModels:TemplateItemViewModel}">
+                            <StackPanel Margin="5">
+                                <TextBlock Text="{Binding Template.Name, Mode=OneWay}" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text="{Binding Template.Description, Mode=OneWay}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ui:DynamicScrollViewer>
+        </DockPanel>
         <ui:DynamicScrollViewer Grid.Column="1">
         <StackPanel Orientation="Vertical">
             <Label Content="{Binding SelectedTemplate.Template.Name}" HorizontalAlignment="Center"/>

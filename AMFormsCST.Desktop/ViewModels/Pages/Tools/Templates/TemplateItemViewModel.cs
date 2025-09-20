@@ -4,6 +4,7 @@ using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 
@@ -37,7 +38,7 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
                     {
                         variable.PropertyChanged += OnVariablePropertyChanged;
                     }
-                    _variables.CollectionChanged += OnVariablesCollectionChanged; 
+                    _variables.CollectionChanged += OnVariablesCollectionChanged;
                 }
                 OnPropertyChanged(nameof(Output));
             }
@@ -46,6 +47,9 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
 
     private readonly ISupportTool _supportTool;
     private readonly ILogService? _logger;
+
+    [ObservableProperty]
+    private int _usageCount = 0;
 
     public TemplateItemViewModel(TextTemplate template, ISupportTool supportTool, ILogService? logger = null)
     {
@@ -143,7 +147,7 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
     }
     public void RefreshTemplateData()
     {
-        OnPropertyChanged(nameof(Template)); 
+        OnPropertyChanged(nameof(Template));
 
         var preprocessedTemplate = PreProcessTemplate(Template.Text);
 
@@ -154,7 +158,7 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
         Variables.Clear();
         foreach (var v in newVariables)
         {
-            Variables.Add(v); 
+            Variables.Add(v);
         }
 
         OnPropertyChanged(nameof(Output));

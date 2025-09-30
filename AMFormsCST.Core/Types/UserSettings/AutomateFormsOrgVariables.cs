@@ -258,6 +258,36 @@ public class AutomateFormsOrgVariables : IOrgVariables
              ?? string.Empty
             ),
             new TextTemplateVariable(
+             properName: "SelectedForm:Notes",
+             name: "notes",
+             prefix: "selectedform:",
+             description: "Selected form notes",
+             aliases: [],
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Forms.SelectedItem?.Notes
+             ?? string.Empty
+            ),
+            new TextTemplateVariable(
+             properName: "SelectedForm:Name",
+             name: "name",
+             prefix: "selectedform:",
+             description: "Selected form name",
+             aliases: [],
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Forms.SelectedItem?.Name
+             ?? string.Empty
+            ),
+            new TextTemplateVariable(
+             properName: "SelectedNote:SummarizeNotableForms",
+             name: "summarizenotableforms",
+             prefix: "selectednote:",
+             description: "Names and notes for notable forms",
+             aliases: [],
+             getValue: () =>
+             string.Join("\n\n", _supportToolFactory()?.Notebook.Notes.SelectedItem?
+                .Forms.Where(f => f.Notable).Where(f => !string.IsNullOrEmpty(f.Name)).Select(f => "Name: " + f.Name + "\nNotes: " + f.Notes) ?? [])
+            ),
+            new TextTemplateVariable(
              properName: "User:Input",
              name: "input",
              prefix: "user:",

@@ -180,6 +180,7 @@ public partial class Form : ManagedObservableCollectionItem
         CoreType.Notable = Notable;
         CoreType.TestDeals.Clear();
         CoreType.TestDeals.AddRange(TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td));
+        CoreType.TestDeals.SelectedItem = TestDeals?.SelectedItem?.CoreType;
         Parent?.UpdateCore();
         _logger?.LogDebug("Form core updated.");
     }

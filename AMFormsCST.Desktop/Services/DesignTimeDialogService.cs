@@ -24,5 +24,9 @@ public class DesignTimeDialogService : IDialogService
 
     public string? ShowOpenFileDialog(string filter, string defaultDirectory)
     => "C:\\temp\\design_time_file.formgen";
-    
+
+    public IDialogService.DialogResult ShowDialog(string title, Page content)
+    {
+        throw new NotImplementedException();
+    }
 }

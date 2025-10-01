@@ -14,9 +14,13 @@
 
   <ItemGroup>
     <Compile Remove="Helpers\**" />
+    <Compile Remove="Releases\**" />
     <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="Releases\**" />
     <None Remove="Helpers\**" />
+    <None Remove="Releases\**" />
     <Page Remove="Helpers\**" />
+    <Page Remove="Releases\**" />
   </ItemGroup>
 	
 	<ItemGroup>

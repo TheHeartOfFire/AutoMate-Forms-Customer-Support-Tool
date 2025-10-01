@@ -88,4 +88,13 @@ public class DialogService : IDialogService
         _logger?.LogInfo("No file selected.");
         return null;
     }
+
+    public IDialogService.DialogResult ShowDialog(string title, Page content)
+    {
+        _logger?.LogInfo($"ShowDialog called: Title='{title}'");
+        var dialog = new PageHostDialog(content, title, true);
+        dialog.ShowDialog();
+        _logger?.LogInfo($"Dialog closed: ConfirmSelected={dialog.ConfirmSelected}");
+        return dialog.ConfirmSelected ? IDialogService.DialogResult.Primary : IDialogService.DialogResult.Cancel;
+    }
 }

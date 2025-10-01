@@ -290,10 +290,13 @@ public partial class NoteModel : ManagedObservableCollectionItem
         CoreType.NotesText = Notes ?? string.Empty;
         CoreType.Dealers.Clear();
         CoreType.Dealers.AddRange(Dealers.Select(d => (Core.Types.Notebook.Dealer)d));
+        CoreType.Dealers.SelectedItem = Dealers?.SelectedItem?.CoreType;
         CoreType.Contacts.Clear();
         CoreType.Contacts.AddRange(Contacts.Select(c => (Core.Types.Notebook.Contact)c));
+        CoreType.Contacts.SelectedItem = Contacts?.SelectedItem?.CoreType;
         CoreType.Forms.Clear();
         CoreType.Forms.AddRange(Forms.Select(f => (Core.Types.Notebook.Form)f));
+        CoreType.Forms.SelectedItem = Forms?.SelectedItem?.CoreType;
         _logger?.LogDebug($"NoteModel core updated. ID: {Id}\tCore ID: {CoreType.Id}");
     }
 

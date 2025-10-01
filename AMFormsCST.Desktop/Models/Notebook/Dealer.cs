@@ -180,6 +180,7 @@ namespace AMFormsCST.Desktop.Models
             CoreType.Notable = Notable;
             CoreType.Companies.Clear();
             CoreType.Companies.AddRange(Companies.Select(c => (Core.Types.Notebook.Company)c));
+            CoreType.Companies.SelectedItem = Companies?.SelectedItem?.CoreType;
             Parent?.UpdateCore();
             _logger?.LogDebug("Dealer core updated.");
         }

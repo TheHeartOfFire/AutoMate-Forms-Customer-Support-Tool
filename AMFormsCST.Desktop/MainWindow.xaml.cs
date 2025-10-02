@@ -3,6 +3,7 @@ using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using AMFormsCST.Desktop.Views.Pages;
+using AMFormsCST.Desktop.Views.Pages.Links;
 using AMFormsCST.Desktop.Views.Pages.Tools;
 using System.Windows;
 using Wpf.Ui;
@@ -41,7 +42,8 @@ public partial class MainWindow : IWindow
         ViewModel.NavigationItems =
         [
             new NavigationViewItem("Dashboard", SymbolRegular.Home24, typeof(DashboardPage)),
-            new NavigationViewItem("Tools", SymbolRegular.Wrench24, typeof(ToolsPage))
+            new NavigationViewItem("Tools", SymbolRegular.Wrench24, typeof(ToolsPage)),
+            new NavigationViewItem("Links", SymbolRegular.Globe24, typeof(LinksPage))
         ];
 
         ViewModel.NavigationFooter =

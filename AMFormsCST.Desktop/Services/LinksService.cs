@@ -24,7 +24,7 @@ namespace AMFormsCST.Desktop.Services
                     "MyApps" => "https://myapps.microsoft.com",
                     "ClientInfoReport" => "https://americamp.sharepoint.com/:x:/r/sites/Compliance-Public/Shared%20Documents/Call%20Center/Client%20Information%20Report.xlsm?d=w2f7b6a8f3c9c4d6a9b7f8e7d0b4a9a6b&csf=1&web=1&e=VvWw9T",
                     "FormsTracker" => "https://americamp.sharepoint.com/sites/Compliance-Public/Lists/Formgen%20Request%20Tracker/AllItems.aspx",
-                    "Workday" => "https://wd5.myworkday.com/americamp/d/home.htmld",
+                    "Workday" => "https://wd5.myworkday.com/solera/d/home.htmld",
                     "CST" => $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\AmpsSupport\\CSTLoader.exe",
                     "Formgen" => $"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\NewFormGen.lnk",
                     _ => string.Empty

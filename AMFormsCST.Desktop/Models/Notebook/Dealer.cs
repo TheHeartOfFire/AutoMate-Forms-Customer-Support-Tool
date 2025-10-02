@@ -48,7 +48,7 @@ namespace AMFormsCST.Desktop.Models
             InitCompanies();
 
             Companies ??= new ManagedObservableCollection<Company>(
-                () => new Company(_logger),
+                () => new Company(_logger) { Parent = this },
                 null,
                 _logger
             );
@@ -65,7 +65,7 @@ namespace AMFormsCST.Desktop.Models
             InitCompanies();
 
             Companies ??= new ManagedObservableCollection<Company>(
-                () => new Company(_logger),
+                () => new Company(_logger) { Parent = this },
                 null,
                 _logger
             );
@@ -93,7 +93,7 @@ namespace AMFormsCST.Desktop.Models
                     });
 
             Companies = new ManagedObservableCollection<Company>(
-                () => new Company(_logger),
+                () => new Company(_logger) { Parent = this },
                 companies,
                 _logger,
                 (c) => c.PropertyChanged += OnCompanyPropertyChanged

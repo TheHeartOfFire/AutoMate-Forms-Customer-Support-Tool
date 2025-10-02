@@ -72,7 +72,7 @@ public partial class Company : ManagedObservableCollectionItem
             _logger?.LogInfo($"Company notable changed: {value}");
         }
     }
-
+    
     internal void UpdateCore()
     {
         if (_isInitializing) return;

@@ -265,7 +265,8 @@ public partial class DashboardViewModel : ViewModel
             if (_supportTool is not null && 
                 _supportTool.Notebook.Notes.SelectedItem is not null && 
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem is not null &&
-                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem?.Id != SelectedNote.SelectedDealer.SelectedCompany.CoreType?.Id)
+                (_supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem is null ||
+                _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem?.Id != SelectedNote.SelectedDealer.SelectedCompany.CoreType?.Id))
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
 
             _logger?.LogInfo($"Company clicked and selected: {company.Id}");

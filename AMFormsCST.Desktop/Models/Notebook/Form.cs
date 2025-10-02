@@ -85,7 +85,7 @@ public partial class Form : ManagedObservableCollectionItem
         InitTestDeals();
 
         TestDeals ??= new ManagedObservableCollection<TestDeal>(
-            () => new TestDeal(_logger),
+            () => new TestDeal(_logger) { Parent = this },
             null,
             _logger
         );
@@ -102,7 +102,7 @@ public partial class Form : ManagedObservableCollectionItem
         InitTestDeals();
 
         TestDeals ??= new ManagedObservableCollection<TestDeal>(
-            () => new TestDeal(_logger),
+            () => new TestDeal(_logger) { Parent = this },
             null,
             _logger
         );
@@ -129,7 +129,7 @@ public partial class Form : ManagedObservableCollectionItem
                 });
 
         TestDeals = new ManagedObservableCollection<TestDeal>(
-            () => new TestDeal(_logger),
+            () => new TestDeal(_logger) { Parent = this },
             testDeals,
             _logger,
             (td) => td.PropertyChanged += OnTestDealPropertyChanged

@@ -359,11 +359,13 @@ public partial class DashboardViewModel : ViewModel
             {
                 case NoteModel noteToDelete:
                     Notes.Remove(noteToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem = SelectedNote.CoreType;
                     _logger?.LogInfo($"Note deleted: {noteToDelete.Id}");
                     break;
 
                 case Models.Dealer dealerToDelete when SelectedNote is not null:
                     SelectedNote.Dealers.Remove(dealerToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
                     _logger?.LogInfo($"Dealer deleted: {dealerToDelete.Id}");
                     break;
 
@@ -371,22 +373,26 @@ public partial class DashboardViewModel : ViewModel
                 SelectedNote is not null &&
                 SelectedNote.SelectedDealer is not null:
                     SelectedNote.SelectedDealer.Companies.Remove(companyToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
                     _logger?.LogInfo($"Company deleted: {companyToDelete.Id}");
                     break;
 
                 case Models.Contact contactToDelete when SelectedNote is not null:
                     SelectedNote.Contacts.Remove(contactToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
                     _logger?.LogInfo($"Contact deleted: {contactToDelete.Id}");
                     break;
 
                 case Models.Form formToDelete when SelectedNote is not null:
                     SelectedNote.Forms.Remove(formToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
                     _logger?.LogInfo($"Form deleted: {formToDelete.Id}");
                     break;
 
                 case Models.TestDeal dealToDelete when
                 SelectedNote?.SelectedForm is not null:
                     SelectedNote.SelectedForm.TestDeals.Remove(dealToDelete);
+                    _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
                     _logger?.LogInfo($"TestDeal deleted: {dealToDelete.Id}");
                     break;
             }

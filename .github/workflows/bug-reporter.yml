@@ -8,13 +8,15 @@ jobs:
   create_github_issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare Gist Payload
+      - name: Decode Log Content and Prepare Gist Payload
         run: |
-          # Use jq to safely build the JSON payload and write it to a file.
-          # This avoids all shell interpolation issues with the log content.
+          # Decode the Base64 log content from the client payload
+          DECODED_LOGS=$(echo "${{ github.event.client_payload.log_content_base64 }}" | base64 --decode)
+          
+          # Use jq to safely build the JSON payload with the decoded content
           jq -n \
             --arg desc "AMFormsCST Log File - $(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-            --arg content "${{ github.event.client_payload.log_content }}" \
+            --arg content "$DECODED_LOGS" \
             '{description: $desc, public: false, files: {"log.txt": {content: $content}}}' > gist_payload.json
         shell: bash
 

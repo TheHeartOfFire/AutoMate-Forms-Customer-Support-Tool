@@ -27,6 +27,11 @@ public class DesignTimeDialogService : IDialogService
 
     public IDialogService.DialogResult ShowDialog(string title, Page content)
     {
-        throw new NotImplementedException();
+        return IDialogService.DialogResult.Primary;
+    }
+
+    public (bool Result, string Title, string Description) ShowBugReportDialog()
+    {
+        return (true, "Design-Time Bug", "This is a bug from design time.");
     }
 }

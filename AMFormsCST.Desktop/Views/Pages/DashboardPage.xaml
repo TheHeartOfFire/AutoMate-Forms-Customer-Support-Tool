@@ -84,7 +84,7 @@
             <Label Content="Notes:"  Margin=" 0, 0, 0, 0" Grid.Row="1" VerticalAlignment="Bottom"/>
             <ui:TextBox Text="{Binding SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                             AcceptsReturn="True" ClearButtonEnabled="True" VerticalAlignment="Stretch" Grid.Row="2"
-                            Margin="0,0,0,10" ToolTip="General notes for this case."/>
+                            Margin="0,0,0,10" ToolTip="General notes for this case." TextWrapping="Wrap"/>
             <controls:CopyButton TextToCopy="{Binding SelectedNote.Notes}" 
                                  Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" Grid.RowSpan="2" ToolTip="Copy notes to clipboard."/>
         </Grid>
@@ -212,7 +212,7 @@
             <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                             ClearButtonEnabled="True" VerticalAlignment="Center" MinWidth="256" 
                         Margin="0,0,0,0" AcceptsReturn="True" MinHeight="100" Grid.Row="4" 
-                        Grid.Column="1" HorizontalAlignment="Stretch" ToolTip="Notes specific to this form."/>
+                        Grid.Column="1" HorizontalAlignment="Stretch" ToolTip="Notes specific to this form." TextWrapping="Wrap"/>
             <controls:CopyButton TextToCopy="{Binding SelectedNote.SelectedForm.Notes}" Grid.Row="4" Grid.Column="2" 
                                  HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top" ToolTip="Copy form notes to clipboard."/>
 

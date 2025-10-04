@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
+using ILinksService = AMFormsCST.Desktop.Services.ILinksService;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Links
 {

@@ -1,17 +1,12 @@
 using System;
 using System.Diagnostics;
-using AMFormsCST.Core.Interfaces;
+using ILogService = AMFormsCST.Core.Interfaces.ILogService;
 
 namespace AMFormsCST.Desktop.Services
 {
-    public class LinksService : ILinksService
+    public class LinksService(ILogService? logger = null) : ILinksService
     {
-        private readonly ILogService? _logger;
-
-        public LinksService(ILogService? logger = null)
-        {
-            _logger = logger;
-        }
+        private readonly ILogService? _logger = logger;
 
         public void OpenLink(string linkKey)
         {

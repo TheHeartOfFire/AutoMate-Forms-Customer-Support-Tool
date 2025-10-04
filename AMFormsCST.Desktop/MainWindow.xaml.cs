@@ -28,7 +28,8 @@ public partial class MainWindow : IWindow
         ISnackbarService snackbarService,
         IContentDialogService contentDialogService,
         ILogService logger,
-        IUpdateManagerService updateManagerService
+        IUpdateManagerService updateManagerService,
+        IBugReportService bugReportService
     )
     {
         updateManagerService.CheckForUpdatesOnStartupAsync().ConfigureAwait(false);

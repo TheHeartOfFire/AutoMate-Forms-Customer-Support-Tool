@@ -18,9 +18,11 @@ public class SettingsPageTests
         var updateManagerServiceMock = new Mock<IUpdateManagerService>();
         var supportToolMock = new Mock<ISupportTool>();
 
+
+        Mock<IBugReportService> mockBugReportService = new();
         // Setup nested settings structure
         var uiSettings = new Mock<IUiSettings>();
-        uiSettings.SetupGet(u => u.Settings).Returns(new List<ISetting>());
+        uiSettings.SetupGet(u => u.Settings).Returns([]);
 
         var userSettings = new Mock<IUserSettings>();
         userSettings.SetupGet(u => u.ExtSeparator).Returns(string.Empty);
@@ -31,7 +33,7 @@ public class SettingsPageTests
 
         supportToolMock.SetupGet(s => s.Settings).Returns(settings.Object);
 
-        var vm = new SettingsViewModel(updateManagerServiceMock.Object, supportToolMock.Object);
+        var vm = new SettingsViewModel(updateManagerServiceMock.Object, supportToolMock.Object, mockBugReportService.Object);
 
         // Act
         var page = new SettingsPage(vm);

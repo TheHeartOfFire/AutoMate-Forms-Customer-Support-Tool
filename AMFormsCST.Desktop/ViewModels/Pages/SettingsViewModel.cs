@@ -14,6 +14,7 @@ public partial class SettingsViewModel : ViewModel
 {
     private readonly IUpdateManagerService _updateManagerService;
     private readonly ISupportTool _supportTool;
+    private readonly IBugReportService _bugReportService;
     private readonly ILogService? _logger;
     private bool _isInitialized = false;
 
@@ -35,10 +36,11 @@ public partial class SettingsViewModel : ViewModel
     [ObservableProperty]
     private string _extSeparator = string.Empty;
 
-    public SettingsViewModel(IUpdateManagerService updateManagerService, ISupportTool supportTool, ILogService? logger = null)
+    public SettingsViewModel(IUpdateManagerService updateManagerService, ISupportTool supportTool, IBugReportService bugReportService, ILogService? logger = null)
     {
         _updateManagerService = updateManagerService;
         _supportTool = supportTool;
+        _bugReportService = bugReportService;
         _logger = logger;
         _logger?.LogInfo("SettingsViewModel initialized.");
 
@@ -149,6 +151,12 @@ public partial class SettingsViewModel : ViewModel
         {
             _logger?.LogError("Error during CheckForUpdates command.", ex);
         }
+    }
+
+    [RelayCommand]
+    private async Task ReportBug()
+    {
+        await _bugReportService.CreateBugReportAsync();
     }
 
     private static string GetAppVersion() => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion ?? "1.0.0";

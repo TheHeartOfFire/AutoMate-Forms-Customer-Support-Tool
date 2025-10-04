@@ -29,8 +29,13 @@ public class BugReportService : IBugReportService
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AMFormsCST", GetAppVersion()));
         
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration[Properties.Resources.LimitedGHPat]);
-       
+        var token = configuration[Properties.Resources.LimitedGHPat];
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            _logger?.LogError($"Configuration value for '{Properties.Resources.LimitedGHPat}' is missing or empty.");
+            throw new InvalidOperationException($"Configuration value for '{Properties.Resources.LimitedGHPat}' is required but was not found.");
+        }
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public async Task CreateBugReportAsync()

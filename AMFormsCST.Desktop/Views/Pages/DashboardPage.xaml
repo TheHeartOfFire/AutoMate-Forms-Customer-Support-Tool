@@ -57,9 +57,11 @@
                              ContentBindingPath="CaseNumber"
                              ContentFallbackValue="Enter a Case Number..."
                              GroupName="CaseNumbers"
-                                 RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemClickedCommand}"
-                                                        ToolTip="Select, add, or delete a case note."/>
+                             RefreshTrigger="{Binding UiRefreshCounter}"
+                             DeleteCommand="{Binding DeleteItemClickedCommand}"
+                             ToolTip="Select, add, or delete a case note."
+                             NextCommand="{Binding SelectNextNoteCommand}"
+                             PreviousCommand="{Binding SelectPreviousNoteCommand}"/>
 
 
         <Grid  Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch">
@@ -110,7 +112,9 @@
                                                          ContentFallbackValue="Enter a Dealership Name..."
                                                          GroupName="DealerNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="3" ToolTip="Select, add, or delete a dealership for this note."/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="3" ToolTip="Select, add, or delete a dealership for this note."
+                                                         NextCommand="{Binding SelectNextDealerCommand}"
+                                                         PreviousCommand="{Binding SelectPreviousDealerCommand}"/>
 
             <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.SelectedDealer.Companies}" 
                                                          RadioButtonCommand="{Binding CompanyClickedCommand}" 
@@ -119,7 +123,9 @@
                                                          ContentFallbackValue="Enter a Company Number..."
                                                          GroupName="CompanyNames"
                                  RefreshTrigger="{Binding UiRefreshCounter}"
-                                 DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="3" Grid.Row="1" Margin="0,0,0,5" ToolTip="Select, add, or delete a company for the selected dealership."/>
+                                 DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="3" Grid.Row="1" Margin="0,0,0,5" ToolTip="Select, add, or delete a company for the selected dealership."
+                                                         NextCommand="{Binding SelectNextCompanyCommand}"
+                                                         PreviousCommand="{Binding SelectPreviousCompanyCommand}"/>
 
             <Label Content="Dealer/Group Name: " VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="2"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedDealer.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -173,7 +179,9 @@
                                          ContentFallbackValue="Enter a Form Name..."
                                          GroupName="FormNames"
                  RefreshTrigger="{Binding UiRefreshCounter}"
-                 DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="2" ToolTip="Select, add, or delete a form for this note."/>
+                 DeleteCommand="{Binding DeleteItemClickedCommand}" Margin="0,0,0,5" Grid.ColumnSpan="2" ToolTip="Select, add, or delete a form for this note."
+                                         NextCommand="{Binding SelectNextFormCommand}"
+                                         PreviousCommand="{Binding SelectPreviousFormCommand}"/>
 
             <controls:ManagedObservableCollectionSelector ItemsSource="{Binding SelectedNote.SelectedForm.TestDeals}" 
                                          RadioButtonCommand="{Binding DealClickedCommand}" 
@@ -182,7 +190,9 @@
                                          ContentFallbackValue="Enter a Deal Number..."
                                          GroupName="TestDeals"
                  RefreshTrigger="{Binding UiRefreshCounter}"
-                 DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,0,0,5" ToolTip="Select, add, or delete a test deal for the selected form."/>
+                 DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,0,0,5" ToolTip="Select, add, or delete a test deal for the selected form."
+                                         NextCommand="{Binding SelectNextTestDealCommand}"
+                                         PreviousCommand="{Binding SelectPreviousTestDealCommand}"/>
 
             <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedForm.Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
@@ -239,8 +249,13 @@
                                      ContentBindingPath="Name"
                                      ContentFallbackValue="Enter a Contact Name..."
                                      GroupName="ContactNames"
-             RefreshTrigger="{Binding UiRefreshCounter}"
-             DeleteCommand="{Binding DeleteItemClickedCommand}" Grid.ColumnSpan="2" Margin="0,0,0,5" ToolTip="Select, add, or delete a contact for this note."/>
+                                     RefreshTrigger="{Binding UiRefreshCounter}"
+                                     DeleteCommand="{Binding DeleteItemClickedCommand}" 
+                                     Grid.ColumnSpan="2" 
+                                     Margin="0,0,0,5" 
+                                     ToolTip="Select, add, or delete a contact for this note."
+                                     NextCommand="{Binding SelectNextContactCommand}"
+                                     PreviousCommand="{Binding SelectPreviousContactCommand}"/>
 
             <Label Content="Name: " VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
             <ui:TextBox Text="{Binding SelectedNote.SelectedContact.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 

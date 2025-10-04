@@ -158,6 +158,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
             (d) => d.PropertyChanged += OnDealerPropertyChanged
         );
         Dealers.CollectionChanged += Dealers_CollectionChanged;
+        Dealers.PropertyChanged += OnDealerPropertyChanged;
         Dealers.FirstOrDefault()?.Select();
     }
     private void InitContacts(string phoneExtensionDelimiter)
@@ -177,6 +178,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
             (c) => c.PropertyChanged += OnContactPropertyChanged
         );
         Contacts.CollectionChanged += Contacts_CollectionChanged;
+        Contacts.PropertyChanged += OnContactPropertyChanged;
         Contacts.FirstOrDefault()?.Select();
     }
     private void InitForms()
@@ -196,6 +198,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
             (f) => f.PropertyChanged += OnFormPropertyChanged
         );
         Forms.CollectionChanged += Forms_CollectionChanged;
+        Forms.PropertyChanged += OnFormPropertyChanged;
         Forms.FirstOrDefault()?.Select();
     }
 
@@ -248,6 +251,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
             foreach (Dealer d in e.OldItems)
                 d.PropertyChanged -= OnDealerPropertyChanged;
         UpdateCore();
+        Parent?.NotifyDealerNavigationChanged();
         _logger?.LogDebug("Dealers collection changed.");
     }
     private void Contacts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -263,6 +267,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
             foreach (Contact c in e.OldItems)
                 c.PropertyChanged -= OnContactPropertyChanged;
         UpdateCore();
+        Parent?.NotifyContactNavigationChanged();
         _logger?.LogDebug("Contacts collection changed.");
     }
     private void Forms_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -280,6 +285,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
                 f.PropertyChanged -= OnFormPropertyChanged;
 
         UpdateCore();
+        Parent?.NotifyFormNavigationChanged();
         _logger?.LogDebug("Forms collection changed.");
     }
 

@@ -11,6 +11,7 @@ using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using AMFormsCST.Desktop.Views.Dialogs;
 using AMFormsCST.Desktop.Views.Pages.Tools;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
@@ -40,6 +41,7 @@ public partial class DashboardViewModel : ViewModel
     private readonly IFileSystem? _fileSystem;
 
     private NoteModel? _lastSelectedNote;
+    private Models.Dealer? _lastSelectedDealer;
     private Models.Form? _lastSelectedForm;
 
     public DashboardViewModel()
@@ -126,10 +128,47 @@ public partial class DashboardViewModel : ViewModel
         }
 
         _notes.PropertyChanged += Notes_PropertyChanged;
+        _notes.CollectionChanged += Notes_CollectionChanged;
         if (_notes.SelectedItem is not null)
         {
             Notes_PropertyChanged(this, new PropertyChangedEventArgs(nameof(Notes.SelectedItem)));
         }
+    }
+
+    private void Notes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        SelectPreviousNoteCommand.NotifyCanExecuteChanged();
+        SelectNextNoteCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyDealerNavigationChanged()
+    {
+        SelectPreviousDealerCommand.NotifyCanExecuteChanged();
+        SelectNextDealerCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyCompanyNavigationChanged()
+    {
+        SelectPreviousCompanyCommand.NotifyCanExecuteChanged();
+        SelectNextCompanyCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyContactNavigationChanged()
+    {
+        SelectPreviousContactCommand.NotifyCanExecuteChanged();
+        SelectNextContactCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyFormNavigationChanged()
+    {
+        SelectPreviousFormCommand.NotifyCanExecuteChanged();
+        SelectNextFormCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyTestDealNavigationChanged()
+    {
+        SelectPreviousTestDealCommand.NotifyCanExecuteChanged();
+        SelectNextTestDealCommand.NotifyCanExecuteChanged();
     }
 
     private void AutosaveTimerElapsed(object? sender, EventArgs e) => IO.SaveNotes([.. Notes.Select(n => n.CoreType).Cast<INote>()]);
@@ -146,6 +185,8 @@ public partial class DashboardViewModel : ViewModel
         }
 
         OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousNoteCommand.NotifyCanExecuteChanged();
+        SelectNextNoteCommand.NotifyCanExecuteChanged();
 
         if (SelectedNote != null)
         {
@@ -154,23 +195,54 @@ public partial class DashboardViewModel : ViewModel
             SelectedNote.Forms.PropertyChanged += SelectedNote_Forms_PropertyChanged;
         }
 
+        // Manually trigger property changed for sub-collections to update CanExecute
+        SelectedNote_Dealers_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Dealer>.SelectedItem)));
+        SelectedNote_Contacts_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Contact>.SelectedItem)));
+        SelectedNote_Forms_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Form>.SelectedItem)));
+
         _lastSelectedNote = SelectedNote;
     }
 
     private void SelectedNote_Dealers_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ManagedObservableCollection<Models.Dealer>.SelectedItem))
+        if (e.PropertyName != nameof(ManagedObservableCollection<Models.Dealer>.SelectedItem)) return;
+
+        if (_lastSelectedDealer != null)
         {
-            OnPropertyChanged(nameof(SelectedNote));
+            _lastSelectedDealer.Companies.PropertyChanged -= SelectedDealer_Companies_PropertyChanged;
         }
+
+        OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousDealerCommand.NotifyCanExecuteChanged();
+        SelectNextDealerCommand.NotifyCanExecuteChanged();
+
+        if (SelectedNote?.SelectedDealer != null)
+        {
+            SelectedNote.SelectedDealer.Companies.PropertyChanged += SelectedDealer_Companies_PropertyChanged;
+        }
+
+        // Manually trigger property changed for sub-collection to update CanExecute
+        SelectedDealer_Companies_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Company>.SelectedItem)));
+
+        _lastSelectedDealer = SelectedNote?.SelectedDealer;
+    }
+
+    private void SelectedDealer_Companies_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ManagedObservableCollection<Models.Company>.SelectedItem)) return;
+
+        OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousCompanyCommand.NotifyCanExecuteChanged();
+        SelectNextCompanyCommand.NotifyCanExecuteChanged();
     }
 
     private void SelectedNote_Contacts_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ManagedObservableCollection<Models.Contact>.SelectedItem))
-        {
-            OnPropertyChanged(nameof(SelectedNote));
-        }
+        if (e.PropertyName != nameof(ManagedObservableCollection<Models.Contact>.SelectedItem)) return;
+
+        OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousContactCommand.NotifyCanExecuteChanged();
+        SelectNextContactCommand.NotifyCanExecuteChanged();
     }
 
     private void SelectedNote_Forms_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -183,21 +255,27 @@ public partial class DashboardViewModel : ViewModel
         }
 
         OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousFormCommand.NotifyCanExecuteChanged();
+        SelectNextFormCommand.NotifyCanExecuteChanged();
 
         if (SelectedNote?.SelectedForm != null)
         {
             SelectedNote.SelectedForm.TestDeals.PropertyChanged += SelectedForm_TestDeals_PropertyChanged;
         }
 
+        // Manually trigger property changed for sub-collection to update CanExecute
+        SelectedForm_TestDeals_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.TestDeal>.SelectedItem)));
+
         _lastSelectedForm = SelectedNote?.SelectedForm;
     }
 
     private void SelectedForm_TestDeals_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ManagedObservableCollection<Models.TestDeal>.SelectedItem))
-        {
-            OnPropertyChanged(nameof(SelectedNote));
-        }
+        if (e.PropertyName != nameof(ManagedObservableCollection<Models.TestDeal>.SelectedItem)) return;
+
+        OnPropertyChanged(nameof(SelectedNote));
+        SelectPreviousTestDealCommand.NotifyCanExecuteChanged();
+        SelectNextTestDealCommand.NotifyCanExecuteChanged();
     }
 
     private void OnNoteModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -205,6 +283,210 @@ public partial class DashboardViewModel : ViewModel
         UiRefreshCounter++;
         _debounceService.ScheduleEvent();
         _logger?.LogDebug($"Note property changed: {e.PropertyName} on {sender}");
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousNote))]
+    private void SelectPreviousNote()
+    {
+        if (SelectedNote is null) return;
+        var currentIndex = Notes.IndexOf(SelectedNote);
+        Notes[currentIndex - 1].Select();
+        if (_supportTool is not null)
+            _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+    }
+
+    private bool CanSelectPreviousNote()
+    {
+        if (SelectedNote is null) return false;
+        var currentIndex = Notes.IndexOf(SelectedNote);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextNote))]
+    private void SelectNextNote()
+    {
+        if (SelectedNote is null) return;
+        var currentIndex = Notes.IndexOf(SelectedNote);
+        Notes[currentIndex + 1].Select();
+        if (_supportTool is not null)
+            _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+    }
+
+    private bool CanSelectNextNote()
+    {
+        if (SelectedNote is null) return false;
+        var currentIndex = Notes.IndexOf(SelectedNote);
+        return currentIndex < Notes.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousDealer))]
+    private void SelectPreviousDealer()
+    {
+        if (SelectedNote?.SelectedDealer is null) return;
+        var currentIndex = SelectedNote.Dealers.IndexOf(SelectedNote.SelectedDealer);
+        SelectedNote.Dealers[currentIndex - 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+    }
+
+    private bool CanSelectPreviousDealer()
+    {
+        if (SelectedNote?.SelectedDealer is null) return false;
+        var currentIndex = SelectedNote.Dealers.IndexOf(SelectedNote.SelectedDealer);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextDealer))]
+    private void SelectNextDealer()
+    {
+        if (SelectedNote?.SelectedDealer is null) return;
+        var currentIndex = SelectedNote.Dealers.IndexOf(SelectedNote.SelectedDealer);
+        SelectedNote.Dealers[currentIndex + 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+    }
+
+    private bool CanSelectNextDealer()
+    {
+        if (SelectedNote?.SelectedDealer is null) return false;
+        var currentIndex = SelectedNote.Dealers.IndexOf(SelectedNote.SelectedDealer);
+        return currentIndex < SelectedNote.Dealers.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousCompany))]
+    private void SelectPreviousCompany()
+    {
+        if (SelectedNote?.SelectedDealer?.SelectedCompany is null) return;
+        var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
+        SelectedNote.SelectedDealer.Companies[currentIndex - 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Dealers.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+    }
+
+    private bool CanSelectPreviousCompany()
+    {
+        if (SelectedNote?.SelectedDealer?.SelectedCompany is null) return false;
+        var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextCompany))]
+    private void SelectNextCompany()
+    {
+        if (SelectedNote?.SelectedDealer?.SelectedCompany is null) return;
+        var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
+        SelectedNote.SelectedDealer.Companies[currentIndex + 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Dealers.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+    }
+
+    private bool CanSelectNextCompany()
+    {
+        if (SelectedNote?.SelectedDealer?.SelectedCompany is null) return false;
+        var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
+        return currentIndex < SelectedNote.SelectedDealer.Companies.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousContact))]
+    private void SelectPreviousContact()
+    {
+        if (SelectedNote?.SelectedContact is null) return;
+        var currentIndex = SelectedNote.Contacts.IndexOf(SelectedNote.SelectedContact);
+        SelectedNote.Contacts[currentIndex - 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+    }
+
+    private bool CanSelectPreviousContact()
+    {
+        if (SelectedNote?.SelectedContact is null) return false;
+        var currentIndex = SelectedNote.Contacts.IndexOf(SelectedNote.SelectedContact);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextContact))]
+    private void SelectNextContact()
+    {
+        if (SelectedNote?.SelectedContact is null) return;
+        var currentIndex = SelectedNote.Contacts.IndexOf(SelectedNote.SelectedContact);
+        SelectedNote.Contacts[currentIndex + 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+    }
+
+    private bool CanSelectNextContact()
+    {
+        if (SelectedNote?.SelectedContact is null) return false;
+        var currentIndex = SelectedNote.Contacts.IndexOf(SelectedNote.SelectedContact);
+        return currentIndex < SelectedNote.Contacts.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousForm))]
+    private void SelectPreviousForm()
+    {
+        if (SelectedNote?.SelectedForm is null) return;
+        var currentIndex = SelectedNote.Forms.IndexOf(SelectedNote.SelectedForm);
+        SelectedNote.Forms[currentIndex - 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+    }
+
+    private bool CanSelectPreviousForm()
+    {
+        if (SelectedNote?.SelectedForm is null) return false;
+        var currentIndex = SelectedNote.Forms.IndexOf(SelectedNote.SelectedForm);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextForm))]
+    private void SelectNextForm()
+    {
+        if (SelectedNote?.SelectedForm is null) return;
+        var currentIndex = SelectedNote.Forms.IndexOf(SelectedNote.SelectedForm);
+        SelectedNote.Forms[currentIndex + 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+    }
+
+    private bool CanSelectNextForm()
+    {
+        if (SelectedNote?.SelectedForm is null) return false;
+        var currentIndex = SelectedNote.Forms.IndexOf(SelectedNote.SelectedForm);
+        return currentIndex < SelectedNote.Forms.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectPreviousTestDeal))]
+    private void SelectPreviousTestDeal()
+    {
+        if (SelectedNote?.SelectedForm?.SelectedTestDeal is null) return;
+        var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
+        SelectedNote.SelectedForm.TestDeals[currentIndex - 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Forms.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+    }
+
+    private bool CanSelectPreviousTestDeal()
+    {
+        if (SelectedNote?.SelectedForm?.SelectedTestDeal is null) return false;
+        var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
+        return currentIndex > 0;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSelectNextTestDeal))]
+    private void SelectNextTestDeal()
+    {
+        if (SelectedNote?.SelectedForm?.SelectedTestDeal is null) return;
+        var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
+        SelectedNote.SelectedForm.TestDeals[currentIndex + 1].Select();
+        if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Forms.SelectedItem is not null)
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+    }
+
+    private bool CanSelectNextTestDeal()
+    {
+        if (SelectedNote?.SelectedForm?.SelectedTestDeal is null) return false;
+        var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
+        return currentIndex < SelectedNote.SelectedForm.TestDeals.Count - 1;
     }
 
     [RelayCommand]
@@ -607,6 +889,8 @@ public partial class DashboardViewModel : ViewModel
             var dealer = note.Dealers[0];
             dealer.Name = GetValueFromKeyValue("Company Name:", submittedValues);
             dealer.ServerCode = GetValueFromKeyValue("Server ID:", serverValues);
+
+
 
             var company = dealer.Companies[0];
             company.Name = GetValueFromKeyValue("Company Name:", submittedValues);

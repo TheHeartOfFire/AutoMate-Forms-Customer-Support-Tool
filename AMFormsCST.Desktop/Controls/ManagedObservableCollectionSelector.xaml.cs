@@ -112,4 +112,22 @@ public partial class ManagedObservableCollectionSelector : UserControl
         get { return (ICommand)GetValue(DeleteCommandProperty); }
         set { SetValue(DeleteCommandProperty, value); }
     }
+
+    public static readonly DependencyProperty PreviousCommandProperty =
+        DependencyProperty.Register(nameof(PreviousCommand), typeof(ICommand), typeof(ManagedObservableCollectionSelector), new PropertyMetadata(null));
+
+    public ICommand PreviousCommand
+    {
+        get { return (ICommand)GetValue(PreviousCommandProperty); }
+        set { SetValue(PreviousCommandProperty, value); }
+    }
+
+    public static readonly DependencyProperty NextCommandProperty =
+        DependencyProperty.Register(nameof(NextCommand), typeof(ICommand), typeof(ManagedObservableCollectionSelector), new PropertyMetadata(null));
+
+    public ICommand NextCommand
+    {
+        get { return (ICommand)GetValue(NextCommandProperty); }
+        set { SetValue(NextCommandProperty, value); }
+    }
 }

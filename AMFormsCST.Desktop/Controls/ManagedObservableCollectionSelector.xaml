@@ -20,7 +20,17 @@
     </UserControl.Resources>
 
     <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
-        <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Column="0" Command="{Binding PreviousCommand, ElementName=RadioButtonControl}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" VerticalAlignment="Center">
+            <TextBlock Text="&#xE76B;" FontFamily="Segoe MDL2 Assets"  Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+        </Button>
+
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible">
             <ItemsControl ItemsSource="{Binding ItemsSource, ElementName=RadioButtonControl}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -117,5 +127,9 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
+
+        <Button Grid.Column="2" Command="{Binding NextCommand, ElementName=RadioButtonControl}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" VerticalAlignment="Center">
+            <TextBlock Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"  Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+        </Button>
     </Grid>
 </UserControl>

@@ -130,6 +130,7 @@ namespace AMFormsCST.Desktop.Models
                     c.PropertyChanged -= OnCompanyPropertyChanged;
 
             UpdateCore();
+            Parent?.Parent?.NotifyCompanyNavigationChanged();
             _logger?.LogDebug("Companies collection changed.");
         }
 

@@ -24,11 +24,6 @@ public class BugReportService : IBugReportService
     public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
     {
         _logger = logger;
-    private static readonly HttpClient _httpClient = CreateHttpClient();
-
-    public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
-    {
-        _logger = logger;
         _dialogService = dialogService;
         _configuration = configuration;
         // Set Authorization header per instance, as it may depend on configuration

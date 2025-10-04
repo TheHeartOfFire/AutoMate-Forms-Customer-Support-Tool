@@ -1,6 +1,5 @@
 name: Bug Reporter
 
-# This action is triggered by a repository_dispatch event
 on:
   repository_dispatch:
     types: [create-bug-report]
@@ -9,34 +8,37 @@ jobs:
   create_github_issue:
     runs-on: ubuntu-latest
     steps:
+      - name: Prepare Gist Payload
+        run: |
+          # Use jq to safely build the JSON payload and write it to a file.
+          # This avoids all shell interpolation issues with the log content.
+          jq -n \
+            --arg desc "AMFormsCST Log File - $(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg content "${{ github.event.client_payload.log_content }}" \
+            '{description: $desc, public: false, files: {"log.txt": {content: $content}}}' > gist_payload.json
+        shell: bash
+
       - name: Create Gist for Logs
         id: create_gist
-        env:
-          LOG_CONTENT: ${{ github.event.client_payload.log_content }}
         run: |
-          # Use jq to safely build the JSON payload, preventing issues with special characters.
-          JSON_PAYLOAD=$(jq -n \
-            --arg desc "AMFormsCST Log File - $(date -u +"%Y-%m-%dT%H:%M-%SZ")" \
-            --arg content "$LOG_CONTENT" \
-            '{description: $desc, public: false, files: {"log.txt": {content: $content}}}')
-
+          # Use curl to post the content of the file.
           GIST_RESPONSE=$(curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/gists \
-            -d "$JSON_PAYLOAD")
+            --data-binary "@gist_payload.json")
 
           GIST_URL=$(echo "$GIST_RESPONSE" | jq -r .html_url)
           echo "GIST_URL=$GIST_URL" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Create Issue Body
-        id: create_body
+      - name: Prepare Issue Body
+        id: prepare_body
         run: |
-          # Using a 'here document' to safely handle multi-line content
-          mapfile -t BODY <<EOF
+          # Write the complete, multi-line issue body to a file.
+          cat > issue_body.md <<EOF
           ${{ github.event.client_payload.description }}
 
           ---
@@ -46,11 +48,6 @@ jobs:
 
           **Logs:** [View Logs on GitHub Gist](${{ steps.create_gist.outputs.GIST_URL }})
           EOF
-          
-          # The peter-evans action needs the body in an environment variable
-          echo "BODY<<EOF" >> $GITHUB_ENV
-          printf '%s\n' "${BODY[@]}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
         shell: bash
 
       - name: Create GitHub Issue
@@ -58,5 +55,5 @@ jobs:
         with:
           token: ${{ secrets.GH_PAT }}
           title: ${{ github.event.client_payload.title }}
-          body: ${{ env.BODY }}
+          content-filepath: ./issue_body.md
           labels: bug, reported-from-app

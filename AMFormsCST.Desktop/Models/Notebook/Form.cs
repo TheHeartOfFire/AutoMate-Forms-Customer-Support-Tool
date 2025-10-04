@@ -165,6 +165,7 @@ public partial class Form : ManagedObservableCollectionItem
             foreach (TestDeal td in e.OldItems)
                 td.PropertyChanged -= OnTestDealPropertyChanged;
         UpdateCore();
+        Parent?.Parent?.NotifyTestDealNavigationChanged();
         _logger?.LogDebug("TestDeals collection changed.");
     }
 

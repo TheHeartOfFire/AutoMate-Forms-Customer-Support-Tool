@@ -116,4 +116,32 @@ public class ManagedObservableCollectionSelectorTests
         // Assert
         Assert.Same(commandMock.Object, control.DeleteCommand);
     }
+
+    [WpfFact]
+    public void PreviousCommand_Property_SetAndGet_Works()
+    {
+        // Arrange
+        var control = new ManagedObservableCollectionSelector();
+        var commandMock = new Mock<ICommand>();
+
+        // Act
+        control.PreviousCommand = commandMock.Object;
+
+        // Assert
+        Assert.Same(commandMock.Object, control.PreviousCommand);
+    }
+
+    [WpfFact]
+    public void NextCommand_Property_SetAndGet_Works()
+    {
+        // Arrange
+        var control = new ManagedObservableCollectionSelector();
+        var commandMock = new Mock<ICommand>();
+
+        // Act
+        control.NextCommand = commandMock.Object;
+
+        // Assert
+        Assert.Same(commandMock.Object, control.NextCommand);
+    }
 }

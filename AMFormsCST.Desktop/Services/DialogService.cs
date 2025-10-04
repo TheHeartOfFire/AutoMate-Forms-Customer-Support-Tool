@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using AMFormsCST.Core.Interfaces;
+using AMFormsCST.Desktop.ViewModels.Dialogs;
 
 namespace AMFormsCST.Desktop.Services;
 
@@ -96,5 +97,23 @@ public class DialogService : IDialogService
         dialog.ShowDialog();
         _logger?.LogInfo($"Dialog closed: ConfirmSelected={dialog.ConfirmSelected}");
         return dialog.ConfirmSelected ? IDialogService.DialogResult.Primary : IDialogService.DialogResult.Cancel;
+    }
+
+    public (bool Result, string Title, string Description) ShowBugReportDialog()
+    {
+        _logger?.LogInfo("ShowBugReportDialog called.");
+        var viewModel = new BugReportDialogViewModel();
+        var content = new BugReportDialog { DataContext = viewModel };
+
+        var result = content.ShowDialog();
+
+        if (result is true)
+        {
+            _logger?.LogInfo("Bug report dialog confirmed.");
+            return (result == true, viewModel.Title, viewModel.Description);
+        }
+
+        _logger?.LogInfo("Bug report dialog cancelled.");
+        return (result == true, string.Empty, string.Empty);
     }
 }

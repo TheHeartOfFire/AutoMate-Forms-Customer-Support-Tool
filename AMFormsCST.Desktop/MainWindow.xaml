@@ -80,19 +80,22 @@
                                   VerticalAlignment="Center" ToolTip="Toggle Theme" Margin="5">
                         <ui:SymbolIcon Symbol="DarkTheme24"/>
                     </ToggleButton>
+                    <ui:Button
+            Command="{Binding ViewModel.ReportBugCommand, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"
+            Icon="{ui:SymbolIcon Bug24}"  Margin="5" ToolTip="Report a bug"/>
                 </StackPanel>
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
-        <!--<tray:NotifyIcon
+        <tray:NotifyIcon
     Grid.Row="0"
     FocusOnLeftClick="True"
     Icon="pack://application:,,,/Assets/AMLogo.png"
     MenuOnRightClick="True"
     TooltipText="Solera Case Management Tool">
-            <tray:NotifyIcon.Menu>
+            <!--<tray:NotifyIcon.Menu>
                 <ContextMenu ItemsSource="{Binding ViewModel.TrayMenuItems, Mode=OneWay}" />
-            </tray:NotifyIcon.Menu>
-        </tray:NotifyIcon>-->
+            </tray:NotifyIcon.Menu>-->
+        </tray:NotifyIcon>
     </Grid>
 </ui:FluentWindow>

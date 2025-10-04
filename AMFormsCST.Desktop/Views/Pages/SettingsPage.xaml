@@ -81,6 +81,11 @@
                         Appearance="Primary"
                         Content="Check for updates"
                         Icon="{ui:SymbolIcon ArrowDownload24}" />
+                    
+                    <ui:Button
+                        Content="Report a Bug"
+                        Command="{Binding ReportBugCommand}"
+                        Icon="{ui:SymbolIcon Bug24}" />
                 </StackPanel>
             </ui:CardControl>
 

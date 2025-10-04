@@ -68,7 +68,7 @@ public partial class App : Application
             .ConfigureServices((_1, services) =>
             {
                 _ = services.AddNavigationViewPageProvider();
-                services.AddSingleton<ILogService>(sp =>
+                _ = services.AddSingleton<ILogService>(sp =>
                 {
                     var logger = new LoggerConfiguration()
                         .MinimumLevel.Debug()
@@ -76,11 +76,19 @@ public partial class App : Application
                         .WriteTo.File(
                         path: "logs\\app.log", 
                         formatter: new CompactJsonFormatter(), 
-                        rollingInterval: RollingInterval.Day)
+                        rollingInterval: RollingInterval.Day,
+                        shared: true)
                         .Enrich.FromLogContext()
                         .CreateLogger();
 
                     return new SerilogService(logger);
+                });
+                _ = services.AddSingleton<IConfiguration>(sp =>
+                {
+                    var builder = new ConfigurationBuilder()
+                        .AddUserSecrets<App>();
+
+                    return builder.Build();
                 });
                 _ = services.AddTransient<IDebounceService, DebounceService>();
 
@@ -92,6 +100,7 @@ public partial class App : Application
                 _ = services.AddSingleton<ISnackbarService, SnackbarService>();
                 _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
                 _ = services.AddSingleton<WindowsProviderService>();
+                _ = services.AddSingleton<IBugReportService, BugReportService>();
 
                 _ = services.AddSingleton<DashboardPage>();
                 _ = services.AddSingleton<DashboardViewModel>();
@@ -130,10 +139,12 @@ public partial class App : Application
                 _ = services.AddSingleton<IUiSettings, UiSettings>();
                 _ = services.AddSingleton<IUserSettings, UserSettings>();
                 _ = services.AddSingleton<ISettings, Settings>();
-                _ = services.AddSingleton<ILinksService, LinksService>();
+                _ = services.AddSingleton<Services.ILinksService, LinksService>();
 
                 _ = services.AddTransient<AddLinkDialogPage>();
                 _ = services.AddTransient<AddLinkDialogViewModel>();
+                _ = services.AddTransient<BugReportDialog>();
+                _ = services.AddTransient<BugReportDialogViewModel>();
 
                 _ = services.AddStringLocalizer(b =>
                 {

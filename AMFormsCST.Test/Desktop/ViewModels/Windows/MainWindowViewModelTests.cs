@@ -1,6 +1,7 @@
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.UserSettings;
 using AMFormsCST.Desktop.Models.UserSettings;
+using AMFormsCST.Desktop.Services;
 using AMFormsCST.Desktop.ViewModels;
 using Moq;
 using Wpf.Ui.Appearance;
@@ -14,6 +15,7 @@ public class MainWindowViewModelTests
     private readonly Mock<ISettings> _mockSettings;
     private readonly Mock<IUiSettings> _mockUiSettings;
     private readonly Mock<ILogService> _mockLogService;
+    private readonly Mock<IBugReportService> _mockBugReportService;
     private readonly ThemeSetting _themeSetting;
     private readonly AlwaysOnTopSetting _aotSetting;
 
@@ -24,6 +26,7 @@ public class MainWindowViewModelTests
         _mockSettings = new Mock<ISettings>();
         _mockUiSettings = new Mock<IUiSettings>();
         _mockLogService = new Mock<ILogService>();
+        _mockBugReportService = new Mock<IBugReportService>();
 
         // 2. Create concrete setting objects to be returned by the mocks.
         _themeSetting = new ThemeSetting { Theme = ApplicationTheme.Dark };
@@ -39,7 +42,7 @@ public class MainWindowViewModelTests
     public void Constructor_InitializesProperties_FromSettings()
     {
         // Arrange & Act
-        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockLogService.Object);
+        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockBugReportService.Object, _mockLogService.Object);
 
         // Assert
         Assert.True(viewModel.IsWindowTopmost);
@@ -50,7 +53,7 @@ public class MainWindowViewModelTests
     public void IsWindowTopmost_WhenChanged_UpdatesAndSavesSetting()
     {
         // Arrange
-        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockLogService.Object);
+        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockBugReportService.Object, _mockLogService.Object);
         Assert.True(viewModel.IsWindowTopmost); // Initial state check
 
         // Act
@@ -65,7 +68,7 @@ public class MainWindowViewModelTests
     public void IsLightTheme_WhenChanged_UpdatesThemeAndSavesSetting()
     {
         // Arrange
-        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockLogService.Object);
+        var viewModel = new MainWindowViewModel(_mockSupportTool.Object, _mockBugReportService.Object, _mockLogService.Object);
         Assert.False(viewModel.IsLightTheme); // Initial state check
 
         // Act

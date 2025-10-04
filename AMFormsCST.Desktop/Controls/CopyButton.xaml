@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="30"
              x:Name="CopyButtonControl">
-    <ui:Button Click="CopyButton_OnClick">
+    <ui:Button Click="CopyButton_OnClick" IsTabStop="False">
         <ui:SymbolIcon Symbol="Copy24"/>
     </ui:Button>
 </UserControl>

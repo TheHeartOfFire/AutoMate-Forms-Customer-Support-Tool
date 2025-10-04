@@ -21,5 +21,6 @@ namespace AMFormsCST.Desktop.Services
         string? ShowOpenFileDialog(string filter);
         string? ShowOpenFileDialog(string filter, string defaultDirectory);
         DialogResult ShowDialog(string title, Page content);
+        public (bool Result, string Title, string Description) ShowBugReportDialog();
     }
 }

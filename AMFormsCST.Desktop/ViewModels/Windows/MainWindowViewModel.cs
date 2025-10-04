@@ -1,6 +1,8 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.Models.UserSettings;
+using AMFormsCST.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Wpf.Ui.Appearance;
@@ -11,6 +13,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private readonly ISupportTool _supportTool;
     private readonly ILogService? _logger;
+    private readonly IBugReportService _bugReportService;
 
     [ObservableProperty]
     private string _applicationTitle = "Case Management Tool";
@@ -27,9 +30,10 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<object> _navigationFooter = [];
 
-    public MainWindowViewModel(ISupportTool supportTool, ILogService? logger = null)
+    public MainWindowViewModel(ISupportTool supportTool, IBugReportService bugReportService, ILogService? logger = null)
     {
         _supportTool = supportTool;
+        _bugReportService = bugReportService;
         _logger = logger;
         _logger?.LogInfo("MainWindowViewModel initialized.");
 
@@ -48,6 +52,12 @@ public partial class MainWindowViewModel : ObservableObject
             themeSetting.PropertyChanged += OnUiSettingsChanged;
             _logger?.LogDebug($"ThemeSetting initialized: {IsLightTheme}");
         }
+    }
+
+    [RelayCommand]
+    private async Task ReportBug()
+    {
+        await _bugReportService.CreateBugReportAsync();
     }
 
     private void OnUiSettingsChanged(object? sender, PropertyChangedEventArgs e)

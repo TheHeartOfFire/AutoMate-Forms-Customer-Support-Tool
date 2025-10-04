@@ -125,6 +125,6 @@
   </data>
   <data name="LimitedGHPat" xml:space="preserve">
     <value>LimitedGHPat</value>
-    <comment>Limited in scope to the repo for this project with no permissions. Used to trigger the Bug Report wrokflow</comment>
+    <comment>Limited in scope to the repo for this project with no permissions. Used to trigger the Bug Report workflow</comment>
   </data>
 </root>

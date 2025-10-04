@@ -1,0 +1,64 @@
+name: Bug Reporter
+
+# This action is triggered by a repository_dispatch event
+on:
+  repository_dispatch:
+    types: [create-bug-report]
+
+jobs:
+  create_github_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Gist for Logs
+        id: create_gist
+        run: |
+          GIST_RESPONSE=$(curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/gists \
+            -d @- <<EOF
+          {
+            "description": "AMFormsCST Log File - $(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "public": false,
+            "files": {
+              "log.txt": {
+                "content": "${{ github.event.client_payload.log_content }}"
+              }
+            }
+          }
+          EOF
+          )
+          GIST_URL=$(echo "$GIST_RESPONSE" | jq -r .html_url)
+          echo "GIST_URL=$GIST_URL" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create Issue Body
+        id: create_body
+        run: |
+          ISSUE_BODY=$(cat <<EOF
+          ${{ github.event.client_payload.description }}
+
+          ---
+          ### Environment
+          - **App Version**: ${{ github.event.client_payload.app_version }}
+          - **OS Version**: ${{ github.event.client_payload.os_version }}
+
+          **Logs:** [View Logs on GitHub Gist](${{ steps.create_gist.outputs.GIST_URL }})
+          EOF
+          )
+          echo "BODY<<EOF" >> $GITHUB_OUTPUT
+          echo "$ISSUE_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create GitHub Issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          token: ${{ secrets.GH_PAT }}
+          title: ${{ github.event.client_payload.title }}
+          content-filepath: .github/workflows/bug-reporter-body.md # A temporary file is used
+          labels: bug, reported-from-app
+        env:
+          ISSUE_BODY: ${{ steps.create_body.outputs.BODY }}

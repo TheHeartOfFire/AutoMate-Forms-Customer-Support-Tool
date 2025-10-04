@@ -24,20 +24,23 @@ public class BugReportService : IBugReportService
     public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
     {
         _logger = logger;
+    private static readonly HttpClient _httpClient = CreateHttpClient();
+
+    public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
+    {
+        _logger = logger;
         _dialogService = dialogService;
         _configuration = configuration;
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AMFormsCST", GetAppVersion()));
-        
-        var token = configuration[Properties.Resources.LimitedGHPat];
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            _logger?.LogError($"Configuration value for '{Properties.Resources.LimitedGHPat}' is missing or empty.");
-            throw new InvalidOperationException($"Configuration value for '{Properties.Resources.LimitedGHPat}' is required but was not found.");
-        }
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        // Set Authorization header per instance, as it may depend on configuration
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration[Properties.Resources.LimitedGHPat]);
     }
 
+    private static HttpClient CreateHttpClient()
+    {
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AMFormsCST", GetAppVersion()));
+        return client;
+    }
     public async Task CreateBugReportAsync()
     {
         var (result, title, description) = _dialogService.ShowBugReportDialog();

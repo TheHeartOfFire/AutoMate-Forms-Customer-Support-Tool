@@ -18,16 +18,20 @@ public class BugReportService : IBugReportService
 {
     private readonly ILogService? _logger;
     private readonly IDialogService _dialogService;
-    private readonly IConfiguration _configuration;
-    private readonly HttpClient _httpClient;
+    private static readonly HttpClient _httpClient = CreateHttpClient();
 
     public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
     {
         _logger = logger;
         _dialogService = dialogService;
-        _configuration = configuration;
-        // Set Authorization header per instance, as it may depend on configuration
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration[Properties.Resources.LimitedGHPat]);
+
+        var token = configuration[Properties.Resources.LimitedGHPat];
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            _logger?.LogError($"Configuration value for '{Properties.Resources.LimitedGHPat}' is missing or empty.");
+            throw new InvalidOperationException($"Configuration value for '{Properties.Resources.LimitedGHPat}' is required but was not found.");
+        }
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     private static HttpClient CreateHttpClient()

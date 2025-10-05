@@ -125,9 +125,28 @@ public class CreateBugReport
 
 public class BugReportPayload
 {
+    /// <summary>
+    /// The title of the bug report. Should be a brief summary of the issue.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// A detailed description of the bug, including steps to reproduce and expected behavior.
+    /// </summary>
     public string Description { get; set; }
+
+    /// <summary>
+    /// The content of the log file related to the bug. Should be plain text.
+    /// </summary>
     public string LogContent { get; set; }
+
+    /// <summary>
+    /// The version of the application where the bug was encountered. Example: "1.2.3".
+    /// </summary>
     public string AppVersion { get; set; }
+
+    /// <summary>
+    /// The operating system version of the user's environment. Example: "Windows 10.0.19045".
+    /// </summary>
     public string OsVersion { get; set; }
 }

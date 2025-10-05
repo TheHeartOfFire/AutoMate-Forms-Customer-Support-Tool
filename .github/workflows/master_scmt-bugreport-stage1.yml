@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy dotnet core project to Azure Function App - SCMT-BugReport-Stage1
+name: SCMT-BugReport-Stage1
 
 on:
   push:
@@ -40,4 +40,5 @@ jobs:
           app-name: 'SCMT-BugReport-Stage1'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4E39643E8AEA4020AF0E843CFF6C1788 }}

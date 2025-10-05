@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMFormsCST.Desktop", "AMFor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGeneration", "SourceGeneration\SourceGeneration.csproj", "{0AC24EC9-51AC-4678-84B0-3766E2FE41B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions", "AzureFunctions\AzureFunctions.csproj", "{489DF778-365B-4FAC-8597-531423F9BF77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{0AC24EC9-51AC-4678-84B0-3766E2FE41B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AC24EC9-51AC-4678-84B0-3766E2FE41B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AC24EC9-51AC-4678-84B0-3766E2FE41B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{489DF778-365B-4FAC-8597-531423F9BF77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{489DF778-365B-4FAC-8597-531423F9BF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{489DF778-365B-4FAC-8597-531423F9BF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{489DF778-365B-4FAC-8597-531423F9BF77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

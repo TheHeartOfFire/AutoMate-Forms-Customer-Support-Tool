@@ -14,25 +14,12 @@ using System.Windows;
 namespace AMFormsCST.Desktop.Services;
 
 
-public class BugReportService : IBugReportService
+public class BugReportService(ILogService? logger, IDialogService dialogService) : IBugReportService
 {
-    private readonly ILogService? _logger;
-    private readonly IDialogService _dialogService;
+    private readonly ILogService? _logger = logger;
+    private readonly IDialogService _dialogService = dialogService;
     private static readonly HttpClient _httpClient = CreateHttpClient();
-
-    public BugReportService(ILogService? logger, IDialogService dialogService, IConfiguration configuration)
-    {
-        _logger = logger;
-        _dialogService = dialogService;
-
-        var token = configuration[Properties.Resources.LimitedGHPat];
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            _logger?.LogError($"Configuration value for '{Properties.Resources.LimitedGHPat}' is missing or empty.");
-            throw new InvalidOperationException($"Configuration value for '{Properties.Resources.LimitedGHPat}' is required but was not found.");
-        }
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    }
+    private readonly string _bugReportEndpoint = Properties.Resources.BugReportEndpointUrl;
 
     private static HttpClient CreateHttpClient()
     {
@@ -64,97 +51,38 @@ public class BugReportService : IBugReportService
 
         try
         {
-            // Step 1: Create the Gist directly from the client.
-            string? gistUrl = await UploadLogAsGistAsync();
-            if (gistUrl == null)
-            {
-                _dialogService.ShowMessageBox("Could not upload logs to create a Gist. Aborting bug report.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Step 2: Trigger the GitHub Action with a small payload.
-            var dispatchUrl = $"https://api.github.com/repos/{Properties.Resources.GitHubRepoOwner}/{Properties.Resources.GitHubRepoName}/dispatches";
-            var encodedDescription = Convert.ToBase64String(Encoding.UTF8.GetBytes(description));
+            var logContent = await GetLogContentAsync();
 
             var payload = new
             {
-                event_type = "create-bug-report",
-                client_payload = new
-                {
-                    title,
-                    description_base64 = encodedDescription,
-                    gist_url = gistUrl, // Send the URL, not the content
-                    app_version = GetAppVersion(),
-                    os_version = RuntimeInformation.OSDescription
-                }
+                title,
+                description,
+                logContent,
+                appVersion = GetAppVersion(),
+                osVersion = RuntimeInformation.OSDescription
             };
 
             var jsonPayload = JsonSerializer.Serialize(payload);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(dispatchUrl, content);
+            var response = await _httpClient.PostAsync(_bugReportEndpoint, content);
 
             if (response.IsSuccessStatusCode)
             {
                 _dialogService.ShowMessageBox("Bug report submitted successfully! It will appear on GitHub shortly.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                _logger?.LogInfo("Successfully triggered the bug report GitHub Action.");
+                _logger?.LogInfo("Successfully submitted the bug report.");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 _dialogService.ShowMessageBox($"Failed to submit bug report. Status: {response.StatusCode}\n{errorContent}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                _logger?.LogError($"Failed to trigger GitHub Action. Status: {response.StatusCode}, Response: {errorContent}");
+                _logger?.LogError($"Failed to submit bug report. Status: {response.StatusCode}, Response: {errorContent}");
             }
         }
         catch (Exception ex)
         {
             _dialogService.ShowMessageBox($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             _logger?.LogError("An exception occurred while creating a bug report.", ex);
-        }
-    }
-
-    private async Task<string?> UploadLogAsGistAsync()
-    {
-        try
-        {
-            var logContent = await GetLogContentAsync();
-            if (string.IsNullOrEmpty(logContent))
-            {
-                _logger?.LogWarning("Log content is empty, skipping Gist creation.");
-                return "No logs available.";
-            }
-
-            var gist = new GitHubGist
-            {
-                Description = $"AMFormsCST Log File - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC",
-                Public = false,
-                Files = new Dictionary<string, GistFile>
-                {
-                    ["log.txt"] = new() { Content = logContent }
-                }
-            };
-
-            var jsonPayload = JsonSerializer.Serialize(gist);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("https://api.github.com/gists", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(responseJson);
-                var htmlUrl = doc.RootElement.GetProperty("html_url").GetString();
-                _logger?.LogInfo($"Successfully created Gist at {htmlUrl}");
-                return htmlUrl;
-            }
-
-            var errorContent = await response.Content.ReadAsStringAsync();
-            _logger?.LogError($"Failed to create Gist. Status: {response.StatusCode}, Response: {errorContent}");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError("An exception occurred while creating a Gist.", ex);
-            return null;
         }
     }
 

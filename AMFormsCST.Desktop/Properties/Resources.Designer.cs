@@ -61,29 +61,11 @@ namespace AMFormsCST.Desktop.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AutoMate-Forms-Customer-Support-Tool.
+        ///   Looks up a localized string similar to https://scmt-bugreport-cwash9d2fpgcbgdx.centralus-01.azurewebsites.net/api/CreateBugReport.
         /// </summary>
-        internal static string GitHubRepoName {
+        internal static string BugReportEndpointUrl {
             get {
-                return ResourceManager.GetString("GitHubRepoName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to TheHeartOfFire.
-        /// </summary>
-        internal static string GitHubRepoOwner {
-            get {
-                return ResourceManager.GetString("GitHubRepoOwner", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LimitedGHPat.
-        /// </summary>
-        internal static string LimitedGHPat {
-            get {
-                return ResourceManager.GetString("LimitedGHPat", resourceCulture);
+                return ResourceManager.GetString("BugReportEndpointUrl", resourceCulture);
             }
         }
     }

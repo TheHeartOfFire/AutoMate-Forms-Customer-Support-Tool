@@ -83,13 +83,6 @@ public partial class App : Application
 
                     return new SerilogService(logger);
                 });
-                _ = services.AddSingleton<IConfiguration>(sp =>
-                {
-                    var builder = new ConfigurationBuilder()
-                        .AddUserSecrets<App>();
-
-                    return builder.Build();
-                });
                 _ = services.AddTransient<IDebounceService, DebounceService>();
 
                 _ = services.AddHostedService<ApplicationHostService>();

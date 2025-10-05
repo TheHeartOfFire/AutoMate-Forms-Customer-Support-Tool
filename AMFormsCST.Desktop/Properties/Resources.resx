@@ -117,14 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="GitHubRepoName" xml:space="preserve">
-    <value>AutoMate-Forms-Customer-Support-Tool</value>
-  </data>
-  <data name="GitHubRepoOwner" xml:space="preserve">
-    <value>TheHeartOfFire</value>
-  </data>
-  <data name="LimitedGHPat" xml:space="preserve">
-    <value>LimitedGHPat</value>
-    <comment>Limited in scope to the repo for this project with no permissions. Used to trigger the Bug Report workflow</comment>
+  <data name="BugReportEndpointUrl" xml:space="preserve">
+    <value>https://scmt-bugreport-cwash9d2fpgcbgdx.centralus-01.azurewebsites.net/api/CreateBugReport</value>
   </data>
 </root>

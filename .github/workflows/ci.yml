@@ -1,29 +1,37 @@
-name: .NET CI
+name: .NET Desktop Build
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "master" ]
 
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup .NET
+    # Install the .NET 9 SDK
+    - name: Setup .NET 9
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
 
-    - name: Restore dependencies
+    # Restore dependencies
+    - name: Restore
       run: dotnet restore
 
+    # Build
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --no-restore --configuration Release
 
+    # Test
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
+      run: dotnet test --no-build --configuration Release

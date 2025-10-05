@@ -1,4 +1,4 @@
-name: .NET Desktop Build
+name: CD/CI
 
 on:
   push:

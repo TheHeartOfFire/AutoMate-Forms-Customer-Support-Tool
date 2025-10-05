@@ -27,6 +27,19 @@ public class CreateBugReport
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         var data = JsonSerializer.Deserialize<BugReportPayload>(requestBody, _jsonOptions);
 
+        // Validate required fields
+        if (data == null ||
+            string.IsNullOrWhiteSpace(data.Title) ||
+            string.IsNullOrWhiteSpace(data.Description) ||
+            string.IsNullOrWhiteSpace(data.LogContent) ||
+            string.IsNullOrWhiteSpace(data.AppVersion) ||
+            string.IsNullOrWhiteSpace(data.OsVersion))
+        {
+            logger.LogWarning("Missing or invalid required fields in bug report payload.");
+            var badRequestResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+            await badRequestResponse.WriteStringAsync("Missing or invalid required fields: Title, Description, LogContent, AppVersion, OsVersion are all required.");
+            return badRequestResponse;
+        }
         // Get secrets from environment variables (Application Settings in Azure)
         var pat = Environment.GetEnvironmentVariable("GITHUB_PAT");
         var repoOwner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER");

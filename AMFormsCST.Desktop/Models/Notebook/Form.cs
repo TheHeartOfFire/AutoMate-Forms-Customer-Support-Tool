@@ -51,6 +51,7 @@ public partial class Form : ManagedObservableCollectionItem
             _logger?.LogInfo($"Form name changed: {value}");
         }
     }
+
     partial void OnNotesChanged(FlowDocument? value)
     {
         OnPropertyChanged(nameof(IsBlank));

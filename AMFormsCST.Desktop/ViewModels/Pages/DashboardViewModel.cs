@@ -202,6 +202,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote_Forms_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Form>.SelectedItem)));
 
         _lastSelectedNote = SelectedNote;
+        UpdateTemplatesVM();
     }
 
     private void SelectedNote_Dealers_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -226,6 +227,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedDealer_Companies_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.Company>.SelectedItem)));
 
         _lastSelectedDealer = SelectedNote?.SelectedDealer;
+        UpdateTemplatesVM();
     }
 
     private void SelectedDealer_Companies_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -235,6 +237,7 @@ public partial class DashboardViewModel : ViewModel
         OnPropertyChanged(nameof(SelectedNote));
         SelectPreviousCompanyCommand.NotifyCanExecuteChanged();
         SelectNextCompanyCommand.NotifyCanExecuteChanged();
+        UpdateTemplatesVM();
     }
 
     private void SelectedNote_Contacts_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -244,6 +247,7 @@ public partial class DashboardViewModel : ViewModel
         OnPropertyChanged(nameof(SelectedNote));
         SelectPreviousContactCommand.NotifyCanExecuteChanged();
         SelectNextContactCommand.NotifyCanExecuteChanged();
+        UpdateTemplatesVM();
     }
 
     private void SelectedNote_Forms_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -268,6 +272,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedForm_TestDeals_PropertyChanged(this, new PropertyChangedEventArgs(nameof(ManagedObservableCollection<Models.TestDeal>.SelectedItem)));
 
         _lastSelectedForm = SelectedNote?.SelectedForm;
+        UpdateTemplatesVM();
     }
 
     private void SelectedForm_TestDeals_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -277,6 +282,7 @@ public partial class DashboardViewModel : ViewModel
         OnPropertyChanged(nameof(SelectedNote));
         SelectPreviousTestDealCommand.NotifyCanExecuteChanged();
         SelectNextTestDealCommand.NotifyCanExecuteChanged();
+        UpdateTemplatesVM();
     }
 
     private void OnNoteModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -284,6 +290,7 @@ public partial class DashboardViewModel : ViewModel
         UiRefreshCounter++;
         _debounceService.ScheduleEvent();
         _logger?.LogDebug($"Note property changed: {e.PropertyName} on {sender}");
+        UpdateTemplatesVM();
     }
 
     [RelayCommand(CanExecute = nameof(CanSelectPreviousNote))]
@@ -294,6 +301,7 @@ public partial class DashboardViewModel : ViewModel
         Notes[currentIndex - 1].Select();
         if (_supportTool is not null)
             _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousNote()
@@ -311,6 +319,7 @@ public partial class DashboardViewModel : ViewModel
         Notes[currentIndex + 1].Select();
         if (_supportTool is not null)
             _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextNote()
@@ -328,6 +337,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Dealers[currentIndex - 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousDealer()
@@ -345,6 +355,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Dealers[currentIndex + 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextDealer()
@@ -361,7 +372,9 @@ public partial class DashboardViewModel : ViewModel
         var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
         SelectedNote.SelectedDealer.Companies[currentIndex - 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Dealers.SelectedItem is not null)
-            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = 
+                SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousCompany()
@@ -378,7 +391,9 @@ public partial class DashboardViewModel : ViewModel
         var currentIndex = SelectedNote.SelectedDealer.Companies.IndexOf(SelectedNote.SelectedDealer.SelectedCompany);
         SelectedNote.SelectedDealer.Companies[currentIndex + 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Dealers.SelectedItem is not null)
-            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+            _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem.Companies.SelectedItem = 
+                SelectedNote.SelectedDealer.SelectedCompany.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextCompany()
@@ -396,6 +411,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Contacts[currentIndex - 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousContact()
@@ -413,6 +429,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Contacts[currentIndex + 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextContact()
@@ -430,6 +447,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Forms[currentIndex - 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousForm()
@@ -447,6 +465,7 @@ public partial class DashboardViewModel : ViewModel
         SelectedNote.Forms[currentIndex + 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null)
             _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextForm()
@@ -463,7 +482,9 @@ public partial class DashboardViewModel : ViewModel
         var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
         SelectedNote.SelectedForm.TestDeals[currentIndex - 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Forms.SelectedItem is not null)
-            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = 
+                SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectPreviousTestDeal()
@@ -480,7 +501,9 @@ public partial class DashboardViewModel : ViewModel
         var currentIndex = SelectedNote.SelectedForm.TestDeals.IndexOf(SelectedNote.SelectedForm.SelectedTestDeal);
         SelectedNote.SelectedForm.TestDeals[currentIndex + 1].Select();
         if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem?.Forms.SelectedItem is not null)
-            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+            _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem.TestDeals.SelectedItem = 
+                SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+        UpdateTemplatesVM();
     }
 
     private bool CanSelectNextTestDeal()
@@ -502,6 +525,7 @@ public partial class DashboardViewModel : ViewModel
             if (_supportTool is not null &&
                 _supportTool.Notebook.Notes.SelectedItem?.Id != SelectedNote?.CoreType?.Id)
                 _supportTool.Notebook.Notes.SelectedItem = SelectedNote?.CoreType;
+            UpdateTemplatesVM();
 
             _logger?.LogInfo($"Note clicked and selected: {caseId}");
 
@@ -524,6 +548,7 @@ public partial class DashboardViewModel : ViewModel
             if (_supportTool is not null && _supportTool.Notebook.Notes.SelectedItem is not null &&
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem?.Id != SelectedNote.SelectedDealer.CoreType?.Id)
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem = SelectedNote.SelectedDealer.CoreType;
+            UpdateTemplatesVM();
 
             _logger?.LogInfo($"Dealer clicked and selected: {dealer.Id}");
         }
@@ -552,6 +577,7 @@ public partial class DashboardViewModel : ViewModel
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem?.Id != SelectedNote.SelectedDealer.SelectedCompany.CoreType?.Id))
                 _supportTool.Notebook.Notes.SelectedItem.Dealers.SelectedItem!.Companies.SelectedItem = SelectedNote.SelectedDealer.SelectedCompany.CoreType;
 
+            UpdateTemplatesVM();
             _logger?.LogInfo($"Company clicked and selected: {company.Id}");
         }
         catch (Exception ex)
@@ -574,6 +600,7 @@ public partial class DashboardViewModel : ViewModel
                 _supportTool.Notebook.Notes.SelectedItem is not null &&
                 _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem?.Id != SelectedNote.SelectedContact.CoreType?.Id)
                 _supportTool.Notebook.Notes.SelectedItem.Contacts.SelectedItem = SelectedNote.SelectedContact.CoreType;
+            UpdateTemplatesVM();
             _logger?.LogInfo($"Contact clicked and selected: {contact.Id}");
         }
         catch (Exception ex)
@@ -597,6 +624,7 @@ public partial class DashboardViewModel : ViewModel
                 _supportTool.Notebook.Notes.SelectedItem is not null &&
                 _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem?.Id != SelectedNote.SelectedForm.CoreType?.Id)
                 _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem = SelectedNote.SelectedForm.CoreType;
+            UpdateTemplatesVM();
 
             _logger?.LogInfo($"Form clicked and selected: {form.Id}");
         }
@@ -623,6 +651,8 @@ public partial class DashboardViewModel : ViewModel
                 _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem is not null &&
                 _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem?.Id != SelectedNote.SelectedForm.SelectedTestDeal.CoreType?.Id)
                 _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
+
+            UpdateTemplatesVM(); 
             _logger?.LogInfo($"Deal clicked and selected: {deal.Id}");
         }
         catch (Exception ex)
@@ -679,7 +709,7 @@ public partial class DashboardViewModel : ViewModel
                     _logger?.LogInfo($"TestDeal deleted: {dealToDelete.Id}");
                     break;
             }
-
+            UpdateTemplatesVM();
             _debounceService.ScheduleEvent();
         }
         catch (Exception ex)
@@ -687,21 +717,36 @@ public partial class DashboardViewModel : ViewModel
             _logger?.LogError("Error in OnDeleteItemClicked.", ex);
         }
     }
-
+    private TemplatesViewModel? _templatesvm;
     [RelayCommand]
     private void OpenTemplateDialog()
     {
         try
         {
             var vm = new TemplatesViewModel(_supportTool, _fileSystem);
+            _templatesvm = vm;
             var page = new TemplatesPage(vm);
             var dialog = new PageHostDialog(page, "Templates");
             dialog.Show();
+            dialog.Closed += (s, e) => _templatesvm = null;
             _logger?.LogInfo("Opened Template Dialog.");
         }
         catch (Exception ex)
         {
             _logger?.LogError("Error opening Template Dialog.", ex);
+        }
+    }
+
+    private void UpdateTemplatesVM()
+    {
+        try
+        {
+            _templatesvm?.Refresh();
+            _logger?.LogInfo("TemplatesViewModel updated.");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Error updating TemplatesViewModel.", ex);
         }
     }
 
@@ -827,9 +872,17 @@ public partial class DashboardViewModel : ViewModel
             _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem?.Id != SelectedNote.SelectedForm.SelectedTestDeal.CoreType?.Id)
             _supportTool.Notebook.Notes.SelectedItem.Forms.SelectedItem!.TestDeals.SelectedItem = SelectedNote.SelectedForm.SelectedTestDeal.CoreType;
 
+        UpdateTemplatesVM();
         _logger?.LogInfo("LoadCase command executed.");
     }
 
+    // Add to your DashboardViewModel
+    [RelayCommand]
+    private void FormNotesChanged()
+    {
+        SelectedNote?.SelectedForm?.UpdateCore();
+        UpdateTemplatesVM();
+    }
     public NoteModel ParseCaseText(string caseText)
     {
         var note = new NoteModel(_supportTool.Settings.UserSettings.ExtSeparator, _logger);

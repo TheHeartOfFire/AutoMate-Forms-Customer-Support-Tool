@@ -192,6 +192,7 @@ public partial class TemplatesViewModel : ViewModel
             Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
             SelectTemplate(template);
+            TemplatesView.Refresh();
             _logger?.LogInfo($"Template added: {template.Template.Name}");
         }
         catch (Exception ex)
@@ -251,6 +252,7 @@ public partial class TemplatesViewModel : ViewModel
             Templates = new(_supportTool.Enforcer.Templates.Select(t => new TemplateItemViewModel(t, _supportTool) { Template = t }));
 
             SelectTemplate(Templates.FirstOrDefault());
+            TemplatesView.Refresh();
             _logger?.LogInfo($"Template removed: {SelectedTemplate?.Template.Name}");
         }
         catch (Exception ex)
@@ -342,5 +344,11 @@ public partial class TemplatesViewModel : ViewModel
         {
             _logger?.LogError("Error importing templates.", ex);
         }
+    }
+
+    public void Refresh()
+    {
+        TemplatesView.Refresh();
+        SelectedTemplate.RefreshTemplateData();
     }
 }

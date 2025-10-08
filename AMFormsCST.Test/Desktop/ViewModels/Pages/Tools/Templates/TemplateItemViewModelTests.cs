@@ -5,6 +5,7 @@ using Moq;
 using System;
 using System.Collections.ObjectModel;
 using Xunit;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Test.Desktop.ViewModels.Pages.Tools.Templates;
 
@@ -13,7 +14,7 @@ public class TemplateItemViewModelTests
     private static TextTemplate CreateTextTemplate(string text = "Hello {0}!", string name = "Test", string description = "Desc")
     {
         var templateType = TextTemplate.TemplateType.Other;
-        return new TextTemplate(name, description, text, templateType);
+        return new TextTemplate(name, description, new FlowDocument(new Paragraph(new Run(text))), templateType);
     }
 
     private static Mock<ISupportTool> CreateSupportToolMock()

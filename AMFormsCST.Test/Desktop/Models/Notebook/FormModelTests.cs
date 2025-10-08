@@ -2,6 +2,7 @@ using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
 using Moq;
 using System.Linq;
+using System.Windows.Documents;
 using Xunit;
 using CoreForm = AMFormsCST.Core.Types.Notebook.Form;
 
@@ -45,7 +46,7 @@ public class FormModelTests
 
         // Act
         form.Name = name;
-        form.Notes = notes;
+        form.Notes = new FlowDocument(new Paragraph(new Run(notes)));
 
         // Assert
         Assert.False(form.IsBlank);
@@ -90,7 +91,7 @@ public class FormModelTests
         var formModel = new Form(null)
         {
             Name = "F1",
-            Notes = "N1",
+            Notes = new FlowDocument(new Paragraph(new Run("N1"))),
             Notable = true
         };
         // The constructor already adds a blank TestDeal. We add a second, non-blank one.
@@ -103,7 +104,7 @@ public class FormModelTests
         // Assert
         Assert.Equal(formModel.Id, coreForm.Id);
         Assert.Equal("F1", coreForm.Name);
-        Assert.Equal("N1", coreForm.Notes);
+        Assert.Equal("N1", coreForm.Notes.Trim());
         Assert.True(coreForm.Notable);
 
         // The test should account for the blank item that is part of the collection.

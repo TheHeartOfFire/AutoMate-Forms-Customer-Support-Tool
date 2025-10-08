@@ -1,6 +1,7 @@
 using AMFormsCST.Desktop.Interfaces;
 using AMFormsCST.Desktop.Models;
 using System.Linq;
+using System.Windows.Documents;
 using Xunit;
 using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 
@@ -67,7 +68,7 @@ public class NoteModelTests
 
         // Act
         note.CaseNumber = caseNumber;
-        note.Notes = notes;
+        note.Notes = new FlowDocument(new Paragraph(new Run(notes)));
 
         // Assert
         Assert.False(note.IsBlank);
@@ -112,7 +113,7 @@ public class NoteModelTests
         var noteModel = new NoteModel(TestExtSeparator, null)
         {
             CaseNumber = "98765",
-            Notes = "Test case notes."
+            Notes = new FlowDocument(new Paragraph(new Run("Test case notes.")))
         };
 
         var dealer = new Dealer(null) { Name = "Test Dealer", ServerCode = "SVR1" };
@@ -133,7 +134,7 @@ public class NoteModelTests
 
         // Assert
         Assert.Equal("98765", coreNote.CaseText);
-        Assert.Equal("Test case notes.", coreNote.NotesText);
+        Assert.Equal("Test case notes.", coreNote.NotesText.Trim());
 
         Assert.Equal(2, coreNote.Dealers.Count);
         var coreDealer = coreNote.Dealers.FirstOrDefault(d => !string.IsNullOrEmpty(d.Name));
@@ -170,10 +171,10 @@ public class NoteModelTests
 
         // Act
         noteModel.CaseNumber = "CS123";
-        noteModel.Notes = "Test Notes";
+        noteModel.Notes = new FlowDocument(new Paragraph(new Run("Test Notes")));
 
         // Assert
         Assert.Equal("CS123", coreNote.CaseText);
-        Assert.Equal("Test Notes", coreNote.NotesText);
+        Assert.Equal("Test Notes", coreNote.NotesText.Trim());
     }
 }

@@ -8,6 +8,7 @@ using AMFormsCST.Desktop.ViewModels.Pages.Tools;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.Desktop.ViewModels.Pages.Tools.Pages;
@@ -35,8 +36,8 @@ public class TemplatesViewModelTests
         // 2. Create a list of templates to be returned by the mock enforcer
         _templateList =
         [
-            new TextTemplate("Template 1", "Desc 1", "Text 1", TextTemplate.TemplateType.Other),
-            new TextTemplate("Template 2", "Desc 2", "Text 2", TextTemplate.TemplateType.Email)
+            new TextTemplate("Template 1", "Desc 1", new FlowDocument(new Paragraph(new Run("Text 1"))), TextTemplate.TemplateType.Other),
+            new TextTemplate("Template 2", "Desc 2", new FlowDocument(new Paragraph(new Run("Text 2"))), TextTemplate.TemplateType.Email)
         ];
 
         // 3. Configure the full dependency chain required by the view models

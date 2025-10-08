@@ -1,8 +1,9 @@
-﻿using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+﻿    using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models.Templates;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Windows.Documents;
 using Xunit;
 
 namespace AMFormsCST.Test.Desktop.Models.Templates;
@@ -30,7 +31,7 @@ public class DeprecatedTemplateTests
         var template = new DeprecatedTemplate("Test", text, variables, new List<string>(defaults), DeprecatedTemplate.TemplateType.Other);
         var converted = (TextTemplate)template;
 
-        Assert.Equal(expected, converted.Text);
+        Assert.Equal(expected + "\r\n", TextTemplate.GetFlowDocumentPlainText(converted.Text));
         Assert.Equal("Test", converted.Name);
         Assert.Equal("[Converted]", converted.Description);
         Assert.Equal(TextTemplate.TemplateType.Other, converted.Type);
@@ -44,7 +45,7 @@ public class DeprecatedTemplateTests
         var converted = (TextTemplate)template;
 
         // Should fallback to raw text
-        Assert.Equal("Value: {0} {1}", converted.Text);
+        Assert.Equal("Value: {0} {1}\r\n", TextTemplate.GetFlowDocumentPlainText(converted.Text));
     }
 
     [Fact]

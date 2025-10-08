@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows;
+using System.Windows.Documents;
+using static AMFormsCST.Core.Types.BestPractices.TextTemplates.Models.TextTemplate;
 
 namespace AMFormsCST.Desktop.ViewModels.Dialogs;
 
@@ -14,10 +16,10 @@ public partial class NewTemplateDialogViewModel : ObservableObject
     private string _templateDescription = string.Empty;
 
     [ObservableProperty]
-    private string _templateContent = string.Empty;
+    private FlowDocument _templateContent = new();
 
     [ObservableProperty]
-    private TextTemplate.TemplateType _templateType = TextTemplate.TemplateType.Other;
+    private TemplateType _templateType;
 
     public NewTemplateDialogViewModel()
     {

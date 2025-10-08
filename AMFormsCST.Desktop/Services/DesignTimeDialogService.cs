@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using MessageBoxResult = System.Windows.MessageBoxResult;
 
 namespace AMFormsCST.Desktop.Services;
@@ -10,9 +11,8 @@ public class DesignTimeDialogService : IDialogService
     => MessageBoxResult.OK;
     
 
-    public (bool? DialogResult, string TemplateName, string TemplateDescription, string TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, string? content = null)
-    => (true, "DesignTimeTemplate", "A template for design time", "Content");
-    
+    public (bool? DialogResult, string TemplateName, string TemplateDescription, FlowDocument TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, FlowDocument? content = null)
+    => (true, "DesignTimeTemplate", "A template for design time", new() { Blocks = { new Paragraph(new Run("Content")) } });
 
     public bool ShowPageHostDialog(Page contentPage, string title = "Page Preview", bool canConfirm = false)
     => true;

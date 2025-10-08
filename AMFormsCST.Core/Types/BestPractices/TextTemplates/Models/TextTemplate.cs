@@ -1,6 +1,7 @@
 ﻿using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.BestPractices;
 using System.Text.Json.Serialization;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 public class TextTemplate : IEquatable<TextTemplate>
@@ -9,7 +10,7 @@ public class TextTemplate : IEquatable<TextTemplate>
     public Guid Id { get; private set; }// Default to empty GUID for new templates
     public string Name { get; set; }
     public string Description { get; set; }
-    public string Text { get; set; }
+    public FlowDocument Text { get; set; }
     public TemplateType Type { get; set; } 
     public enum TemplateType
     {
@@ -19,7 +20,7 @@ public class TextTemplate : IEquatable<TextTemplate>
         Email,
         Other
     }
-    public TextTemplate(string name, string description, string text, TemplateType type)
+    public TextTemplate(string name, string description, FlowDocument text, TemplateType type)
     {
         Id = Guid.NewGuid(); // Or pass in an existing ID for editing
         Name = name;
@@ -28,7 +29,7 @@ public class TextTemplate : IEquatable<TextTemplate>
         Type = type;
     }
     [JsonConstructor]
-    public TextTemplate(Guid id, string name, string description, string text, TemplateType type)
+    public TextTemplate(Guid id, string name, string description, FlowDocument text, TemplateType type)
     {
         Id = id;
         Name = name;
@@ -47,8 +48,8 @@ public class TextTemplate : IEquatable<TextTemplate>
         foreach (var variable in supportTool.Settings.UserSettings.Organization.Variables)
         {
             if (Text is not null && 
-                (Text.Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
-                Text.Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase)))
+                (GetFlowDocumentPlainText(Text).Contains(variable.ProperName, StringComparison.InvariantCultureIgnoreCase) ||
+                GetFlowDocumentPlainText(Text).Contains(variable.Prefix + variable.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 variables.Add(variable);
             }
@@ -143,6 +144,17 @@ public class TextTemplate : IEquatable<TextTemplate>
         }
 
         return lowestIndex;
+    }
+    public static string GetFlowDocumentPlainText(FlowDocument document)
+    {
+        // Create a TextRange from the beginning (ContentStart) to the end (ContentEnd) of the document.
+        TextRange textRange = new TextRange(
+            document.ContentStart,
+            document.ContentEnd
+        );
+
+        // The Text property of the TextRange object returns the plain text content as a string.
+        return textRange.Text;
     }
 }
 

@@ -10,5 +10,12 @@ public interface IForm : INotebookItem<IForm>
     string Name { get; set; }
     bool Notable { get; set; }
     string Notes { get; set; }
+    FormFormat Format { get; set; }
     SelectableList<ITestDeal> TestDeals { get; set; }
+
+    public enum FormFormat
+    {
+        LegacyImpact,
+        Pdf
+    }
 }

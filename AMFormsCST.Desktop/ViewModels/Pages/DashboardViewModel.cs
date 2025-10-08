@@ -16,6 +16,7 @@ using System.ComponentModel;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Documents;
 using Wpf.Ui;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages;
@@ -51,12 +52,12 @@ public partial class DashboardViewModel : ViewModel
         var note1 = new NoteModel("x")
         {
             CaseNumber = "00123456",
-            Notes = "This is the first sample note."
+            Notes = new() { Blocks = { new Paragraph(new Run("This is the first sample note.")) } }
         };
         var note2 = new NoteModel("x")
         {
             CaseNumber = "00234567",
-            Notes = "This is the second sample note."
+            Notes = new() { Blocks = { new Paragraph(new Run("This is the second sample note.")) } }
         };
 
         var contact1 = new Models.Contact("x") { Name = "John Doe", Email = "john.doe@email.com", Phone = "888-555-1234", PhoneExtension = "1234" };
@@ -70,7 +71,7 @@ public partial class DashboardViewModel : ViewModel
         note1.Dealers.Add(dealer1);
         note1.Dealers.FirstOrDefault(x => !x.IsBlank, note1.Dealers.First())?.Select();
 
-        var form1 = new Models.Form(note1) { Name = "Sample Form 1", Notes = "Notes for form 1" };
+        var form1 = new Models.Form(note1) { Name = "Sample Form 1", Notes = new() { Blocks = { new Paragraph(new Run("Notes for form 1")) } } };
         var testDeal1 = new Models.TestDeal { DealNumber = "D001", Purpose = "Test purpose 1" };
         form1.TestDeals.Add(testDeal1);
         form1.TestDeals.FirstOrDefault(x => !x.IsBlank, form1.TestDeals.First())?.Select();
@@ -868,7 +869,8 @@ public partial class DashboardViewModel : ViewModel
                 ? string.Join(Environment.NewLine, lines.Skip(descriptionIdx + 1).Take(separatorIdx - descriptionIdx - 1)).Trim()
                 : string.Empty;
 
-            note.Notes = $"{subject}{Environment.NewLine}{description}".Trim();
+            note.Notes = new FlowDocument();
+            note.Notes.Blocks.Add(new Paragraph(new Run($"{subject}{Environment.NewLine}{description}".Trim())));
 
             var contact = note.Contacts[0];
             contact.Name = GetValueAfter("Contact Name");

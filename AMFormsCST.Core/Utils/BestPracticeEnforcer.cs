@@ -28,7 +28,7 @@ public class BestPracticeEnforcer : IBestPracticeEnforcer
         try
         {
             ArgumentNullException.ThrowIfNull(template);
-            if (string.IsNullOrWhiteSpace(template.Text)) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
+            if (string.IsNullOrWhiteSpace(TextTemplate.GetFlowDocumentPlainText(template.Text))) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
             if (Templates.Contains(template)) throw new ArgumentException("Template already exists.", nameof(template));
 
             Templates.Add(template);
@@ -47,7 +47,7 @@ public class BestPracticeEnforcer : IBestPracticeEnforcer
         try
         {
             ArgumentNullException.ThrowIfNull(template);
-            if (string.IsNullOrWhiteSpace(template.Text)) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
+            if (string.IsNullOrWhiteSpace(TextTemplate.GetFlowDocumentPlainText(template.Text))) throw new ArgumentException("Template text cannot be null or whitespace.", nameof(template));
             if (!Templates.Contains(template)) throw new ArgumentException("Template does not exist.", nameof(template));
 
             Templates.Remove(template);

@@ -8,6 +8,8 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:models="clr-namespace:AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;assembly=AMFormsCST.Core" 
                  xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                 xmlns:controls="clr-namespace:AMFormsCST.Desktop.Controls"
+                 xmlns:helpers="clr-namespace:AMFormsCST.Desktop.Helpers"
                  mc:Ignorable="d"
         Title="Create New Template" Height="450" Width="600"
         WindowStartupLocation="CenterScreen"
@@ -20,7 +22,6 @@
 
         <Grid Margin="15,40,15,15">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -45,10 +46,12 @@
                       SelectedItem="{Binding TemplateType, Mode=TwoWay}" />
 
             <Label Grid.Row="3" Grid.Column="0" Content="Content:"/>
-            <ui:TextBox Grid.Row="3" Grid.Column="1" Margin="5" Text="{Binding TemplateContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        TextWrapping="Wrap" AcceptsReturn="True" MinHeight="150" VerticalScrollBarVisibility="Auto"/>
+            <controls:RichTextToolbar Grid.Row="3" Grid.Column="1" Target="{Binding ElementName=ContentRichTextBox}" Margin="5,0,0,2"/>
+            <ui:RichTextBox x:Name="ContentRichTextBox" Grid.Row="4" Grid.Column="1" Margin="5" 
+                          helpers:RichTextBoxHelper.Document="{Binding TemplateContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          AcceptsReturn="True" MinHeight="150" VerticalScrollBarVisibility="Auto"/>
 
-            <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                 <ui:Button Content="Create" Command="{Binding CreateCommand}" Margin="0,0,10,0" MinWidth="80" IsDefault="True"
                            CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ui:FluentWindow}}}" x:Name="ConfirmButton"/>
                 <ui:Button Content="Cancel" MinWidth="80" IsCancel="True"/>

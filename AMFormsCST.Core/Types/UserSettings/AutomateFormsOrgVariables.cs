@@ -4,6 +4,7 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Interfaces;
 using System.Text.Json.Serialization;
+using static AMFormsCST.Core.Interfaces.Notebook.IForm;
 
 namespace AMFormsCST.Core.Types.UserSettings;
 public class AutomateFormsOrgVariables : IOrgVariables
@@ -67,15 +68,15 @@ public class AutomateFormsOrgVariables : IOrgVariables
         }
 
         var variables = new List<ITextTemplateVariable>
-        { 
+        {
             new TextTemplateVariable(
              properName: "SelectedDealer:ServerID",
              name: "serverid",
              prefix: "selecteddealer:",
              description: "Server ID#",
              aliases: ["server", "serv", "code", "id"],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.ServerCode 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.ServerCode
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -84,8 +85,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectedcompany:",
              description: "Company#(s)",
              aliases: ["code"],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.Companies.SelectedItem?.CompanyCode 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.Companies.SelectedItem?.CompanyCode
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -94,8 +95,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selecteddealer:",
              description: "Dealership Name",
              aliases: [],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.Companies.SelectedItem?.Name 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Dealers.SelectedItem?.Companies.SelectedItem?.Name
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -104,8 +105,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectedcontact:",
              description: "Contact Name",
              aliases: [],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Name 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Name
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -114,8 +115,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectedcontact:",
              description: "E-Mail Address",
              aliases: ["email"],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Email 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Email
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -124,8 +125,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectedcontact:",
              description: "Phone#",
              aliases: [],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Phone 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Contacts.SelectedItem?.Phone
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -134,9 +135,10 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectednote:",
              description: "Notes",
              aliases: [],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.NotesText 
-             ?? string.Empty
+             getValue: () =>
+             !string.IsNullOrWhiteSpace(_supportToolFactory()?.Notebook.Notes.SelectedItem?.NotesText) 
+                ? _supportToolFactory()!.Notebook.Notes.SelectedItem!.NotesText
+                : string.Empty
             ),
             new TextTemplateVariable(
              properName: "SelectedNote:CaseNumber",
@@ -144,8 +146,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectednote:",
              description: "Case#",
              aliases: ["caseno", "case"],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.CaseText 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.CaseText
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -154,8 +156,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectednote:",
              description: "All Forms",
              aliases: ["form"],
-             getValue: () => 
-             ">" + 
+             getValue: () =>
+             ">" +
              string.Join("\n>", _supportToolFactory()?.Notebook.Notes.SelectedItem?
                 .Forms.Where(f => !string.IsNullOrEmpty(f.Name)).Select(f => f.Name) ?? [])
             ),
@@ -165,8 +167,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectednote:",
              description: "Notable Forms",
              aliases: ["notable"],
-             getValue: () => 
-             ">" + 
+             getValue: () =>
+             ">" +
              string.Join("\n>", _supportToolFactory()?.Notebook.Notes.SelectedItem?
                 .Forms.Where(f => f.Notable).Where(f => !string.IsNullOrEmpty(f.Name)).Select(f => f.Name) ?? [])
             ),
@@ -190,7 +192,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address",
              aliases: ["all", "full", "mailingaddress", "mailto"],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMMailingAddress", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -199,7 +201,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Name",
              aliases: [],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMMailingName", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -208,7 +210,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Street Address",
              aliases: ["street", "line1"],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMStreetAddress", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -217,7 +219,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - City",
              aliases: [],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMCity", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -226,7 +228,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - State",
              aliases: [],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMState", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -235,7 +237,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - Zip Code",
              aliases: ["postalcode", "zip"],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMZip", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -244,7 +246,7 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "ammail:",
              description: "AutoMate Forms Mailing Address - City, State Zip",
              aliases: ["csz", "line2"],
-             getValue: () => 
+             getValue: () =>
              LooseVariables.TryGetValue("AMCityStateZip", out var address) ? address : string.Empty
             ),
             new TextTemplateVariable(
@@ -253,8 +255,8 @@ public class AutomateFormsOrgVariables : IOrgVariables
              prefix: "selectedtestdeal:",
              description: "Test Deal#",
              aliases: ["dealno", "deal"],
-             getValue: () => 
-             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Forms.SelectedItem?.TestDeals.SelectedItem?.DealNumber 
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Forms.SelectedItem?.TestDeals.SelectedItem?.DealNumber
              ?? string.Empty
             ),
             new TextTemplateVariable(
@@ -285,7 +287,16 @@ public class AutomateFormsOrgVariables : IOrgVariables
              aliases: [],
              getValue: () =>
              string.Join("\n\n", _supportToolFactory()?.Notebook.Notes.SelectedItem?
-                .Forms.Where(f => f.Notable).Where(f => !string.IsNullOrEmpty(f.Name)).Select(f => "Name: " + f.Name + "\nNotes: " + f.Notes) ?? [])
+                .Forms.Where(f => f.Notable).Where(f => !string.IsNullOrEmpty(f.Name)).Select(f => "Name: " + f.Name +"\nFormat: " + f.Format.ToString() + "\nTest Deals: " + string.Join(", ", f.TestDeals.Select(td => td.DealNumber)) + "\nNotes: " + f.Notes) ?? [])
+            ),
+            new TextTemplateVariable(
+             properName: "SelectedForm:Type",
+             name: "formtype",
+             prefix: "selectedform:",
+             description: "Selected form type",
+             aliases: [],
+             getValue: () =>
+             _supportToolFactory()?.Notebook.Notes.SelectedItem?.Forms.SelectedItem?.Format.ToString() ?? FormFormat.Pdf.ToString()
             ),
             new TextTemplateVariable(
              properName: "User:Input",

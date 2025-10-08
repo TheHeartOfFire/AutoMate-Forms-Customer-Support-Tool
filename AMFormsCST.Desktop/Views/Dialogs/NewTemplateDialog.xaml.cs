@@ -22,7 +22,7 @@ namespace AMFormsCST.Desktop.Views.Dialogs;
 /// </summary>
 public partial class NewTemplateDialog : FluentWindow
 {
-    public NewTemplateDialog(string? Name = null, string? Description = null, string? Content = null, TextTemplate.TemplateType type = TextTemplate.TemplateType.Other)
+    public NewTemplateDialog(string? Name = null, string? Description = null, FlowDocument? Content = null, TextTemplate.TemplateType type = TextTemplate.TemplateType.Other)
     {
         InitializeComponent();
         
@@ -30,7 +30,7 @@ public partial class NewTemplateDialog : FluentWindow
         {
             TemplateName = Name ?? string.Empty,
             TemplateDescription = Description ?? string.Empty,
-            TemplateContent = Content ?? string.Empty,
+            TemplateContent = Content ?? new(),
             TemplateType = type
         }; // Set the DataContext
 
@@ -42,7 +42,7 @@ public partial class NewTemplateDialog : FluentWindow
     // Optional: Properties to easily access the values from the ViewModel
     public string TemplateName => ((NewTemplateDialogViewModel)DataContext).TemplateName;
     public string TemplateDescription => ((NewTemplateDialogViewModel)DataContext).TemplateDescription;
-    public string TemplateContent => ((NewTemplateDialogViewModel)DataContext).TemplateContent;
+    public string TemplateContent => TextTemplate.GetFlowDocumentPlainText(((NewTemplateDialogViewModel)DataContext).TemplateContent);
     public TextTemplate.TemplateType Type => ((NewTemplateDialogViewModel)DataContext).TemplateType;
 
     private void CustomTitleBarArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

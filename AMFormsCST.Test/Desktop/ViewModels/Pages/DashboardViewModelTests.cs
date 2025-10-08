@@ -11,6 +11,7 @@ using System;
 using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 using Assert = Xunit.Assert;
 using CollectionMemberState = AMFormsCST.Desktop.Interfaces.IManagedObservableCollectionItem.CollectionMemberState;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 
 namespace AMFormsCST.Test.Desktop.ViewModels.Pages;
 
@@ -516,7 +517,7 @@ Web Browser: 11
         // Assert
         Assert.NotNull(note);
         Assert.Equal(expectedCaseNumber, note.CaseNumber);
-        Assert.Equal(expectedNotes, note.Notes);
+        Assert.Equal(expectedNotes, TextTemplate.GetFlowDocumentPlainText(note.Notes).Trim());
 
         Assert.Equal(2, note.Dealers.Count);
         var dealer = note.Dealers[0];

@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Desktop.ViewModels.Dialogs;
+using System.Windows.Documents;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 
 namespace AMFormsCST.Desktop.Services;
 
@@ -33,13 +35,13 @@ public class DialogService : IDialogService
     }
 
     /// <inheritdoc />
-    public (bool? DialogResult, string TemplateName, string TemplateDescription, string TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, string? content = null)
+    public (bool? DialogResult, string TemplateName, string TemplateDescription, FlowDocument TemplateContent) ShowNewTemplateDialog(string? name = null, string? description = null, FlowDocument? content = null)
     {
         _logger?.LogInfo("ShowNewTemplateDialog called.");
         var dialog = new NewTemplateDialog(name, description, content);
         var result = dialog.ShowDialog();
         _logger?.LogInfo($"NewTemplateDialog result: {result}");
-        return (result, dialog.TemplateName, dialog.TemplateDescription, dialog.TemplateContent);
+        return (result, dialog.TemplateName, dialog.TemplateDescription, ((NewTemplateDialogViewModel)dialog.DataContext).TemplateContent);
     }
 
     /// <inheritdoc />

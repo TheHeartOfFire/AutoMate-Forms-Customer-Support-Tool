@@ -17,6 +17,8 @@ public class Form : IForm
     public bool Notable { get; set; } = true;
     public Guid Id => _id;
 
+    public IForm.FormFormat Format { get; set; }
+
     public Form() : this(null) { }
     public Form(ILogService? logger)
     {

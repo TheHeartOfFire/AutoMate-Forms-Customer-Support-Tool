@@ -3,6 +3,7 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Desktop.Models.Templates;
 using AMFormsCST.Desktop.Services;
+using AMFormsCST.Desktop.ViewModels.Dialogs;
 using AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 using AMFormsCST.Desktop.Views.Dialogs;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +14,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools;
 
@@ -181,7 +183,7 @@ public partial class TemplatesViewModel : ViewModel
                 new TextTemplate(
                     dialog.TemplateName,
                     dialog.TemplateDescription,
-                    dialog.TemplateContent,
+                    ((NewTemplateDialogViewModel)dialog.DataContext).TemplateContent,
                     dialog.Type),
                 _supportTool);
 
@@ -223,7 +225,7 @@ public partial class TemplatesViewModel : ViewModel
 
             SelectedTemplate.Template.Name = dialog.TemplateName;
             SelectedTemplate.Template.Description = dialog.TemplateDescription;
-            SelectedTemplate.Template.Text = dialog.TemplateContent;
+            SelectedTemplate.Template.Text = ((NewTemplateDialogViewModel)dialog.DataContext).TemplateContent;
             SelectedTemplate.Template.Type = dialog.Type;
 
             SelectedTemplate.RefreshTemplateData();
@@ -277,7 +279,7 @@ public partial class TemplatesViewModel : ViewModel
         {
             if (item == SelectedTemplate) return;
 
-            Clipboard.SetText(SelectedTemplate?.Output);
+            Clipboard.SetText(TextTemplate.GetFlowDocumentPlainText(SelectedTemplate?.Output));
             _logger?.LogInfo($"Template output copied: {SelectedTemplate?.Template.Name}");
         }
         catch (Exception ex)

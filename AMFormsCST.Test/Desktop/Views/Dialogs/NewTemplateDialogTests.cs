@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Xunit;
 using AMFormsCST.Test.Helpers;
+using System.Windows.Documents;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 
 namespace AMFormsCST.Test.Desktop.Views.Dialogs;
 [Collection("STA Tests")]
@@ -15,24 +17,24 @@ public class NewTemplateDialogTests
     public void Constructor_InitializesDataContextAndProperties()
     {
         // Act
-        var dialog = new NewTemplateDialog("Name", "Desc", "Content");
+        var dialog = new NewTemplateDialog("Name", "Desc", new FlowDocument(new Paragraph(new Run("Content"))));
 
         // Assert
         Assert.IsType<NewTemplateDialogViewModel>(dialog.DataContext);
         var vm = (NewTemplateDialogViewModel)dialog.DataContext;
         Assert.Equal("Name", vm.TemplateName);
         Assert.Equal("Desc", vm.TemplateDescription);
-        Assert.Equal("Content", vm.TemplateContent);
+        Assert.Equal("Content", TextTemplate.GetFlowDocumentPlainText(vm.TemplateContent).Trim());
         Assert.Equal("Name", dialog.TemplateName);
         Assert.Equal("Desc", dialog.TemplateDescription);
-        Assert.Equal("Content", dialog.TemplateContent);
+        Assert.Equal("Content", dialog.TemplateContent.Trim());
     }
 
     [WpfFact]
     public void Constructor_SetsConfirmButtonContentToUpdate_WhenAnyFieldIsNotEmpty()
     {
         // Act
-        var dialog = new NewTemplateDialog("Name", "Desc", "Content");
+        var dialog = new NewTemplateDialog("Name", "Desc", new FlowDocument(new Paragraph(new Run("Content"))));
 
         // Assert
         Assert.Equal("Update", dialog.ConfirmButton.Content);
@@ -52,7 +54,7 @@ public class NewTemplateDialogTests
     public void CustomTitleBarArea_MouseLeftButtonDown_CallsDragMove()
     {
         // Arrange
-        var dialog = new NewTemplateDialog("Name", "Desc", "Content");
+        var dialog = new NewTemplateDialog("Name", "Desc", new FlowDocument(new Paragraph(new Run("Content"))));
         var mouseEvent = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
         {
             RoutedEvent = UIElement.MouseLeftButtonDownEvent,

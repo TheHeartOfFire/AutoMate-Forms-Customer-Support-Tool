@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class NoteModel : ManagedObservableCollectionItem
@@ -42,8 +43,8 @@ public partial class NoteModel : ManagedObservableCollectionItem
             }
         }
     }
-    private string? _notes; 
-    public string? Notes
+    private FlowDocument? _notes; 
+    public FlowDocument? Notes
     {
         get => _notes;
         set
@@ -79,7 +80,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
     {
         get
         {
-            if (!string.IsNullOrEmpty(CaseNumber) || !string.IsNullOrEmpty(Notes))
+            if (!string.IsNullOrEmpty(CaseNumber) || Notes != null)
                 return false;
             if (Dealers.Any(d => !d.IsBlank) ||
                 Contacts.Any(c => !c.IsBlank) ||
@@ -125,7 +126,8 @@ public partial class NoteModel : ManagedObservableCollectionItem
         InitForms();
 
         CaseNumber = note.CaseText;
-        Notes = note.NotesText;
+        Notes = new FlowDocument();
+        Notes.Blocks.Add(new Paragraph(new Run(note.NotesText)));
         _isInit = false;
         UpdateCore();
 
@@ -293,7 +295,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
     {
         if (CoreType == null || _isInit) return;
         CoreType.CaseText = CaseNumber ?? string.Empty;
-        CoreType.NotesText = Notes ?? string.Empty;
+        CoreType.NotesText = GetFlowDocumentPlainText(Notes ?? new()) ?? string.Empty;
         CoreType.Dealers.Clear();
         CoreType.Dealers.AddRange(Dealers.Select(d => (Core.Types.Notebook.Dealer)d));
         CoreType.Dealers.SelectedItem = Dealers?.SelectedItem?.CoreType;
@@ -305,6 +307,17 @@ public partial class NoteModel : ManagedObservableCollectionItem
         CoreType.Forms.SelectedItem = Forms?.SelectedItem?.CoreType;
         _logger?.LogDebug($"NoteModel core updated. ID: {Id}\tCore ID: {CoreType.Id}");
     }
+    public static string GetFlowDocumentPlainText(FlowDocument document)
+    {
+        // Create a TextRange from the beginning (ContentStart) to the end (ContentEnd) of the document.
+        TextRange textRange = new TextRange(
+            document.ContentStart,
+            document.ContentEnd
+        );
+
+        // The Text property of the TextRange object returns the plain text content as a string.
+        return textRange.Text;
+    }
 
     public static implicit operator Note(NoteModel note)
     {
@@ -312,7 +325,7 @@ public partial class NoteModel : ManagedObservableCollectionItem
         return new Note(note.CoreType.Id)
         {
             CaseText = note.CaseNumber ?? string.Empty,
-            NotesText = note.Notes ?? string.Empty,
+            NotesText = GetFlowDocumentPlainText(note.Notes ?? new()) ?? string.Empty,
             Dealers = [..note.Dealers.Select(d => (Core.Types.Notebook.Dealer)d)],
             Contacts = [..note.Contacts.Select(c => (Core.Types.Notebook.Contact)c)],
             Forms = [..note.Forms.Select(f => (Core.Types.Notebook.Form)f)]

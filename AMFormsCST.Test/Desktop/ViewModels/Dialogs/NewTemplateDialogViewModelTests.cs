@@ -3,6 +3,8 @@ using System.Windows;
 using Xunit;
 using Moq;
 using AMFormsCST.Test.Helpers;
+using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Test.Desktop.ViewModels.Dialogs;
 public class NewTemplateDialogViewModelTests
@@ -16,7 +18,7 @@ public class NewTemplateDialogViewModelTests
         // Assert
         Assert.Equal(string.Empty, vm.TemplateName);
         Assert.Equal(string.Empty, vm.TemplateDescription);
-        Assert.Equal(string.Empty, vm.TemplateContent);
+        Assert.Equal(string.Empty, TextTemplate.GetFlowDocumentPlainText(vm.TemplateContent));
     }
 
     [Fact]
@@ -28,11 +30,11 @@ public class NewTemplateDialogViewModelTests
         // Act
         vm.TemplateName = "Name";
         vm.TemplateDescription = "Desc";
-        vm.TemplateContent = "Content";
+        vm.TemplateContent = new FlowDocument(new Paragraph(new Run("Content")));
 
         // Assert
         Assert.Equal("Name", vm.TemplateName);
         Assert.Equal("Desc", vm.TemplateDescription);
-        Assert.Equal("Content", vm.TemplateContent);
+        Assert.Equal("Content", TextTemplate.GetFlowDocumentPlainText(vm.TemplateContent).Trim());
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using AMFormsCST.Core.Interfaces;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Desktop.Models.Templates;
 public class DeprecatedTemplate
@@ -66,7 +67,7 @@ public class DeprecatedTemplate
         var template = new TextTemplate(
             name: deprecated.Name,
             description: "[Converted]",
-            text: formattedText,
+            text: new() { Blocks = { new Paragraph(new Run(formattedText)) } },
             type: ConvertType(deprecated.Type)
         );
 

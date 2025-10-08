@@ -1,4 +1,5 @@
-﻿using AMFormsCST.Core.Helpers;
+﻿using AMFormsCST.Core.Converters;
+using AMFormsCST.Core.Helpers;
 using AMFormsCST.Core.Interfaces;
 using AMFormsCST.Core.Interfaces.Notebook;
 using AMFormsCST.Core.Interfaces.UserSettings;
@@ -8,6 +9,7 @@ using System.Text.Json;
 using System.Xml;
 
 namespace AMFormsCST.Core;
+
 public static class IO
 {
     private static readonly string _appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -62,6 +64,7 @@ public static class IO
         _jsonOptions.Converters.Add(new SelectableListJsonConverter<IForm>());
         _jsonOptions.Converters.Add(new SelectableListJsonConverter<ITestDeal>());
         _jsonOptions.Converters.Add(new SelectableListJsonConverter<INote>());
+        _jsonOptions.Converters.Add(new TextTemplateJsonConverter());
         Logger?.LogInfo("IO JSON serializer configured.");
     }
 

@@ -6,6 +6,7 @@ using AMFormsCST.Core.Types.BestPractices.Models;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using Moq;
 using System.Globalization;
+using System.Windows.Documents;
 using static AMFormsCST.Core.Types.BestPractices.TextTemplates.Models.TextTemplate;
 
 namespace AMFormsCST.Desktop.Services;
@@ -56,9 +57,9 @@ public class DesignTimeSupportTool : ISupportTool
 
         var templates = new List<TextTemplate>
         {
-            new("Case Intro", "Standard introduction for a new case.", "Hello {FirstName}, this is in regards to case #{CaseNumber}.", TemplateType.InternalComments),
-            new("Form Issue", "Template for reporting a form issue.", "The form {FormName} is having an issue. Details: {IssueDetails}", TemplateType.Other),
-            new("Closing", "Standard case closing.", "Thank you for your time. Case #{CaseNumber} will now be closed.", TemplateType.Email)
+            new("Case Intro", "Standard introduction for a new case.", new() { Blocks = { new Paragraph(new Run("Hello {FirstName}, this is in regards to case #{CaseNumber}.")) } }, TemplateType.InternalComments),
+            new("Form Issue", "Template for reporting a form issue.", new() { Blocks = { new Paragraph(new Run("The form {FormName} is having an issue. Details: {IssueDetails}")) } }, TemplateType.Other),
+            new("Closing", "Standard case closing.", new() { Blocks = { new Paragraph(new Run("Thank you for your time. Case #{CaseNumber} will now be closed.")) } }, TemplateType.Email)
         };
         mockEnforcer.Setup(e => e.Templates).Returns(templates);
 

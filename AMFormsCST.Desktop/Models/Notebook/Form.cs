@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog.Context;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Documents;
+using static AMFormsCST.Core.Interfaces.Notebook.IForm;
 
 namespace AMFormsCST.Desktop.Models;
 public partial class Form : ManagedObservableCollectionItem
@@ -15,7 +17,7 @@ public partial class Form : ManagedObservableCollectionItem
     [ObservableProperty]
     private string? _name = string.Empty;
     [ObservableProperty]
-    private string? _notes = string.Empty;
+    private FlowDocument? _notes = new();
     public ManagedObservableCollection<TestDeal> TestDeals { get; set; }
     [ObservableProperty]
     private bool _notable = true;
@@ -28,7 +30,7 @@ public partial class Form : ManagedObservableCollectionItem
     {
         get
         {
-            if (!string.IsNullOrEmpty(Name) || !string.IsNullOrEmpty(Notes))
+            if (!string.IsNullOrEmpty(Name) || !string.IsNullOrEmpty(GetFlowDocumentPlainText(Notes ?? new())))
                 return false;
             if (TestDeals.Any(td => !td.IsBlank))
                 return false;
@@ -37,11 +39,6 @@ public partial class Form : ManagedObservableCollectionItem
     }
     public TestDeal? SelectedTestDeal => TestDeals.SelectedItem;
 
-    public enum FormFormat
-    {
-        LegacyImpact,
-        Pdf
-    }
     partial void OnNameChanged(string? value)
     {
         OnPropertyChanged(nameof(IsBlank));
@@ -54,7 +51,7 @@ public partial class Form : ManagedObservableCollectionItem
             _logger?.LogInfo($"Form name changed: {value}");
         }
     }
-    partial void OnNotesChanged(string? value)
+    partial void OnNotesChanged(FlowDocument? value)
     {
         OnPropertyChanged(nameof(IsBlank));
         UpdateCore();
@@ -74,6 +71,15 @@ public partial class Form : ManagedObservableCollectionItem
         using (LogContext.PushProperty("Notable", value))
         {
             _logger?.LogInfo($"Form notable changed: {value}");
+        }
+    }
+    partial void OnFormatChanged(FormFormat value)
+    {
+        UpdateCore();
+        using (LogContext.PushProperty("FormId", Id))
+        using (LogContext.PushProperty("Format", value))
+        {
+            _logger?.LogInfo($"Form format changed: {value}");
         }
     }
 
@@ -108,7 +114,7 @@ public partial class Form : ManagedObservableCollectionItem
         );
 
         Name = form.Name ?? string.Empty;
-        Notes = form.Notes ?? string.Empty;
+        Notes =  new() { Blocks = { new Paragraph(new Run(form.Notes ?? string.Empty)) } };
         Notable = form.Notable;
         _logger?.LogInfo("Form loaded from core type.");
         _isInitializing = false;
@@ -177,13 +183,25 @@ public partial class Form : ManagedObservableCollectionItem
             CoreType = Parent.CoreType.Forms.FirstOrDefault(f => f.Id == Id);
         if (CoreType == null) return;
         CoreType.Name = Name ?? string.Empty;
-        CoreType.Notes = Notes ?? string.Empty;
+        CoreType.Notes = GetFlowDocumentPlainText(Notes ?? new()) ?? string.Empty;
         CoreType.Notable = Notable;
+        CoreType.Format = Format;
         CoreType.TestDeals.Clear();
         CoreType.TestDeals.AddRange(TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td));
         CoreType.TestDeals.SelectedItem = TestDeals?.SelectedItem?.CoreType;
         Parent?.UpdateCore();
         _logger?.LogDebug("Form core updated.");
+    }
+    public static string GetFlowDocumentPlainText(FlowDocument document)
+    {
+        // Create a TextRange from the beginning (ContentStart) to the end (ContentEnd) of the document.
+        TextRange textRange = new TextRange(
+            document.ContentStart,
+            document.ContentEnd
+        );
+
+        // The Text property of the TextRange object returns the plain text content as a string.
+        return textRange.Text;
     }
 
     public static implicit operator Core.Types.Notebook.Form(Form form)
@@ -192,7 +210,7 @@ public partial class Form : ManagedObservableCollectionItem
         return new Core.Types.Notebook.Form(form.Id)
         {
             Name = form.Name ?? string.Empty,
-            Notes = form.Notes ?? string.Empty,
+            Notes = GetFlowDocumentPlainText(form.Notes ?? new()) ?? string.Empty,
             Notable = form.Notable,
             TestDeals = [..form.TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td)]
         };

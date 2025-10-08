@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using CoreNote = AMFormsCST.Core.Types.Notebook.Note;
 using Assert = Xunit.Assert;
+using System.Windows.Documents;
 
 namespace AMFormsCST.Test.Desktop.Models.Notebook;
 
@@ -17,7 +18,7 @@ public class NoteModelConversionTests
         var noteModel = new NoteModel(TestExtSeparator)
         {
             CaseNumber = "CS12345",
-            Notes = "This is a test note.",
+            Notes = new FlowDocument(new Paragraph(new Run("This is a test note."))),
         };
 
         // Populate a dealer and its company
@@ -52,7 +53,7 @@ public class NoteModelConversionTests
         // Assert
         Assert.NotNull(coreNote);
         Assert.Equal("CS12345", coreNote.CaseText);
-        Assert.Equal("This is a test note.", coreNote.NotesText);
+        Assert.Equal("This is a test note.", coreNote.NotesText.Trim());
 
         // Assert Dealer and Company (expecting 2 items: 1 blank, 1 with data)
         Assert.Equal(2, coreNote.Dealers.Count);

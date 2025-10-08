@@ -5,6 +5,8 @@ using AMFormsCST.Desktop.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Documents;
+using System.Windows.Markup;
 
 namespace AMFormsCST.Desktop.ViewModels.Pages.Tools.Templates;
 
@@ -68,17 +70,53 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
         _logger?.LogInfo($"TemplateItemViewModel initialized: Template='{template.Name}'");
     }
 
-    public string Output
+    public FlowDocument Output
     {
         get
         {
-            var preprocessedTemplate = PreProcessTemplate(Template.Text);
-            var variables = preprocessedTemplate.variables.Select(v => v.variable).ToList();
-            var values = Variables.Select(v => v.Value).ToList();
+            // Create a deep copy of the template document to avoid modifying the original.
+            var xaml = XamlWriter.Save(Template.Text);
+            var doc = (FlowDocument)XamlReader.Parse(xaml);
 
-            var result = TextTemplate.Process(preprocessedTemplate.processedText, variables, values) ?? string.Empty;
-            _logger?.LogDebug($"TemplateItemViewModel Output generated for '{Template.Name}': {result}");
-            return result;
+            var templateVariables = Template.GetVariables(_supportTool);
+            var variableValues = Variables.Select(v => v.Value).ToList();
+
+            for (int i = 0; i < templateVariables.Count; i++)
+            {
+                var variable = templateVariables[i];
+                var value = (i < variableValues.Count && !string.IsNullOrEmpty(variableValues[i]))
+                            ? variableValues[i]
+                            : variable.GetValue();
+
+                // Replace all occurrences of the variable's placeholder in the document.
+                ReplaceInFlowDocument(doc, variable.ProperName, value);
+            }
+
+            _logger?.LogDebug($"TemplateItemViewModel Output generated for '{Template.Name}'");
+            return doc;
+        }
+    }
+
+    private static void ReplaceInFlowDocument(FlowDocument doc, string placeholder, string value)
+    {
+        var textRange = new TextRange(doc.ContentStart, doc.ContentEnd);
+        var current = textRange.Start;
+
+        while (current != null && current.CompareTo(textRange.End) < 0)
+        {
+            if (current.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+            {
+                var textRun = current.GetTextInRun(LogicalDirection.Forward);
+                var index = textRun.IndexOf(placeholder, StringComparison.OrdinalIgnoreCase);
+
+                if (index != -1)
+                {
+                    var start = current.GetPositionAtOffset(index);
+                    var end = current.GetPositionAtOffset(index + placeholder.Length);
+                    new TextRange(start, end).Text = value;
+                }
+            }
+            current = current.GetNextContextPosition(LogicalDirection.Forward);
         }
     }
 
@@ -149,17 +187,17 @@ public partial class TemplateItemViewModel : ObservableObject, ISelectable
     {
         OnPropertyChanged(nameof(Template));
 
-        var preprocessedTemplate = PreProcessTemplate(Template.Text);
+        //var preprocessedTemplate = PreProcessTemplate(TextTemplate.GetFlowDocumentPlainText(Template.Text));
 
-        var newVariables = new ObservableCollection<TemplateVariableViewModel>(
-            preprocessedTemplate.variables
-                .Select(variable => new TemplateVariableViewModel(variable.variable, _logger) { Variable = variable.variable }));
+        //var newVariables = new ObservableCollection<TemplateVariableViewModel>(
+        //    preprocessedTemplate.variables
+        //        .Select(variable => new TemplateVariableViewModel(variable.variable, _logger) { Variable = variable.variable }));
 
-        Variables.Clear();
-        foreach (var v in newVariables)
-        {
-            Variables.Add(v);
-        }
+        //Variables.Clear();
+        //foreach (var v in newVariables)
+        //{
+        //    Variables.Add(v);
+        //}
 
         OnPropertyChanged(nameof(Output));
         _logger?.LogInfo($"TemplateItemViewModel '{Template.Name}' data refreshed.");

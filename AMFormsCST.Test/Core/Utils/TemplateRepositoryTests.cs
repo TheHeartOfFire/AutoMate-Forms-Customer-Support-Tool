@@ -2,6 +2,7 @@ using AMFormsCST.Core.Interfaces.Utils;
 using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using Moq;
 using System.Collections.Generic;
+using System.Windows.Documents;
 using Xunit;
 
 namespace AMFormsCST.Test.Core.Utils;
@@ -14,7 +15,7 @@ public class TemplateRepositoryTests
         var mockRepo = new Mock<ITemplateRepository>();
         var expectedList = new List<TextTemplate>
         {
-            new TextTemplate("T1", "D1", "Text1", TextTemplate.TemplateType.Other)
+            new TextTemplate("T1", "D1", new FlowDocument(new Paragraph(new Run("Text1"))), TextTemplate.TemplateType.Other)
         };
         mockRepo.Setup(r => r.LoadTemplates()).Returns(expectedList);
 
@@ -35,7 +36,7 @@ public class TemplateRepositoryTests
 
         var templates = new List<TextTemplate>
         {
-            new TextTemplate("T1", "D1", "Text1", TextTemplate.TemplateType.Other)
+            new TextTemplate("T1", "D1", new FlowDocument(new Paragraph(new Run("Text1"))), TextTemplate.TemplateType.Other)
         };
 
         var ex = Record.Exception(() => mockRepo.Object.SaveTemplates(templates));

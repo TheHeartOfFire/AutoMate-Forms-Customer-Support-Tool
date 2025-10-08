@@ -5,6 +5,7 @@ using AMFormsCST.Core.Types.BestPractices.TextTemplates.Models;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Windows.Documents;
 using Assert = Xunit.Assert;
 
 namespace AMFormsCST.Test.Core.Types.BestPractices.TextTemplates.Models;
@@ -49,7 +50,8 @@ public class TextTemplateTests
     public void GetVariables_FindsVariablesInText_AndReturnsThem()
     {
         // Arrange
-        var template = new TextTemplate("Test", "Desc", "Case number is {CaseNumber} and user is $User.", TextTemplate.TemplateType.Other);
+        var flowDoc = new FlowDocument(new Paragraph(new Run("Case number is {CaseNumber} and user is $User.")));
+        var template = new TextTemplate("Test", "Desc", flowDoc, TextTemplate.TemplateType.Other);
     
         // Act
         var foundVariables = template.GetVariables(_mockSupportTool.Object);
@@ -64,7 +66,8 @@ public class TextTemplateTests
     public void GetVariables_WhenNoVariablesInText_ReturnsEmptyList()
     {
         // Arrange
-        var template = new TextTemplate("Test", "Desc", "This text has no variables.", TextTemplate.TemplateType.Other);
+        var flowDoc = new FlowDocument(new Paragraph(new Run("This text has no variables.")));
+        var template = new TextTemplate("Test", "Desc", flowDoc, TextTemplate.TemplateType.Other);
 
         // Act
         var foundVariables = template.GetVariables(_mockSupportTool.Object);
@@ -155,7 +158,8 @@ public class TextTemplateTests
     public void Constructor_SetsTemplateTypeCorrectly(TextTemplate.TemplateType type)
     {
         // Arrange & Act
-        var template = new TextTemplate("Name", "Desc", "Text", type);
+        var flowDoc = new FlowDocument(new Paragraph(new Run("Text")));
+        var template = new TextTemplate("Name", "Desc", flowDoc, type);
 
         // Assert
         Assert.Equal(type, template.Type);
@@ -166,15 +170,16 @@ public class TextTemplateTests
     {
         // Arrange
         var id = Guid.NewGuid();
+        var flowDoc = new FlowDocument(new Paragraph(new Run("Text")));
 
         // Act
-        var template = new TextTemplate(id, "Name", "Desc", "Text", TextTemplate.TemplateType.Email);
+        var template = new TextTemplate(id, "Name", "Desc", flowDoc, TextTemplate.TemplateType.Email);
 
         // Assert
         Assert.Equal(id, template.Id);
         Assert.Equal("Name", template.Name);
         Assert.Equal("Desc", template.Description);
-        Assert.Equal("Text", template.Text);
+        Assert.Equal("Text\r\n", TextTemplate.GetFlowDocumentPlainText(template.Text));
         Assert.Equal(TextTemplate.TemplateType.Email, template.Type);
     }
 }

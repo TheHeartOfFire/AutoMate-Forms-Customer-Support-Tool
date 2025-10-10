@@ -17,12 +17,29 @@ public partial class Form : ManagedObservableCollectionItem
     [ObservableProperty]
     private string? _name = string.Empty;
     [ObservableProperty]
+
     private FlowDocument? _notes = new();
     public ManagedObservableCollection<TestDeal> TestDeals { get; set; }
     [ObservableProperty]
     private bool _notable = true;
     [ObservableProperty]
     private FormFormat _format = FormFormat.Pdf;
+    public bool IsImpact
+    {
+        get => Format == FormFormat.LegacyImpact;
+        set
+        {
+            if (Format != FormFormat.Pdf)
+            {
+                Format = FormFormat.Pdf;
+                
+            }
+            else if (Format != FormFormat.LegacyImpact)
+            {
+                Format = FormFormat.LegacyImpact;
+            }
+        }
+    }
     internal IForm? CoreType { get; set; }
     internal NoteModel? Parent { get; set; }
     public override Guid Id { get; } = Guid.NewGuid();
@@ -76,6 +93,7 @@ public partial class Form : ManagedObservableCollectionItem
     }
     partial void OnFormatChanged(FormFormat value)
     {
+        OnPropertyChanged(nameof(IsImpact));
         UpdateCore();
         using (LogContext.PushProperty("FormId", Id))
         using (LogContext.PushProperty("Format", value))
@@ -117,6 +135,7 @@ public partial class Form : ManagedObservableCollectionItem
         Name = form.Name ?? string.Empty;
         Notes =  new() { Blocks = { new Paragraph(new Run(form.Notes ?? string.Empty)) } };
         Notable = form.Notable;
+        Format = form.Format;
         _logger?.LogInfo("Form loaded from core type.");
         _isInitializing = false;
         UpdateCore();
@@ -196,7 +215,7 @@ public partial class Form : ManagedObservableCollectionItem
     public static string GetFlowDocumentPlainText(FlowDocument document)
     {
         // Create a TextRange from the beginning (ContentStart) to the end (ContentEnd) of the document.
-        TextRange textRange = new TextRange(
+        TextRange textRange = new(
             document.ContentStart,
             document.ContentEnd
         );
@@ -213,6 +232,7 @@ public partial class Form : ManagedObservableCollectionItem
             Name = form.Name ?? string.Empty,
             Notes = GetFlowDocumentPlainText(form.Notes ?? new()) ?? string.Empty,
             Notable = form.Notable,
+            Format = form.Format,
             TestDeals = [..form.TestDeals.Select(td => (Core.Types.Notebook.TestDeal)td)]
         };
     }

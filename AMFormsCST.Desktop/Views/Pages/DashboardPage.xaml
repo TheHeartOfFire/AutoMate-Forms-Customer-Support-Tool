@@ -91,7 +91,7 @@
             <controls:RichTextToolbar Grid.Row="2" Target="{Binding ElementName=NoteRichTextBox}" Margin="0,0,0,2" HorizontalAlignment="Left"/>
             <ui:RichTextBox x:Name="NoteRichTextBox" helpers:RichTextBoxHelper.Document="{Binding SelectedNote.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                             AcceptsReturn="True" VerticalAlignment="Stretch" Grid.Row="3"
-                            Margin="0,0,0,10" ToolTip="General notes for this case." VerticalScrollBarVisibility="Auto" />
+                            Margin="0,0,0,10" ToolTip="General notes for this case." VerticalScrollBarVisibility="Auto"/>
             <controls:CopyButton TextToCopy="{Binding SelectedNote.Notes, Converter={StaticResource FlowDocumentToTextConverter}}" 
                                  Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" Grid.RowSpan="2" ToolTip="Copy notes to clipboard."/>
         </Grid>
@@ -229,7 +229,7 @@
 
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Grid.Row="6" Grid.Column="1">
                 <Label Content="Pdf" VerticalAlignment="Center"/>
-                <ui:ToggleSwitch Margin="5,0,5,0" ToolTip="Toggle PDF/Impact form type."/>
+                <ui:ToggleSwitch IsChecked="{Binding SelectedNote.SelectedForm.IsImpact, Mode=TwoWay}" Margin="5,0,5,0" ToolTip="Toggle PDF/Impact form type."/>
                 <Label Content="Impact" Margin="0,0,5,0" VerticalAlignment="Center"/>
                 <ToggleButton Margin="0,0,5,0" IsChecked="{Binding SelectedNote.SelectedForm.Notable, Mode=TwoWay}" ToolTip="Mark this form as notable.">
                     <ui:SymbolIcon Symbol="Note24" Filled="True" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="24"/>
